@@ -1,0 +1,5 @@
+MISC.LIB
+.C	[-b4 -r6 -d0 -m0 -rs -fm]
+.S	[-u -m0]
+=
+COMPMEM.S

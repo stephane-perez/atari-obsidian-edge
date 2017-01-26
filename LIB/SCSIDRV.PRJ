@@ -1,0 +1,6 @@
+SCSIDRV.LIB
+.C	[-b4 -r6 -v -w -cf -cu -d0 -m0 -rs -fm -Oloop]
+.S	[-m0]
+.L	[NODEBUG]
+=
+SCSIDRV.C

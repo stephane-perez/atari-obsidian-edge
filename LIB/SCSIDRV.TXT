@@ -1,0 +1,17 @@
+Some notes on compiling scsidrv.lib
+-----------------------------------
+
+1. Lattice C (following the Standard C specification) always widens
+   smaller integer values (char, short) to int when passing them on the
+   stack.  Since the SCSIDRV routines expect at least some parameters
+   to be 16-bits wide, SCSIDRV.C must be compiled with default short
+   integers under Lattice C.
+
+2. SCSIDRV.H #includes SCSIDEFS.H, which is a (slightly) modified
+   version of Steffen Engel's header.
+
+3. All source code includes real tabs, which are assumed to be set
+   every 4 characters.
+
+Roger Burrows
+january/2017

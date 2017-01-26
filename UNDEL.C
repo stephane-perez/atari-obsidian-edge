@@ -1251,21 +1251,21 @@ char *fatptr;
  */
 PRIVATE int dirok()
 {
-char *buff;
+char *buf;
 char dname[MAX_FILENAME];
 DIRENTRY *temp;
 short j;
 int fail = 0;
 
-	if ((buff=calloc(1,dpb.bpc)) == NULL) {
+	if ((buf=calloc(1,dpb.bpc)) == NULL) {
 		error(dpb.bpc,MEMALLOC,"");
 		return -1;
 	}
-	if (log_read(dev,dpb.spc,logsector(finfo.start),buff,DIR)) {
-		free(buff);
+	if (log_read(dev,dpb.spc,logsector(finfo.start),buf,DIR)) {
+		free(buf);
 		return -1;
 	}
-	temp = (DIRENTRY *)buff;
+	temp = (DIRENTRY *)buf;
 	get_name(temp,dname);
 	j = get_word((char *)&temp->start);
 	if ((strcmp(dname,".") != 0) || (j != finfo.start))
@@ -1276,7 +1276,7 @@ int fail = 0;
 	if (strcmp(dname,"..") != 0)
 		fail = -1;
 
-	free(buff);
+	free(buf);
 
 	return fail;
 }

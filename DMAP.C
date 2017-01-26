@@ -23,6 +23,11 @@
  *		  (option must be set manually in INF file at this time)
  *		. add DEMO support for Zero & Wipe (Unzero is done in info.c)
  *
+ *	version 2.55 (june/2007)		roger burrows
+ *		. fixed bug: the search for the partition label, introduced
+ *		  in v2.53, went past the end of the in-memory copy of the
+ *		  root directory
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -920,7 +925,7 @@ DIRENTRY label = { 0x00 };
 			free(fatrootbuf);
 			return -1;
 		}
-		for (p = root; p < root + dpb.bpf; p += sizeof(DIRENTRY)) {
+		for (p = root; p < root + dpb.rdb; p += sizeof(DIRENTRY)) {
 			if (((DIRENTRY *)p)->attr == FA_VOLUME) {
 				memcpy(&label,p,sizeof(DIRENTRY));
 				break;							/* always use first label if > 1 */

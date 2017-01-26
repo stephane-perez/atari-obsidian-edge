@@ -29,6 +29,10 @@
  *		. fix test for directory in test_loop()/bad_loop(): it was
  *		  (attr==FA_SUBDIR), which failed when any other bit was set;
  *		  it's now (attr&FA_SUBDIR != 0)
+ *
+ *	version 2.55 (february/2007)		roger burrows
+ *		. add cluster number to file collision message
+ *		. removed commented-out code (neatness)
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,12 +69,6 @@ extern DIRLIST dirlist[MAX_DIR_DEPTH];
 extern STATUS status;
 extern OPT opt;
 extern OBJECT *badpref, *medic, *menu, *text;
-
-//extern GRECT gmap;				/* for cluster map */
-
-// the following variables are shared with dmap.c
-//extern short mapx, mapy;	/* screen coords of start of cluster map */
-
 
 
 /*
@@ -380,8 +378,6 @@ static char title[MAX_DISPLAYSIZE];
 
 	wind_update(BEG_UPDATE);
 	mouse_off();
-//	objc_offset(medic,MDAREA,&mapx,&mapy);					//rfb: aren't mapx == gmap.g_x etc?
-//	assert((mapx==gmap.g_x)&&(mapy==gmap.g_y));				//rfb: test theory
 	set_clip();
 
 	if (opt.visual) {
@@ -1074,7 +1070,7 @@ char dname[MAX_FILENAME];
 		/* diskerr(7); */
 		errcnt[COLLISION]++;
 		get_name(file,dname);
-		write_errfile("%s%s %s\n",pathin,dname,text[MEDLOG_COLLISION].ob_spec);
+		write_errfile("%s%s %s %d\n",pathin,dname,text[MEDLOG_COLLISION].ob_spec,st);
 		if (fix) {
 			if (fix_collision(file,start,st,start) < 0)
 				return -1;
@@ -1467,8 +1463,6 @@ static char title[MAX_DISPLAYSIZE];
 	} else {
 		wind_update(BEG_UPDATE);
 		mouse_off();
-//		objc_offset(medic,MDAREA,&mapx,&mapy);			//rfb: see prev comment about gmap
-//		assert((mapx==gmap.g_x)&&(mapy==gmap.g_y));		//rfb: test theory
 		format_cpb(blocks->te_ptext);
 		redraw_object(medic,MBLOCKS);
 		fail = process_bad();

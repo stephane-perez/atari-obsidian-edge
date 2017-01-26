@@ -62,6 +62,13 @@
  * Changes:   -	call form_error() with PC-style error numbers rather than
  *				Atari-style (as per definition)
  *
+ * Version:	1.22
+ * Date:	19 February 2007
+ * Author:  Roger Burrows
+ * Changes:   -	in proto.h, the declaration of xrsrc_load() includes CONST,
+ *				so we restore it to the definition & related called functions
+ *				(CONST is defined in xrsrc.h)
+ *
  *
  * Issues:	form_error() is sometimes issued for initialisation errors, and
  *			sometimes not:
@@ -155,10 +162,10 @@ static VOID rs_sglobal(WORD *base);
 static WORD rs_free(WORD *base);
 static WORD rs_gaddr(WORD *base,WORD re_gtype,WORD re_gindex,OBJECT **re_gaddr);
 static WORD rs_sadd(WORD *base,WORD rs_stype,WORD rs_sindex,OBJECT *re_saddr);
-static WORD rs_load(WORD *global,BYTE *fname);
+static WORD rs_load(WORD *global,CONST BYTE *fname);
 static VOID *get_address(WORD type,WORD index);
 static VOID *get_sub(WORD index,LONG offset,WORD size);
-static WORD rs_read(WORD *global,BYTE *fname);
+static WORD rs_read(WORD *global,CONST BYTE *fname);
 static VOID rs_fixindex(WORD *global);
 static VOID do_rsfix(ULONG rs_size);
 static VOID fix_treeindex(VOID);
@@ -201,7 +208,7 @@ GLOBAL VOID term_xrsrc(VOID)
 
 /*****************************************************************************/
 
-GLOBAL WORD xrsrc_load(BYTE *re_lpfname,WORD *pglobal)
+GLOBAL WORD xrsrc_load(CONST BYTE *re_lpfname,WORD *pglobal)
 {
 	return rs_load(pglobal,re_lpfname);
 }
@@ -378,7 +385,7 @@ OBJECT *old_addr;
 
 /*****************************************************************************/
 
-static WORD rs_load(WORD *global,BYTE *fname)
+static WORD rs_load(WORD *global,CONST BYTE *fname)
 {
 	if (!rs_read(global,fname))
 		return FALSE;
@@ -486,7 +493,7 @@ UBYTE *ptr = (UBYTE *)rs_hdr;
 
 /*****************************************************************************/
 
-static WORD rs_read(WORD *global,BYTE *fname)
+static WORD rs_read(WORD *global,CONST BYTE *fname)
 {
 WORD i, fh;
 BYTE tmpnam[128];

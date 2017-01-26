@@ -5,7 +5,7 @@
 /*                                                                          */
 /* version 1.20 by Roger Burrows (December 2002)							*/
 /*	. add required includes to allow standalone clean compile				*/
-/*	. remove CONST (not defined in standard portability header)				*/
+/*	. #define CONST (not defined in standard Lattice portability header)	*/
 /*	. remove usage of compatibility macro for prototyping					*/
 /*																			*/
 /****************************************************************************/
@@ -15,6 +15,9 @@
 #include <aes.h>
 #include <portab.h>
 
+#ifdef LATTICE
+	#define CONST const
+#endif
 /****** DEFINES **************************************************************/
 
 /****** TYPES ****************************************************************/
@@ -46,7 +49,7 @@ typedef struct
 
 /****** FUNCTIONS ************************************************************/
 
-WORD xrsrc_load(BYTE *re_lpfname,WORD *pglobal);
+WORD xrsrc_load(CONST BYTE *re_lpfname,WORD *pglobal);
 WORD xrsrc_free(WORD *pglobal);
 WORD xrsrc_gaddr(WORD re_gtype,WORD re_gindex,VOID *re_gaddr,WORD *pglobal);
 WORD xrsrc_saddr(WORD re_stype,WORD re_sindex,VOID *re_saddr,WORD *pglobal);

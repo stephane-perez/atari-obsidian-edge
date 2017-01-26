@@ -12,6 +12,12 @@
  *	version 2.13 (february/2003)		roger burrows
  *		more cleanup, removal of pointless 'look for more free space
  *		when we run out' code
+ *
+ *	version 2.55 (february/2007)		roger burrows
+ *		fix bug: in the output partition, the directory entry for
+ *		empty files inadvertently contained the next cluster number
+ *		to be assigned, rather thn zero.  this created a file collision
+ *		in the output partition.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,7 +62,7 @@ PRIVATE int calc_nextcluster(void);
 PRIVATE void cleanup_dirs(char *curpath,char *nextpath,short override);
 PRIVATE int cleanup_disk(void);
 PRIVATE int copydir(char *path);
-PRIVATE int copyfile(char *from,DTA *dtap,DIRLIST *curdir,char *buff,long bufsize);
+PRIVATE int copyfile(char *from,DTA *dtap,DIRLIST *curdir,char *buf,long bufsize);
 PRIVATE void dir_entry(DIRLIST *dest,DTA *dtap,short cluster,short flag);
 PRIVATE long estimate(char *path);
 PRIVATE int form_run(void);
@@ -64,7 +70,7 @@ PRIVATE void free_all_runs(void);
 PRIVATE void get_dirname(char *source,char *dirname,short level);
 PRIVATE int mydcreate(DTA *dtap,DIRLIST *parent,DIRLIST *child);
 PRIVATE void myfdelete(DIRLIST *dir);
-PRIVATE int rwabs_write(char *buff,long count);
+PRIVATE int rwabs_write(char *buf,long count);
 PRIVATE int setup_hd(void);
 PRIVATE void update_hdfat(long count,RUN *r1);
 PRIVATE void write_dir(DIRLIST *dir);
@@ -231,7 +237,7 @@ char pbuff[MAX_PATHNAME], pathsearch[MAX_PATHNAME], fromfile[MAX_PATHNAME];
 /*
  *	copy one file
  */
-PRIVATE int copyfile(char *from,DTA *dtap,DIRLIST *curdir,char *buff,long bufsize)
+PRIVATE int copyfile(char *from,DTA *dtap,DIRLIST *curdir,char *buf,long bufsize)
 {
 short ffrom;
 int hdret = 0;
@@ -265,12 +271,12 @@ RUN *r1;
 			return OUT_OF_SPACE;
 		}
 		count = min(bufsize,fsize-bytes_written);
-		if (file_read(ffrom,count,buff,from)) {
+		if (file_read(ffrom,count,buf,from)) {
 			Fclose(ffrom);
 			myfdelete(curdir);
 			return 0;
 		}
-		if ((hdret=rwabs_write(buff,count)) < 0) {
+		if ((hdret=rwabs_write(buf,count)) < 0) {
 			Fclose(ffrom);
 			myfdelete(curdir);
 			return hdret;
@@ -307,7 +313,7 @@ char *iobuf;
  *				-1	write error (msg has been issued)
  *				-2	out of runs (disk full)
  */
-PRIVATE int rwabs_write(char *buff,long count)
+PRIVATE int rwabs_write(char *buf,long count)
 {
 short clusleft;
 int cluswrite;
@@ -318,7 +324,7 @@ long offset = 0L;
 	while(TRUE) {
 		cluswrite = min(clusleft,currun.num);		/* clusters to write */
 
-		if (log_write(dev,cluswrite*dpb.spc,logsector(nextcluster),buff+offset,FILEERR))
+		if (log_write(dev,cluswrite*dpb.spc,logsector(nextcluster),buf+offset,FILEERR))
 			return -1;
 
 		clusters_written += cluswrite;
@@ -542,6 +548,8 @@ DIRENTRY dir;
 	putword(&dir.time,dtap->ftime);
 	putword(&dir.date,dtap->fdate);
 	putlong(&dir.size,dtap->fsize);
+	if (!(dtap->fattr&FA_SUBDIR) && (dtap->fsize == 0L))	/* zero-length files have no cluster */
+		cluster = 0;
 	putword(&dir.start,cluster);
 	memcpy(dest->dirbuf+dest->offset,&dir,sizeof(DIRENTRY));
 	dest->offset += sizeof(DIRENTRY);

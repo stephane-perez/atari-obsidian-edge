@@ -508,7 +508,7 @@ PRIVATE void write_valid(DTA *dtap,unsigned short crcval,FILE *vf,int valcode)
  */
 PRIVATE unsigned short calc_valid(char *path,DTA *dtap,int valcode)
 {
-char *buff;
+char *buf;
 unsigned short crcval;
 short fh, offset;
 long div, bytes_out, count, rc;
@@ -524,7 +524,7 @@ char pathname[MAX_PATHNAME];
 
 	for (div = 1; ; div++) {
 		bufsize = (dtap->fsize/div + 1) & ~1L;	/* ensure even number for checksum calc */
-		if (buff=malloc(bufsize))
+		if (buf=malloc(bufsize))
 			break;
 		if (bufsize < MINBUFSIZE) {			//rfb: we should issue an error msg
 			Fclose(fh);						//better still, only assign/free buffer in calling routine
@@ -537,17 +537,17 @@ char pathname[MAX_PATHNAME];
 	else offset = 0;
 	for (bytes_out = 0L, crcval = 0; bytes_out < dtap->fsize; bytes_out += count, offset = 0) {
 		count = min(bufsize,dtap->fsize-bytes_out);
-		if (file_read(fh,count,buff,pathname)) {
+		if (file_read(fh,count,buf,pathname)) {
 			Fclose(fh);
-			free(buff);
+			free(buf);
 			return 0;
 		}
 		if ((valcode>>4)&0x0f == CRC)
-			crcval = addcrc(crcval,buff+offset,count-offset);
-		else crcval = addchk(crcval,(unsigned short *)(buff+offset),(count-offset)/2L);
+			crcval = addcrc(crcval,buf+offset,count-offset);
+		else crcval = addchk(crcval,(unsigned short *)(buf+offset),(count-offset)/2L);
 	}
 
-	free(buff);
+	free(buf);
 	Fclose(fh);
 
 	return crcval;

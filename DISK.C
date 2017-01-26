@@ -183,7 +183,7 @@ long rc;
  *	returns:	0	ok
  *				-1	error
  */
-PUBLIC int load_mybpb(char *buff,MYBPB *mybpb,BPB *tbpb)
+PUBLIC int load_mybpb(char *buf,MYBPB *mybpb,BPB *tbpb)
 {
 int n;
 long maxclus;
@@ -191,13 +191,13 @@ long maxclus;
 	if (tbpb)
 		mybpb->isfat16 = tbpb->bflags & 0x01;
 
-	if (memcmp(buff+DATALITE_ID_OFFSET,DATALITE_ID,4) == 0)
+	if (memcmp(buf+DATALITE_ID_OFFSET,DATALITE_ID,4) == 0)
 		mybpb->datalite = 1;
 	else mybpb->datalite = 0;
 
-	mybpb->tsec = get_word(buff + 19);		/* total sectors */
-	mybpb->bps = get_word(buff + 11);		/* bytes per sector */
-	mybpb->spc = buff[13];					/* sec per cluster */
+	mybpb->tsec = get_word(buf + 19);		/* total sectors */
+	mybpb->bps = get_word(buf + 11);		/* bytes per sector */
+	mybpb->spc = buf[13];					/* sec per cluster */
 	if (tbpb) {
 		if (mybpb->bps != tbpb->recsiz)		/* when we first access a partition, we */
 			return -1;						/* seem to get an empty boot sector ... */
@@ -205,26 +205,26 @@ long maxclus;
 			return -1;
 	}
 
-	mybpb->spt = get_word(buff + 24);		/* sec per track */
+	mybpb->spt = get_word(buf + 24);		/* sec per track */
 	if ((mybpb->spt > 999) || (mybpb->spt < 0))
 		mybpb->spt = 0;						/* silently fix cosmetic error */
 
-	mybpb->tpc = get_word(buff + 26);		/* track per cylinder */
+	mybpb->tpc = get_word(buf + 26);		/* track per cylinder */
 	if ((mybpb->tpc > 999) || (mybpb->tpc < 0))
 		mybpb->tpc = 0;						/* silently fix cosmetic error */
 
-	mybpb->media = buff[21];
-	mybpb->spf = get_word(buff + 22);		/* sec per fat */
-	mybpb->nfat = buff[16];					/* number of fat */
-	mybpb->ndir = get_word(buff + 17);		/* max dir root entries */
+	mybpb->media = buf[21];
+	mybpb->spf = get_word(buf + 22);		/* sec per fat */
+	mybpb->nfat = buf[16];					/* number of fat */
+	mybpb->ndir = get_word(buf + 17);		/* max dir root entries */
 
 	mybpb->rds = (short)((mybpb->ndir*sizeof(DIRENTRY)+mybpb->bps-1) / mybpb->bps);
 											/* rootdir in sectors */
-	mybpb->nhide = get_word(buff + 28);		/* hidden sectors */
+	mybpb->nhide = get_word(buf + 28);		/* hidden sectors */
 	if ((mybpb->nhide > 999) || (mybpb->nhide < 0))
 		mybpb->nhide = 0;					/* silently fix */
 
-	mybpb->nres = get_word(buff + 14);		/* number reserved */
+	mybpb->nres = get_word(buf + 14);		/* number reserved */
 	mybpb->firstd = (mybpb->nfat*mybpb->spf) + mybpb->rds + mybpb->nres;
 
 	if (doing_opt) {
@@ -233,7 +233,7 @@ long maxclus;
 	} else {
 		mybpb->cdata = (short) ((mybpb->tsec-mybpb->firstd) / mybpb->spc);
 		if (mybpb->datalite)
-			mybpb->tsec = *(unsigned short *)(buff+DATALITE_SEC_OFFSET);
+			mybpb->tsec = *(unsigned short *)(buf+DATALITE_SEC_OFFSET);
 	}
 
 	mybpb->bpf = (long)mybpb->spf * mybpb->bps;
@@ -283,19 +283,19 @@ long maxclus;
 }
 
 /*************************************************************************/
-PUBLIC void loadboot(char *buff,MYBPB *mybpb)
+PUBLIC void loadboot(char *buf,MYBPB *mybpb)
 {
-	putword((IWORD *)(buff+11),mybpb->bps);		/* bytes per sector */
-	buff[13] = mybpb->spc;						/* sec per clus */
-	putword((IWORD *)(buff+14),mybpb->nres);	/* number reserved */
-	buff[16] = mybpb->nfat;						/* number of fat */
-	putword((IWORD *)(buff+17),mybpb->ndir);	/* max dir root entries */
-	putword((IWORD *)(buff+19),(unsigned short)mybpb->tsec); 	/* tot sec */
-	buff[21] = mybpb->media;					/* media descriptor */
-	putword((IWORD *)(buff+22),mybpb->spf); 	/* sec per fat */
-	putword((IWORD *)(buff+24),mybpb->spt); 	/* sec per track */
-	putword((IWORD *)(buff+26),mybpb->tpc); 	/* track per cylinder */
-	putword((IWORD *)(buff+28),mybpb->nhide);	/* hidden sectors */
+	putword((IWORD *)(buf+11),mybpb->bps);		/* bytes per sector */
+	buf[13] = mybpb->spc;						/* sec per clus */
+	putword((IWORD *)(buf+14),mybpb->nres);		/* number reserved */
+	buf[16] = mybpb->nfat;						/* number of fat */
+	putword((IWORD *)(buf+17),mybpb->ndir);		/* max dir root entries */
+	putword((IWORD *)(buf+19),(unsigned short)mybpb->tsec); 	/* tot sec */
+	buf[21] = mybpb->media;						/* media descriptor */
+	putword((IWORD *)(buf+22),mybpb->spf);	 	/* sec per fat */
+	putword((IWORD *)(buf+24),mybpb->spt);	 	/* sec per track */
+	putword((IWORD *)(buf+26),mybpb->tpc); 		/* track per cylinder */
+	putword((IWORD *)(buf+28),mybpb->nhide);	/* hidden sectors */
 }
 
 /*

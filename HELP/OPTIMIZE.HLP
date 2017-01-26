@@ -1,5 +1,5 @@
  Diamond Edge Extensible Help System
- File: OPTIMIZE.HLP
+ File: OPTIMIZE.HLP (v2.51)
  Topics covered:
  
     ù  Choosing the Optimization Method
@@ -110,8 +110,8 @@
  Medic for problems.  Any problems detected by Disk Medic must be
  fixed before optimization will be allowed.  After the disk has passed
  the Disk Medic examination, the optimization will begin.  During
- optimization, the movement of disk data is displayed in the graphic
- window.  Diamond Edge will ring the keyboard 'bell' to indicate when
- the optimization is complete.
+ optimization, if Visual Update is enabled, the movement of disk data
+ is displayed in the graphic window.  Diamond Edge will ring the
+ keyboard 'bell' to indicate when the optimization is complete.
 
 

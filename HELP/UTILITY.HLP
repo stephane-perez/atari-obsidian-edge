@@ -1,11 +1,11 @@
  Diamond Edge Extensible Help System
- File: UTILITY.HLP
+ File: UTILITY.HLP (v2.51)
  Topics covered:
   
-    ù  Partition Copy - Image
-    ù  Partition Copy - Defragmented
+    ù  Copy Drive Image
+    ù  Copy Drive with Defragmentation
     ù  Forcing Media Change
-    ù  Browsing, Viewing, and Printing Files
+    ù  Viewing, Printing and Browsing Files
     ù  Partition Zeroing
     ù  Partition Unzeroing
     ù  Partition Wiping
@@ -14,41 +14,40 @@
     ù  Contact Information
  
  
- ù  Partition Copy - Image
+ ù  Copy Drive Image
  
-    Copy Partition Image copies, sector for sector, an exact image of
- the source partition to the destination partition.  The file and
- folder structure and the disk fragmentation characteristics of the
- source are exactly duplicated on the destination.  The source and
- destination partitions must be of exactly the same size and type
- (both GEM or both BGM).  All existing data on the destination
- partition is lost.
+    Copy Drive Image copies, sector for sector, an exact image of the
+ source partition to the destination partition.  The file and folder
+ structure and the disk fragmentation characteristics of the source
+ are exactly duplicated on the destination.  Both partitions must be
+ of exactly the same size and type (both GEM or both BGM).  All
+ existing data on the destination partition is lost.
  
-    To perform a partition image copy, select Copy Partition Image
- from the Utility menu.  You will be prompted for the source and
- destination partitions.  If you have Warn mode set, you will be
- notified that all data on the destination partition will be lost, and
- you will be given the opportunity to cancel.  Otherwise the partition
- copy will begin immediately.
+    To perform an image copy, select Copy Drive Image from the Utility
+ menu.  Diamond Edge will prompt you for the source and destination
+ partitions.  If you have Warn mode set, you will be notified that all
+ data on the destination partition will be lost, and you will be given
+ the opportunity to cancel.  Otherwise the partition copy will begin
+ immediately.
  
  
- ù  Partition Copy  - Defragmented
+ ù  Copy Drive with Defragmentation
  
-    Copy Partition Defrag copies the entire contents of the source
+    Copy Drive Defrag copies the entire contents of the source
  partition to the destination partition, defragmenting the partition
  at the same time.  The result is a destination disk that has had a
  full optimization for reading performed.  The source and destination
  partitions do not have to be the same size or type; thus you can,
- for example, perform a Copy Partition Defrag from a 10 megabyte GEM
+ for example, perform a Copy Drive Defrag from a 10 megabyte GEM
  partition to a 40 megabyte BGM partition.  All existing data on the
  destination partition will be lost.  
  
-    To perform a partition copy with defragmentation, select Copy
- Partition Defrag from the Utility menu.  You will be prompted for
- the source and destination partitions.  If you have Warn mode set,
- you will be notified that all data on the destination partition will
- be lost, and you will be given the opportunity to cancel.  Otherwise
- the partition copy will begin immediately.
+    To perform a copy with defragmentation, select Copy Drive Defrag
+ from the Utility menu.  Diamond Edge will prompt you for the source
+ and destination partitions.  If you have Warn mode set, you will be
+ notified that all data on the destination partition will be lost,
+ and you will be given the opportunity to cancel.  Otherwise the
+ partition copy will begin immediately.
  
  
  ù  Forcing Media Change
@@ -58,9 +57,10 @@
  been modified in such a way that TOS needs to update its internal
  information about the disk.  This is especially true for floppy
  disks.  If you suspect that TOS has not recognized such a change, you
- can use this option to force TOS to recognize the change.  Choose the
- the drive as the active drive, and select Force Media Change.  This
- will force TOS to rebuild all information it has about the disk.
+ can use this option to force TOS to recognize the change.  Set the
+ drive in question to be the active drive, and select Force Media
+ Change.  This will force TOS to rebuild all information it has about
+ the drive.
  
  
  ù  Viewing, Printing and Browsing Files
@@ -82,7 +82,7 @@
 
     Selecting Print File will allow you to print a text file of your
  choice on your printer: this is useful for examining and printing
- Disk Medic Error reports or Validation Error reports.
+ Disk Medic or Validation error reports.
 
     Selecting Browse will give you access to the GEM File Selector to
  look around your disk.
@@ -93,15 +93,15 @@
     Diamond Edge provides several methods of erasing information from
  your disk.  In order to minimise the possibility that you will do
  this accidentally, you must enable the zeroing functions by selecting
- Enable Zeroing from the Utility Menu.
+ Enable zeroing from the Utility Menu.
 
     The basic Zeroing function erases all of the information in the
- disk's FAT and root folder sectors.  The result will be a partition
- that appears to be completely empty to TOS and normal application
- programs.
+ partition's FAT and root directory sectors.  The result will be a
+ partition that appears to be completely empty to TOS and normal
+ application programs.
  
-    To Zero a partition, make the partition you want to zero, the
- active drive.  Then select Zero Partition from the Utility menu.
+    To Zero a partition, set the active drive to the partition you
+ want to zero.  Then select Zero Drive from the Utility menu.
  Regardless of the warning level specified in the user preferences,
  you will always be warned before a zeroing operation.  If you decide
  to continue with the zeroing, select Yes; to abort, select No.
@@ -110,61 +110,49 @@
  before the zeroing is actually performed, all of the critical disk
  information will be saved to a disk information file.  This will
  allow you to Unzero the partition with absolutely no loss of data if
- you realise that you have mistakenly zeroed the partition.
+ you belatedly realise that you have, for example, zeroed the wrong
+ partition.
 
  
  ù  Partition Unzeroing
  
-    To Unzero a partition, make the partition you want to Unzero the
- active drive.  Then select Unzero Partition from the Utility menu
+    To Unzero a partition, set the active drive to the partition you
+ want to unzero.  Then select Un-Zero Drive from the Utility menu
  (this invokes the same procedure as would be used by the Restore Disk
  Mirror function, since they perform the same task).
  
     After selecting the disk you want to unzero, click on the Select
- Disk Info File button to choose the disk information file to restore
- to the selected disk.  After specifying the information file to
- restore (which will normally be the one created most recently), the
- disk characteristics from the disk information file will be displayed.
- If this is correct then select Proceed with Restore.  If you have any
- doubt at all that the information you are about to restore is correct,
- select Cancel to abort the restore.  
+ disk info file button to choose the disk mirror file to restore to
+ the selected disk.  After specifying the mirror file (which will
+ normally be the one created most recently), the disk characteristics
+ from the disk mirror file will be displayed.  If these are correct,
+ select Proceed with Restore.  If you have any doubt at all that the
+ information you are about to restore is correct, select Cancel to
+ abort the restore.  
 
  
- ù  Wipe Partition
+ ù  Partition Wiping
  
     Wiping a partition is a special kind of Zeroing.  When you wipe a
- partition, first the FAT tables and root folder sectors are erased,
- and then every sector of the partition is overwritten.  This allows
- you to completely eliminate confidential data.  You should use this
- function with care: if you Wipe a partition, Diamond Edge will not be
- able to recover the lost data.
+ partition, first the FAT and root directory sectors are erased, and
+ then every sector of the partition is overwritten.  This allows you
+ to eliminate confidential data.  You should use this function with
+ care: if you Wipe a partition, Diamond Edge will not be able to
+ recover the lost data.
 
  
  ù  Hotkeys
  
-    For ease of use, keyboard equivalents and hotkeys are provided for
- every major program function.  In addition there are special keyboard
- commands that control the operation of various program functions.
+    For ease of use, keyboard equivalents are provided for every major
+ program function, as follows:
  
-    During functions that scroll data, such as Creating a Validation
- file or Validating files, you may pause the display by selecting
- Control-S; pressing Control-Q will restart the process.  Control-C is
- the universal abort key and applies to every abortable function, such
- as Mapping Bad Sectors or Validating a disk drive.  For safety, the
- Optimizing and Disk Medic functions are NOT abortable via Control-C.
- 
-    The program functions and their associated hotkeys are described
- below:
- 
- Function:                 Hotkey:
- 
- Window Icon Block
+ Button Bar
    Change Active Drive     Drive Letter (A thru P)
    Disk Information        Alt-I
    Fragmentation Map       Alt-M
    Test Disk               Alt-T
-   Optimize                Alt-O
-   Undelete                Alt-U
+   Optimize Disk           Alt-O
+   Undelete Files          Alt-U
    All Disk Information    Alt-A
    Print                   Alt-P
    
@@ -176,7 +164,7 @@
  Medic Menu
    Test Disk Structure     Alt-T
    Test Multiple           Control-T
-   Map Bad Sectors         Alt-B
+   Map Bad Drive           Alt-B
    Map Bad Multiple        Control-B
    Create CRC File         Alt-R
    Create Checksum File    Alt-C
@@ -203,16 +191,23 @@
    View File               Control-F
    Print File              Control-P
    Browse Disk             Control-R
-   Zero Disk               Control-Z
-   Unzero Disk             Control-X
-   Wipe Partition          Control-W
+   Zero Drive              Control-Z
+   Un-Zero Drive           Control-X
+   Wipe Drive              Control-W
+ 
+     During functions that scroll data, such as creating a validation
+ file or validating files, you may pause the display by selecting
+ Control-S; pressing Control-Q will restart the process.  Control-C is
+ the universal abort key and applies to every abortable function, such
+ as Mapping Bad Sectors or Validating a disk drive.  For safety, the
+ Optimizing and Disk Medic functions are NOT abortable via Control-C.
  
  
  ù  Technical Support
  
     Diamond Edge is backed by Anodyne Software's experienced technical
  support. If you require assistance beyond that which the manual, help
- features, and README files can provide, then we are available to help
+ features, and READ.ME files can provide, then we are available to help
  you.
  
     Before calling technical support, please attempt to recreate the
@@ -224,11 +219,11 @@
        date/time of the application program.  The version number
        appears in the About box.
  
-    ù  Your user registration number:  This appears on the master disk
-       label.
+    ù  Your user registration code:  This appears on the distribution
+       disk label.
  
     ù  System Information: The model of TOS-compatible system that you
-       own, including memory configuration, operating system version
+       use, including memory configuration, operating system version
        used, and the name/version of your hard disk driver software.
  
     ù  Disk Drives:  The model and capacity of all of your internal
@@ -248,7 +243,7 @@
        messages that you receive from the program.
  
     ù  Attempted solutions:  Make a careful note of any steps you took
-      to solve the problem and what the results were.
+       to solve the problem and what the results were.
  
     ù  Contact Information:
  

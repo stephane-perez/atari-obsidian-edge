@@ -1,15 +1,15 @@
  Diamond Edge Extensible Help System
- File: FILE.HLP
+ File: FILE.HLP (v2.51)
  Topics covered:
  
-    ù  User Preferences
+    ù  Preferences
     ù  User Mode
-    ù  Warn Mode
+    ù  Warning Mode
     ù  Medic Pause Delay
     ù  Active Drive
     ù  The Disk Information Display
-    ù  The Fragmentation Map Display
-    ù  The All Drives Information Display
+    ù  The Disk Fragmentation Map Display
+    ù  The All Partitions Information Display
     ù  The Print Function
  
  
@@ -41,18 +41,18 @@
  action.  Be certain that you do!
  
  
- ù  Warn Mode
+ ù  Warning Mode
  
-    Warn mode affects the amount of warning that you will receive
+    Warning mode affects the amount of warning that you will receive
  before the program performs certain types of actions.  There are two
- warning modes: Only before potential loss of data, and Never.  Note
+ warning modes: Whenever data loss is possible, and Never.  Note
  that even if you select Expert mode and Never warn, you will still
- receive warnings before critical actions such as repartitioning your
+ receive warnings before critical actions, such as repartitioning your
  hard disk or zeroing drive C.
  
     ù  Until you are very comfortable with the operation of Diamond
-       Edge, it is strongly suggested that you select both the Novice
-       user mode and the Warn before potential loss of data mode.
+       Edge, it is strongly suggested that you select both Novice
+       user mode and warn whenever data loss is possible.
  
  
  ù  Medic Pause Delay
@@ -73,11 +73,11 @@
  program function: the Active Drive.  ALMOST ALL PROGRAM FUNCTIONS
  ARE PERFORMED ON THE ACTIVE DRIVE; the only exceptions to this rule
  are the SCSI level operations and Disk to Disk copy operations.  To
- change the Active Drive, select the Active Drive icon in the main
- window, and click on the appropriate drive button within the popup
- window.  Alternatively, you can switch active drives directly from
- the main window by pressing the keyboard letter corresponding to the
- desired drive.
+ change the Active Drive, select the Active Drive icon in the button
+ bar at the bottom of the main window, and click on the appropriate
+ drive button within the popup window.  Alternatively, you can switch
+ active drives directly from the main window by pressing the keyboard
+ letter corresponding to the desired drive.
 
     ù  To avoid misleading error messages, only letters assigned to
        hard disk partitions should be selected.  If a modern CD-ROM
@@ -94,7 +94,7 @@
  your manual.
 
  
- ù  The Fragmentation Map Display
+ ù  The Disk Fragmentation Map Display
  
     Selecting Frag Map from the main window (or pressing Alt-M) will
  create a visual display of the fragmentation level of the active
@@ -143,18 +143,19 @@
  it is necessary to optimize the drive to regain performance.
  
  
- ù  The All Drives Information Display
+ ù  The All Partitions Information Display
  
     Selecting All Info (Alt-A) provides a list of the capacities of
  all of your hard disk partitions, as well as the current usage.
  Total capacity, bytes used, bytes free, and percentage bytes free
  are given for each partition individually.  The total for all your
- partitions is displayed at the bottom of the All Drives Information
- display.
+ partitions is displayed at the bottom of the display.
 
     ù  If you have some drive letters assigned to CD-ROM drives and
        you are NOT using a modern CD-ROM driver, Diamond Edge may
        attempt to access these drives, resulting in error messages.
+       You will also get an error message if a partition is defined
+       on a removable drive, and the disk is not present.
 
  
  ù  The Print Function

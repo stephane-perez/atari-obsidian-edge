@@ -258,10 +258,12 @@ short dummy, j;
 		objc_sysvar(0,INDBUTCOL,0,0,&indcolor,&dummy);
 	}
 
+#ifndef BETA
 	if (strncmp(gettext(about,USERNAME),UNREGISTERED,sizeof(UNREGISTERED)-1) == 0) {
 		xform_alert(1,REG_WARNING);
 		return;
 	}
+#endif
 
 	fix_rsrc();
 	update_menu(dev);

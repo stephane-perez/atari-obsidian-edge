@@ -8,9 +8,22 @@
  *	(these should probably be in misc.c)
  *
  *
- *	version 2.10 (december/2002)		roger burrows
+ *	version 2.50 (april/2003)		roger burrows
  *		a highly cleaned up and reorganised version of
  *		the DE v2.04 source; no new function
+ *
+ *	version 2.51 (may/2003)			roger burrows
+ *		fix bugs in copy_image():
+ *			. the 'last cluster used' variable was not initialised if the partition
+ *			  was completely empty, which would cause data clusters to be copied
+ *			  unnecessarily (it could also cause a spurious error message if the
+ *			  variable happened to contain a value greater than the last cluster
+ *			  in the partition)
+ *			. the test for 'copy complete' was incorrect (< last cluster used,
+ *			  rather than <= last cluster used).  depending on the size of the i/o
+ *			  buffer and the number of the last cluster used, this would cause:
+ *				. the last cluster not to be copied, or
+ *				. the progress bar code to detect a 'greater than 100%' condition
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -125,7 +138,6 @@ char *bbuf;
 	}
 
 	if ((ret=bootsector_read(device,bbuf,ERROR_LINENUM)) < 0) {
-//was	if (log_read(device,1,0,bbuf,BOOT)) {
 		free(bbuf);
 		return ret;
 	}
@@ -420,8 +432,8 @@ PRIVATE int copy_image(int dev1,int dev2)
 int cmpbps, cmpcdata, nout, ndo;
 int nclus, ls, i;
 long rc;
+short lastused;			/* hwm of used clusters */
 unsigned short *f16;
-short nextcluster;
 char *readbuf = NULL;
 char *rootbuf;
 
@@ -450,13 +462,13 @@ char *rootbuf;
 	if (rc == 0) {
 		rc = log_write(dev2,dpb.nfat*dpb.spf,1,f16,FAT);
 		if (dpb.isfat16) {						/* fat16 */
-			for (i = 2; i < dpb.maxc; i++) {
+			for (i = 2, lastused = 1; i < dpb.maxc; i++) {
 				if (f16[i]) {
 					if (f16[i] != BADCLUST16_INTEL)	/* because we haven't swabbed */
-						nextcluster = i;
+						lastused = i;
 				}
 			}
-		} else nextcluster = dpb.maxc - 1;		/* fat12 */
+		} else lastused = dpb.maxc - 1;		/* fat12 */
 	}
 	free(f16);
 	if (rc)
@@ -480,22 +492,21 @@ char *rootbuf;
 	}
 
 	nout = 2;
-	init_bar(nextcluster);
-	while (nout < nextcluster) {
-		ndo = min(nextcluster-nout+1,nclus);
-//was		ndo = ((nextcluster - nout + 1) < nclus) ? (nextcluster - nout + 1) : nclus;
+	init_bar(lastused+1);
+	while (nout <= lastused) {
+		ndo = min(lastused-nout+1,nclus);
 		ls = logsector(nout);
 		if (log_read(dev1,ndo*dpb.spc,ls,readbuf,HARDDISK)) {
 			free(readbuf);
 			return -1;
 		}
-		update_bar(nout + (ndo / 2));
+		update_bar(nout+(ndo/2));
 
 		if (log_write(dev2,ndo*dpb.spc,ls,readbuf,HARDDISK)) {
 			free(readbuf);
 			return -1;
 		}
-		update_bar(nout + ndo);
+		update_bar(nout+ndo);
 		nout += ndo;
 	}
 

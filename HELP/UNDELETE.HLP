@@ -1,5 +1,5 @@
  Diamond Edge Extensible Help System
- File: UNDELETE.HLP
+ File: UNDELETE.HLP (v2.51)
  Topics covered:
  
     ù  Saving Disk Mirror
@@ -18,29 +18,30 @@
  ù  Saving Disk Mirror
  
     To save critical disk partition structure information (boot
- sector, FAT table, directory sectors), select Save Disk Mirror from
- the Undelete menu.  The Save Disk Mirror dialog will appear.
+ sector, file allocation table (FAT), root directory sectors), select
+ Save Disk Mirror from the Undelete menu.  The Save Disk Mirror dialog
+ will appear.
  
     Select all of the drives for which you want to create disk mirror
  files, and then click on Save.  A GEM file selector will appear,
  prompting you for the folder in which to save the mirror files.  The
  default folder is that specified in the Diamond Edge Preferences
  dialog.  Note that you need only select the appropriate folder, not
- a specific filename, since disk information file names are generated
+ a specific filename, since disk mirror file names are generated
  automatically.  Select OK from the file selector to save the disk
- information files; select Cancel to abort the process.
+ mirror files; select Cancel to abort the process.
 
  
  ù  Restoring Disk Mirror
  
     To restore the critical disk information to a disk, select Restore
  Disk Info from the Undelete menu.  You have the option of restoring
- one or more of the boot sector, the FAT table and the root directory
- sector.  Then choose which drive you want the information restored
+ one or more of the following: the boot sector, the FATs, and the root
+ directory.  Then choose which drive you want the information restored
  to.  As a first step, it is often advisable to reinstall only the
  boot sector, and then perform a Disk Medic check with Auto-Fix OFF.
- If significant problems remain, then reinstall the FAT table and root
- directory sectors as well.
+ If significant problems remain, then reinstall the FAT and root
+ directory as well.
  
     ù  If the boot sector is severely damaged, TOS may not recognize
        the disk as valid.  It may not be listed as active or it may
@@ -51,12 +52,11 @@
        the archived disk information.
  
      Click on the Select Disk Info File button to choose the disk
- information file to restore to the selected disk.  After specifying
- the information file to restore, the disk characteristics from the
- disk information file will be displayed.  If this is correct then
- select Proceed with Restore.  If you have any doubt at all that the
- information you are about to restore is correct, select Cancel to
- abort the restore.
+ mirror file to restore to the selected disk.  After specifying the
+ mirror file to restore, the disk characteristics from the disk mirror
+ file will be displayed.  If these are correct then select Proceed
+ with Restore.  If you have any doubt at all that the information you
+ are about to restore is correct, select Cancel to abort the restore.
 
  
  ù  Saving SCSI Mirror (requires installed SCSIDRV driver)
@@ -64,47 +64,50 @@
     Physical sector 0 of each hard disk drive contains information on
  how the drive is partitioned.  If this information is lost, then all
  the information in all the partitions on that drive will become
- unavailable!  So it is highly advisable to keep a copy of this
+ unavailable!  Thus it is highly advisable to keep a copy of this
  information elsewhere so that it can be restored in the event of a
  catastrophe.  That is the purpose of Save SCSI Mirror.
 
     To create a SCSI Mirror file, select Save SCSI Mirror from the
  Undelete menu.  Diamond Edge will query the SCSIDRV driver for
- installed hard disk devices on the ACSI, SCSI, and IDE buses.  The
- devices found will be displayed in the Select SCSI device dialog.
- Select the devices that you wish to create mirror files for.
+ installed hard disk devices on the system buses.  The devices found
+ will be displayed in the Select SCSI device dialog: select the
+ devices that you wish to create mirror files for.
  
     ù  If a hard disk drive that should be available does not show up
        in the list of available devices, choose Rescan, and Diamond
        Edge will request the SCSIDRV driver to rescan all buses, to
        try to locate it.
 
-    Selecting Save SCSI Info File will bring up a GEM file selector
+    Selecting Save SCSI Info File will bring up a GEM file selector,
  prompting you for the folder in which to save the SCSI Mirror files.
  The default folder is that specified in the Diamond Edge Preferences
  dialog.  Note that you need only select the appropriate folder, not
- a specific filename, since SCSI information file names are generated
+ a specific filename, since SCSI mirror file names are generated
  automatically.  Select OK from the file selector to save the SCSI
- information files; select Cancel to abort the process.
+ mirror files; select Cancel to abort the process.
 
  
  ù  Restoring SCSI Mirror (requires installed SCSIDRV driver)
  
     To restore the disk partitioning information to a hard disk drive,
- select Restore SCSI Info from the Undelete menu.  Choose the physical
- drive that you want the information restored to, and click on Select
- SCSI Info File.  A GEM file selector will appear, allowing you to
- select the SCSI Mirror file to restore to the selected drive.  Click
- on OK to proceed with the SCSI Mirror restore.  If you have any
- doubts at all that the information you are about to restore is
- correct, select Cancel to abort the restore.
+ select Restore SCSI Mirror from the Undelete menu.  Choose the
+ physical drive that you want the information restored to, and click
+ on Select SCSI Info File.  A GEM file selector will appear, allowing
+ you to select the SCSI Mirror file to restore to the selected drive.
+ Click on OK to proceed.  The standard hard disk partitioning screen
+ will now appear, loaded with the partitioning information contained
+ in the file.  To reinstall the old partitioning information without
+ affecting any other data on the disk, select Install Partition Info
+ Only.  If you have any doubts at all that the information you are
+ about to restore is correct, select Cancel to abort the restore.
 
   
  ù  Configuring Diamond Mirror
  
     One of the keys to successful recovery of deleted files is a good
  knowledge of the FAT structure prior to the file deletion.  Diamond
- Mirror is an AUTO-folder program which saves FAT and root folder
+ Mirror is an AUTO-folder program which saves FAT and root directory
  information at user-specified intervals; it also has the capability
  of testing your disk partitions.  Both of these functions can be very
  useful and we strongly recommend that you use Diamond Mirror.
@@ -127,7 +130,7 @@
     ù  Where to put your Mirror files:  Specify the folder in which
        the files created by Diamond Mirror will be stored.
  
-    After you are satisfied with your configuration, select Save
+    After you are satisfied with your configuration, click on Save
  Configuration.  If you want to exit without changing the existing
  configuration, select Cancel.
  
@@ -135,9 +138,9 @@
  ù  Choosing your Undelete method
  
     Two methods of recovering deleted files are provided by Diamond
- Edge: Simple Undelete and Mirror Undelete.  Select Mirror Undelete if
- you have a recent Mirror file for the drive that contains the deleted
- file.  Otherwise, you should select Simple Undelete.  
+ Edge: Simple Undelete and Mirror Undelete.  You should normally
+ select Mirror Undelete if you have a recent Mirror file for the drive
+ that contains the deleted file, and Simple Undelete otherwise.
  
     A Simple Undelete calculates the number of clusters the file would
  have occupied on the disk.  Then it locates the starting cluster of
@@ -146,8 +149,8 @@
  files.  These unused clusters are then recovered.  This method works
  best when the partition is not highly fragmented.
  
-    A Mirror Undelete uses FAT and root folder information stored in
- the disk Mirror files to determine exactly what clusters the file
+    A Mirror Undelete uses FAT and root directory information stored
+ in the disk Mirror files to determine exactly what clusters the file
  occupied prior to deletion.  Diamond Edge then recovers all clusters
  that the file occupied that are not currently allocated to other
  files.  This is the only method that can fully recover a fragmented

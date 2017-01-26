@@ -2,9 +2,18 @@
  *	opt2.c: implements the optimisation functions
  *
  *
- *	version 2.10 (february/2003)		roger burrows
+ *	version 2.50 (april/2003)		roger burrows
  *		a cleaned up and reorganised version of
  *		the DE v2.04 source; no new function
+ *
+ *	version 2.51 (may/2003)			roger burrows
+ *		fix bug in opt_full():
+ *			instead of using dpb.rds for the size of the root (in logical sectors), we
+ *			calculated it from the number of directory entries, but did not round up.
+ *			in some cases (e.g. logical sector size = 16K, # root dir entries = 256),
+ *			this caused fewer sectors to be written than should have been, which munged
+ *			a partition if any entries in the root were deleted AND the 'Remove deleted
+ *			entries' option was set.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -1075,14 +1084,14 @@ static char title[MAX_DISPLAYSIZE];	/* static because it's a window title */
 		update_obarmsg(text[PROG_ADJUSTFAT].ob_spec);
 		must_write(dev,dpb.spf,1,fat12,FAT);
 		must_write(dev,dpb.spf,dpb.spf+1,fat12,FAT);
-		must_write(dev,dpb.ndir*sizeof(DIRENTRY)/dpb.bps,2*dpb.spf+1,rootbuf,DIR);
+		must_write(dev,dpb.rds,2*dpb.spf+1,rootbuf,DIR);
 		free(fat12);
 		fat12 = NULL;
 	} else {
 		update_obarmsg(text[PROG_ADJUSTFAT].ob_spec);
 		must_write(dev,dpb.spf,1,fat12,FAT);
 		must_write(dev,dpb.spf,dpb.spf+1,fat12,FAT);
-		must_write(dev,dpb.ndir*sizeof(DIRENTRY)/dpb.bps,2*dpb.spf+1,rootbuf,DIR);
+		must_write(dev,dpb.rds,2*dpb.spf+1,rootbuf,DIR);
 		free(fat12);
 		fat12 = NULL;
 		update_obarmsg(text[PROG_WORKING].ob_spec);

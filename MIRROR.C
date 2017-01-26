@@ -2,8 +2,12 @@
  *	mirror.c: implements the Diamond Mirror configuration function
  *
  *
- *	v2.10	roger burrows (december/2002)
+ *	version 2.10 (december/2002)	roger burrows
  *		rewritten to a use windform-style INF file
+ *
+ *	version 2.54 (august/2003)		roger burrows
+ *		. add DEMO support (no save for prefs)
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -313,12 +317,17 @@ int n, obj;
  */
 PRIVATE void save_mirror_prefs(MIRROR_PREFS *mprefs)
 {
+#ifndef DEMO
 int n;
 char *p;
 char savepath[MAX_PATHNAME], temp[MAX_PATHNAME];
+#endif
 
 	set_mirror_prefs(mprefs);
 
+#ifdef DEMO
+	form_alert(1,DEMO_UNAVAIL);
+#else
 	/*
 	 *	temporarily set new app_path for open_section()
 	 */
@@ -362,6 +371,7 @@ char savepath[MAX_PATHNAME], temp[MAX_PATHNAME];
 		xform_alert(1,MI_WARN_ALERT,app_path,DM_PROGRAM_FILE);
 
 	strcpy(app_path,savepath);		/* restore previous path */
+#endif
 }
 
 /*

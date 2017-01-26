@@ -18,7 +18,9 @@
  *		  .	combine set_opt()/set_test() (prepare for elimination of
  *			duplicate menu options & move to options dialog)
  *		  .	call set_opt() before calling do_bad()
- 
+ *
+ *	version 2.54 (august/2003)			roger burrows
+ *		. add DEMO support
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -268,7 +270,7 @@ short dummy, j;
 		objc_sysvar(0,INDBUTCOL,0,0,&indcolor,&dummy);
 	}
 
-#ifndef BETA
+#if !defined(BETA) && !defined(DEMO)
 	if (strncmp(gettext(about,USERNAME),UNREGISTERED,sizeof(UNREGISTERED)-1) == 0) {
 		xform_alert(1,REG_WARNING);
 		return;
@@ -784,6 +786,9 @@ short title, item;
 			menu[ORMDEL].ob_state ^= CHECKED;
 			break;
 		case OAUTOFIX:
+#ifdef DEMO
+			form_alert(1,DEMO_UNAVAIL);
+#else
 			if (menu[OAUTOFIX].ob_state & CHECKED) {
 				menu[OAUTOFIX].ob_state &= ~CHECKED;
 				menu[MAUTOFIX].ob_state &= ~CHECKED;
@@ -791,6 +796,7 @@ short title, item;
 				menu[OAUTOFIX].ob_state |= CHECKED;
 				menu[MAUTOFIX].ob_state |= CHECKED;
 			}
+#endif
 			break;
 		case OIGNORE:
 			if (menu[OIGNORE].ob_state & CHECKED) {
@@ -924,6 +930,9 @@ short title, item;
 			do_multi(MBADM);
 			break;
 		case MAUTOFIX:
+#ifdef DEMO
+			form_alert(1,DEMO_UNAVAIL);
+#else
 			if (menu[MAUTOFIX].ob_state & CHECKED) {
 				menu[OAUTOFIX].ob_state &= ~CHECKED;
 				menu[MAUTOFIX].ob_state &= ~CHECKED;
@@ -931,6 +940,7 @@ short title, item;
 				menu[OAUTOFIX].ob_state |= CHECKED;
 				menu[MAUTOFIX].ob_state |= CHECKED;
 			}
+#endif
 			break;
 		case MIGNORE:
 			if (menu[MIGNORE].ob_state & CHECKED) {
@@ -1294,10 +1304,14 @@ PRIVATE void set_opt()
 		opt.rmdel = TRUE;
 	else opt.rmdel = FALSE;
 
+#ifdef DEMO
+	opt.autofix = FALSE;
+#else
 	if ((menu[OAUTOFIX].ob_state & CHECKED)
 	 || (menu[MAUTOFIX].ob_state & CHECKED))
 		opt.autofix = TRUE;
 	else opt.autofix = FALSE;
+#endif
 
 	if ((menu[OIGNORE].ob_state & CHECKED)
 	 || (menu[MIGNORE].ob_state & CHECKED))

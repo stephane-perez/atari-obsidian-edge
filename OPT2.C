@@ -24,7 +24,7 @@
  *			however, this could occur any time the number of clusters to move was
  *			(n * M + 1), where M is the size of the input buffer in clusters.
  *
- *	version 2.53 (july/2003)			roger burrows
+ *	version 2.53 (july/2003)		roger burrows
  *		1. fix bugs in full optimisation:
  *			a) it was possible for setup_defrag_dir() to fail due to lack of memory
  *			   to store directory clusters, AFTER it had partially modified the
@@ -65,6 +65,14 @@
  *		3. added error message for "can't happen" error in do_defrag() [no disk
  *		   space to store displaced clusters temporarily].
  *		4. do some code optimisation in do_defrag()
+ *
+ *	version 2.54 (september/2003)	roger burrows
+ *		. add DEMO support (no optimisation allowed)
+ *		. fix bug in optimization that was introduced by item 1(a) in v2.52:
+ *		  can_malloc(0) always returned FALSE instead of always returning TRUE.
+ *		  this caused an optimize of a partition with *no* subdirectories to
+ *		  always fail.  in addition, there was no descriptive error message
+ *		  issued, just the general "Cannot complete operation" alert.
  *
  */
 #include <stdio.h>
@@ -163,7 +171,10 @@ PRIVATE void wrap_obar(void);
 
 PUBLIC short do_opt_compress(short display)
 {
-int maxdirclus, rc;
+int maxdirclus;
+#ifndef DEMO
+int rc;
+#endif
 
 	if ((maxdirclus=do_tdisk(1)) < 0) {			//MAGNUM
 		force_update(-1);
@@ -171,6 +182,11 @@ int maxdirclus, rc;
 		return -1;
 	}
 
+#ifdef DEMO
+	form_alert(1,DEMO_UNAVAIL);
+	force_update(-1);
+	return -1;
+#else
 	toggle_bottom(BDOOPT);
 	doing_opt = 1;					/* flag for bpb with DATAlite */
 
@@ -226,6 +242,7 @@ int maxdirclus, rc;
 		force_update(-1);
 
 	return rc;
+#endif
 }
 
 /*
@@ -942,7 +959,10 @@ short nextc;
 
 PUBLIC short do_opt(void)
 {
-int i, maxdirclus, rc;
+int maxdirclus;
+#ifndef DEMO
+int i, rc;
+#endif
 
 	if ((maxdirclus=do_tdisk(1)) < 0) {		//MAGNUM
 		force_update(-1);
@@ -950,6 +970,11 @@ int i, maxdirclus, rc;
 		return -1;
 	}
 
+#ifdef DEMO
+	form_alert(1,DEMO_UNAVAIL);
+	force_update(-1);
+	return -1;
+#else
 	if (opt.visual) {
 		do_diskmap();
 	} else {
@@ -987,7 +1012,7 @@ int i, maxdirclus, rc;
 
 	_mediach(dev);
 
-//do we need to reset infodev/mapdev here ???
+//FIXME: do we need to reset infodev/mapdev here ???
 
 	if (rc == 0) {
 		if (opt.visual) {
@@ -1010,6 +1035,7 @@ int i, maxdirclus, rc;
 	doing_opt = 0;				/* flag for bpb with DATAlite */
 
 	return rc;
+#endif
 }
 
 PRIVATE int opt_full(int maxdirclus)
@@ -1900,10 +1926,17 @@ PRIVATE void up_dirlist()
 PRIVATE int can_malloc(int n)
 {
 char *temp;
+int memory;
 
-	temp = malloc(n*(dpb.bpc+16));	/* kludge to allow for multiple malloc overhead */
-	if (!temp)
+	if (n == 0)						/* we can always allocate zero bytes ... */
+		return TRUE;
+
+	memory = n * (dpb.bpc+16);		/* kludge to allow for multiple malloc overhead */
+	temp = malloc(memory);
+	if (!temp) {
+		error(memory,MEMALLOC,"");
 		return FALSE;
+	}
 
 	free(temp);
 	return TRUE;

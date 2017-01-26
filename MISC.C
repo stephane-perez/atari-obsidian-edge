@@ -23,6 +23,9 @@
  *			allocating it (and therefore the caller doesn't have to malloc it
  *			again), we should avoid this problem ...
  *
+ *	version 2.54 (august/2003)			roger burrows
+ *		. add DEMO support to get_src_dest() [used by copy image & copy defrag]
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -600,7 +603,12 @@ int i, obj, src, dest;
 		if (xform_alert(2,CP_WARN_ALERT,dest+'A',src+'A',dest+'A') == 2)
 			return -1;
 
+#ifdef DEMO
+	form_alert(1,DEMO_UNAVAIL);
+	return -1;
+#else
 	return (src<<8) + dest;
+#endif
 }
 
 /*

@@ -5,6 +5,9 @@
  *	version 2.10 (december/2002)		roger burrows
  *		a highly cleaned up and reorganised version of
  *		the DE v2.04 source; no new function
+ *
+ *	version 2.54 (august/2003)			roger burrows
+ *		. add DEMO support
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -975,9 +978,14 @@ char fname2[MAX_FILENAME];
 				}
 			}
 
+#ifdef DEMO
+			form_alert(1,DEMO_UNAVAIL);
+			break;
+#else
 			ddir[j].entry->name[0] = *c;
 			undelete_one_file(ddir[j].entry);
 			writedir = 1;
+#endif
 		}
 	}
 

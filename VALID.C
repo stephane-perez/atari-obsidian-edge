@@ -5,7 +5,7 @@
  *		a highly cleaned up and reorganised version of
  *		the DE v2.04 source; no new function
  *
- *	version 2.11 (august/2002)	roger burrows
+ *	version 2.11 (august/2002)		roger burrows
  *		revised validation file structure
  *		. new starting magic (necessary precaution :-))
  *		. store method in file, allowing mixed crc/checksum files
@@ -14,6 +14,10 @@
  *		fix subtle bug in validation code: if the name/date/time/size
  *		match, but the crc/checksum doesn't, we must keep on checking
  *		the validation file, in case we have two almost-identical files
+ *
+ *	version 2.54 (august/2003)		roger burrows
+ *		. add DEMO support for do_valid()
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -116,6 +120,13 @@ int i, rc, saveaction, maxlines;
 char fpath[MAX_PATHNAME];
 static char title[MAX_DISPLAYSIZE];
 FILE *fto;
+
+#ifdef DEMO
+	if (dev > FIRST_HD_DEVICE) {
+		form_alert(1,DEMO_DRIVEC);
+		return;
+	}
+#endif
 
 	vsf_style(myhandle,8);
 	vsf_color(myhandle,GREEN);

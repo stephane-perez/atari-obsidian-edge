@@ -8,6 +8,13 @@
  *
  *	version 2.20 (january/2003)	roger burrows
  *		moved view_file() function to new module
+ *
+ *	version 2.54 (august/2003)		roger burrows
+ *		. support new option to preserve partition label when zeroing
+ *		  or wiping.  in order to avoid changing the resource when we
+ *		  are planning to rewrite preference handling anyway, the
+ *		  option must currently be set manually in the INF file.
+ *		. add DEMO support
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -197,6 +204,7 @@ char temp[MAX_PATHNAME];
 
 	if (open_section(PREFS_FILE,"ra",UTILITY_SECTION) == 0) {
 		read_section_line(INF_UTILZERO," %d",&opt->disablezero);
+		read_section_line(INF_UTILKEEP," %d",&opt->keeplabel);
 		close_section();
 	}
 
@@ -244,6 +252,9 @@ PRIVATE void validate_options(OPT *opt)
 
 	if (opt->disablezero != FALSE)
 		opt->disablezero = TRUE;
+
+	if (opt->keeplabel != TRUE)			/* default is don't preserve */
+		opt->keeplabel = FALSE;
 }
 
 PRIVATE void update_menu_prefs(OPT *opt)
@@ -527,6 +538,9 @@ PUBLIC void save_prefs(OPT *opt)
 {
 	set_prefs(opt);
 
+#ifdef DEMO
+	form_alert(1,DEMO_UNAVAIL);
+#else
 	open_section(PREFS_FILE,"wa",GENERAL_SECTION);
 	write_section_line(INF_NOVICE,"%d",opt->novice);
 	write_section_line(INF_WARN,"%d",opt->warn);
@@ -556,7 +570,10 @@ PUBLIC void save_prefs(OPT *opt)
 
 	open_section(PREFS_FILE,"wa",UTILITY_SECTION);
 	write_section_line(INF_UTILZERO,"%d",opt->disablezero);
+	if (opt->keeplabel)
+		write_section_line(INF_UTILKEEP,"%d",opt->keeplabel);
 	close_section();
+#endif
 }
 
 /*

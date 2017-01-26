@@ -18,6 +18,11 @@
  *		   allocate_max_units().  see misc.c for explanation/comments.
  *		3. eliminate mapx/mapy (same as gmap.g_x/gmap.g_y)
  *
+ *	version 2.54 (august/2003)		roger burrows
+ *		. as per 1(a) above, optionally preserve partition label
+ *		  (option must be set manually in INF file at this time)
+ *		. add DEMO support for Zero & Wipe (Unzero is done in info.c)
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -789,6 +794,13 @@ PUBLIC void do_zero()
 {
 char path[MAX_PATHNAME];
 
+#ifdef DEMO
+	if (dev > FIRST_HD_DEVICE) {
+		form_alert(1,DEMO_DRIVEC);
+		return;
+	}
+#endif
+
 	/*
 	 *	make sure we don't save the Unzero info on the drive
 	 *	that we're about to Zero ...
@@ -835,6 +847,13 @@ PUBLIC void do_wipe()
 int rc;
 char temp[MAX_DISPLAYSIZE];
 
+#ifdef DEMO
+	if (dev > FIRST_HD_DEVICE) {
+		form_alert(1,DEMO_DRIVEC);
+		return;
+	}
+#endif
+
 	if (get_mybpb(&dpb,dev) < 0)
 		xform_alert(1,GEN_BPB_ALERT);
 	else if (zero_fats_and_root() < 0)
@@ -862,10 +881,8 @@ int i, rc = 0;
 long nbytes;
 char *fatrootbuf, *root;
 unsigned short *f16;
-#ifdef BELA_SUGGESTION
 char *p;
 DIRENTRY label = { 0x00 };
-#endif
 
 	if (dpb.isfat16)
 		nbytes = dpb.bpf * 2L + dpb.rdb;
@@ -898,25 +915,23 @@ DIRENTRY label = { 0x00 };
 
 	root = fatrootbuf + (dpb.bpf * 2L);			/* point to start of root */
 
-#ifdef BELA_SUGGESTION
-	if (log_read(dev,dpb.rds,1+2*dpb.spf,root,ROOTDIR)) {
-		free(fatrootbuf);
-		return -1;
-	}
-	for (p = root; p < root + dpb.bpf; p += sizeof(DIRENTRY)) {
-		if (((DIRENTRY *)p)->attr == FA_VOLUME) {
-			memcpy(&label,p,sizeof(DIRENTRY));
-			break;								/* always use first label if > 1 */
+	if (opt.keeplabel) {
+		if (log_read(dev,dpb.rds,1+2*dpb.spf,root,ROOTDIR)) {
+			free(fatrootbuf);
+			return -1;
+		}
+		for (p = root; p < root + dpb.bpf; p += sizeof(DIRENTRY)) {
+			if (((DIRENTRY *)p)->attr == FA_VOLUME) {
+				memcpy(&label,p,sizeof(DIRENTRY));
+				break;							/* always use first label if > 1 */
+			}
 		}
 	}
-#endif
 
 	memset(root,0x00,dpb.rdb);					/* ensure root is zeroed */
 
-#ifdef BELA_SUGGESTION
-	if (label.name[0])
+	if (opt.keeplabel && label.name[0])
 		memcpy(root,&label,sizeof(DIRENTRY));	/* restore label if present */
-#endif
 
 	if (log_write(dev,2*dpb.spf+dpb.rds,1,fatrootbuf,BOOT))
 		rc = -1;

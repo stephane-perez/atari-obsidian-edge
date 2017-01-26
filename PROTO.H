@@ -194,5 +194,5 @@ PUBLIC unsigned short addchk(unsigned short chksum,unsigned short *p,long count)
 PUBLIC unsigned short addcrc(unsigned short crc,unsigned char *p,long count);
 PUBLIC void do_valid(short type,short val);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\FILEIO.C */
+/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\VIEWFILE.C */
 PUBLIC void view_file(char *namein,short draw);

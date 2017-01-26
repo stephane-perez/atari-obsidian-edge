@@ -31,6 +31,9 @@
  *		arithmetic overflow when the size exceeded 2GB.  fixed by
  *		using secs_to_cmegs() routine to perform conversion
  *		
+ *	version 2.54 (augudt/2003)	roger burrows
+ *		. add DEMO support
+ *		
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -429,6 +432,9 @@ static char info[MAX_DISPLAYSIZE];
 			break;
 
 		case PARTONLY:
+#ifdef DEMO
+			form_alert(1,DEMO_UNAVAIL);
+#else
 			loadob_topart();
 			load_and_update(toppart);
 			if (secavail < 0) {
@@ -443,9 +449,13 @@ static char info[MAX_DISPLAYSIZE];
 				redraw_object(scsiedit,ESCANCEL);
 				need_to_reboot = TRUE;
 			}
+#endif
 			break;
 
 		case PARTNREB:
+#ifdef DEMO
+			form_alert(1,DEMO_UNAVAIL);
+#else
 			loadob_topart();
 			load_and_update(toppart);
 			if (secavail < 0) {
@@ -456,9 +466,13 @@ static char info[MAX_DISPLAYSIZE];
 				if (xform_alert(2,PT_REBUILD_ALERT) == 2)
 					break;
 			rebuild_all(id,lun);
+#endif
 			break;
 
 		case REBUILD1:
+#ifdef DEMO
+			form_alert(1,DEMO_UNAVAIL);
+#else
 			loadob_topart();
 			load_and_update(toppart);
 			if (secavail < 0) {
@@ -469,9 +483,13 @@ static char info[MAX_DISPLAYSIZE];
 				if (xform_alert(2,PT_REBPART_ALERT) == 2)
 					break;
 			rebuild_one(id,lun);
+#endif
 			break;
 
 		case ONEBOOT:
+#ifdef DEMO
+			form_alert(1,DEMO_UNAVAIL);
+#else
 			loadob_topart();
 			load_and_update(toppart);
 			if (secavail < 0) {
@@ -479,6 +497,7 @@ static char info[MAX_DISPLAYSIZE];
 				break;
 			}
 			oneboot(id,lun);
+#endif
 			break;
 
 		case ESTART1:

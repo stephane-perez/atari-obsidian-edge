@@ -56,6 +56,13 @@
  *				height of the monochrome icon in the CICONBLK
  *			  -	and the usual non-significant reformatting
  *
+ * Version:	1.21
+ * Date:	1 September 2003
+ * Author:  Roger Burrows
+ * Changes:   -	call form_error() with PC-style error numbers rather than
+ *				Atari-style (as per definition)
+ *
+ *
  * Issues:	form_error() is sometimes issued for initialisation errors, and
  *			sometimes not:
  *				rs_read(): sometimes
@@ -490,7 +497,7 @@ WORD ret = TRUE;
 	strcpy(tmpnam,fname);
 
 	if (!shel_find(tmpnam)) {
-		form_error(-33);
+		form_error(2);			/* error: file not found */
 		return FALSE;
 	}
 	rs_global = global;
@@ -520,7 +527,7 @@ WORD ret = TRUE;
 			} else
 				ret = FALSE;
 		} else {
-			form_error(-39);
+			form_error(8);		/* error: insufficient memory */
 			ret = FALSE;
 		}
 
@@ -870,13 +877,13 @@ CICON *max_icn = NULL;
 
 	/* allocate space for device-dependent format */
 	if ((color_icn->col_data = malloc(len * color_icn->num_planes)) == NULL) {
-		form_error(-39);
+		form_error(8);			/* error: insufficient memory */
 		return FALSE;
 	}
 	if (color_icn->sel_data) {
 		if ((color_icn->sel_data = malloc(len * color_icn->num_planes)) == NULL) {
 			free(color_icn->col_data);
-			form_error(-39);
+			form_error(8);		/* error: insufficient memory */
 			return FALSE;
 		}
 	}
@@ -887,7 +894,7 @@ CICON *max_icn = NULL;
 				free(color_icn->col_data);
 				if (color_icn->sel_data)
 					free(color_icn->sel_data);
-				form_error(-39);
+				form_error(8);	/* error: insufficient memory */
 				return FALSE;
 			}
 			xmax = cicnblk->monoblk.ib_wicon / 16;
@@ -1325,7 +1332,7 @@ ULONG colback;
 
 	if (s->fd_addr == col_data) {
 		if ((col_data = malloc(len * sizeof(WORD) * s->fd_nplanes)) == NULL) {
-			form_error(-39);
+			form_error(8);		/* error: insufficient memory */
 			return;
 		}
 		memcpy(col_data,s->fd_addr,len * sizeof(WORD) * s->fd_nplanes);

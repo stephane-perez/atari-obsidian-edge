@@ -14,6 +14,11 @@
 #define debug_alert(x)	((void)0)
 #endif
 
+#ifdef DEMO
+#define DEMO_UNAVAIL	"[1][Sorry, this option is not|available in the demo version][ OK ]"
+#define DEMO_DRIVEC		"[1][Sorry, this function is only |available for drives A-C|in the demo version][ OK ]"
+#endif
+
 /*
  *	definitions for functions
  */
@@ -23,9 +28,15 @@
 /*
  *	various and sundry filenames
  */
+#ifdef DEMO
+#define PROGRAM_FILE	"EDGEDEMO.PRG"
+#define RSC_FILE		"EDGEDEMO.RSC"
+#define PREFS_FILE		"EDGEDEMO.INF"		/* stores preferences for Edge */
+#else
 #define PROGRAM_FILE	"EDGE.PRG"
 #define RSC_FILE		"EDGE.RSC"
 #define PREFS_FILE		"EDGE.INF"			/* stores preferences for Edge */
+#endif
 #define IN_PROGRAM_FILE	"INSTALL.PRG"
 #define DM_PROGRAM_FILE	"DMIRROR.PRG"
 #define DM_PREFS_FILE	"DMIRROR.INF"		/* stores preferences for Diamond Mirror */
@@ -196,6 +207,7 @@
 	#define INF_UNDDATE		"Date format"
 #define UTILITY_SECTION		"Utility"
 	#define INF_UTILZERO	"Disable zeroing"
+	#define INF_UTILKEEP	"Keep label"
 
 
 /*
@@ -337,6 +349,7 @@ typedef struct options {
 	int datemode;				/* UK (dd/mm/yy) or US (mm/dd/yy) */
 							/* utility */
 	int disablezero;			/* TRUE => disable zeroing options in menu */
+	int keeplabel;				/* TRUE => retain volume label across zero/wipe */
 } OPT;
 
 typedef struct status {

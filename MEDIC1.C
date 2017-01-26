@@ -23,6 +23,12 @@
  *			. eliminate mapx/mapy (no longer used by dmap.c) and gmap (no
  *			  longer used by medic1.c)
  *			. remove unnecessary setting of opt.visual in do_tdisk()
+ *
+ *	version 2.54 (august/2003)			roger burrows
+ *		. add DEMO support for Medic & Map bad
+ *		. fix test for directory in test_loop()/bad_loop(): it was
+ *		  (attr==FA_SUBDIR), which failed when any other bit was set;
+ *		  it's now (attr&FA_SUBDIR != 0)
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -460,9 +466,13 @@ static char title[MAX_DISPLAYSIZE];
 	}
 	if (*problems && !fix) {
 		if (obj == FIXNOW) {
+#ifdef DEMO
+			form_alert(1,DEMO_UNAVAIL);
+#else
 			fix = 1;
 			free_pointers();
 			return 0;			/* try again ... */
+#endif
 		}
 		return -1;
 	}
@@ -585,13 +595,14 @@ char pathout[MAX_ERRFILEMSGSIZE];
 			curfile++;
 	} else curfile += 2;
 
-	for ( ; curfile->attr == FA_SUBDIR;	curfile++) {
+	for ( ; curfile->attr & FA_SUBDIR; curfile++) {
 		if (curfile->name[0] == DELETION_MARK)
 			continue;
 		errflag = 0;
 		dirlevel++;
 		st = dirstart = get_word((char *)&curfile->start);
 		ncl = 1;
+
 		while (fat16[st] != dpb.bitmask) {
 			sc = st;
 			st = fat16[st];
@@ -646,8 +657,10 @@ char pathout[MAX_ERRFILEMSGSIZE];
 			up_dirlist();
 			continue;
 		}
+
 		endpoint = sort_dir(dirlist[dirlevel].dirbuf,ncl,0);	/* don't remove deleted entries */
 		end = dirlist[dirlevel].dirbuf + dpb.bpc * ncl;
+
 		for (temp = endpoint; temp < end; temp += sizeof(DIRENTRY)) {
 			for (i = 0; i < sizeof(DIRENTRY); i++) {
 				if (*(temp + i)) {
@@ -1688,9 +1701,15 @@ BAD *b1;
 	}
 	obj = wait_bad();
 
-	if ((obj == BADFIXN) && firstbad && !firstfatbad && !fix) {
-		fix = 1;
-		return 1;
+	if (firstbad && !firstfatbad && !fix) {
+		if (obj == BADFIXN) {
+#ifdef DEMO
+			form_alert(1,DEMO_UNAVAIL);
+#else
+			fix = 1;
+			return 1;
+#endif
+		}
 	}
 
 	return 0;
@@ -1810,7 +1829,7 @@ char *temp;
 	/*
 	 *	process subdirectories (they have been sorted in-memory to start of dir)
 	 */
-	for ( ; curfile->attr == FA_SUBDIR; curfile++) {
+	for ( ; curfile->attr & FA_SUBDIR; curfile++) {
 		if (curfile->name[0] == DELETION_MARK)
 			continue;
 		/*

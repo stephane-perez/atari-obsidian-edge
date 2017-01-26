@@ -6,6 +6,10 @@
  *
  *	version 2.10 (december/2002)	roger burrows
  *
+ *	version 2.54 (august/2003)		roger burrows
+ *		. add DEMO support for save_disk_info(), restore_disk_info()
+ *		  [also handles Unzero function]
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -133,17 +137,26 @@ OBJECT *obj;
 					objc_xsel(saveinfo,SIA+j);
 			break;
 		case SICAN:
-//was			refresh_now(saveinfo,0);
 			refresh_screen(saveinfo);
 			return;
 			break;
 		case SAVEDI:
 			done = TRUE;
+#ifdef DEMO
+			for (j = 0, obj = &saveinfo[SIA]; j < NUM_DEVICES; j++, obj++) {
+				if (obj->ob_state & SELECTED) {
+					if (j > FIRST_HD_DEVICE) {
+						form_alert(1,DEMO_DRIVEC);
+						done = FALSE;
+						break;
+					}
+				}
+			}
+#endif
 			break;
 		}
 	} while(!done);
 
-//was	refresh_now(saveinfo,0);
 	refresh_screen(saveinfo);
 	if (get_path(fbootf,opt.filepath,MIRROR_MASK,text[DINFO_FSEL_SAVE].ob_spec)) {
 		savep = fbootf;
@@ -191,6 +204,12 @@ int rc;
 		}
 		if (restdev < 0)
 			xform_alert(1,GEN_PART_ALERT);
+#ifdef DEMO
+		else if (restdev > FIRST_HD_DEVICE) {
+			form_alert(1,DEMO_DRIVEC);
+			restdev = -1;
+		}
+#endif
 	} while(restdev < 0);
 
 	if (get_existing_fname(fname,opt.filepath,MIRROR_MASK,text[DINFO_FSEL_REST].ob_spec) == 0)
@@ -445,7 +464,6 @@ OBJECT *obj;
 
 		case SELSGO:
 			if ((rc=idlun(0)) >= 0L) {	/* first (if present) is only selected object */
-//was				refresh_now(selscsi,0);	/* clean up the selscsi dialog ... */
 				refresh_screen(selscsi);	/* clean up the selscsi dialog ... */
 				id = rc >> 16;
 				lun = rc & 0xffff;

@@ -14,6 +14,15 @@
  *			this caused fewer sectors to be written than should have been, which munged
  *			a partition if any entries in the root were deleted AND the 'Remove deleted
  *			entries' option was set.
+ *
+ *	version 2.52 (june/2003)		roger burrows
+ *		fix bug in a_index():
+ *			the sort of indx[] looped forever iff n == 1.  this occurred when a_index()
+ *			was entered with one remaining cluster to move.  the simplest situation is
+ *			when optimizing a partition from which all files have been deleted except
+ *			one, which itself occupies only a single cluster.  however, this could occur
+ *			any time the number of clusters to move is (n * M + 1), where M is the size
+ *			of the input buffer in clusters.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -1767,9 +1776,14 @@ int volume_labels_allowed;
 /*************************************************************************/
 
 /*
- *	creates index array in increasing order
+ *	creates index array
  *
- *	we need to figure out exactly what this does ... looks like some kind of tree
+ *	first, fills indx[1..n] with values 0..n-1
+ *	then sorts indx[1..n] so that arrin[indx[n]]<arrin[indx[arrin[n+1]]
+ *
+ *	this is used e.g. to collect fragmented clusters when reading so that
+ *	they can be written out consecutively
+ *
  */
 PRIVATE void a_index(short n,short arrin[],short indx[])
 {
@@ -1777,8 +1791,14 @@ short l, j, i;
 short ir, indxt;
 long q;
 
+	if (n < 2) {		/* handle degenerate case */
+		indx[1] = 0;
+		return;
+	}
+
 	for (j = 1; j <= n; j++)
 		indx[j] = j - 1;
+
 	l = (n >> 1) + 1;
 	ir = n;
 	for ( ; ; ) {

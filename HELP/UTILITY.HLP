@@ -1,0 +1,267 @@
+ Diamond Edge Extensible Help System
+ File: UTILITY.HLP
+ Topics covered:
+  
+    ù  Partition Copy - Image
+    ù  Partition Copy - Defragmented
+    ù  Forcing Media Change
+    ù  Browsing, Viewing, and Printing Files
+    ù  Partition Zeroing
+    ù  Partition Unzeroing
+    ù  Partition Wiping
+    ù  Hotkeys
+    ù  Technical Support
+    ù  Contact Information
+ 
+ 
+ ù  Partition Copy - Image
+ 
+    Copy Partition Image copies, sector for sector, an exact image of
+ the source partition to the destination partition.  The file and
+ folder structure and the disk fragmentation characteristics of the
+ source are exactly duplicated on the destination.  The source and
+ destination partitions must be of exactly the same size and type
+ (both GEM or both BGM).  All existing data on the destination
+ partition is lost.
+ 
+    To perform a partition image copy, select Copy Partition Image
+ from the Utility menu.  You will be prompted for the source and
+ destination partitions.  If you have Warn mode set, you will be
+ notified that all data on the destination partition will be lost, and
+ you will be given the opportunity to cancel.  Otherwise the partition
+ copy will begin immediately.
+ 
+ 
+ ù  Partition Copy  - Defragmented
+ 
+    Copy Partition Defrag copies the entire contents of the source
+ partition to the destination partition, defragmenting the partition
+ at the same time.  The result is a destination disk that has had a
+ full optimization for reading performed.  The source and destination
+ partitions do not have to be the same size or type; thus you can,
+ for example, perform a Copy Partition Defrag from a 10 megabyte GEM
+ partition to a 40 megabyte BGM partition.  All existing data on the
+ destination partition will be lost.  
+ 
+    To perform a partition copy with defragmentation, select Copy
+ Partition Defrag from the Utility menu.  You will be prompted for
+ the source and destination partitions.  If you have Warn mode set,
+ you will be notified that all data on the destination partition will
+ be lost, and you will be given the opportunity to cancel.  Otherwise
+ the partition copy will begin immediately.
+ 
+ 
+ ù  Forcing Media Change
+ 
+    TOS occasionally has difficulty detecting whether the media in a
+ removable disk drive has been replaced, or a hard disk partition has
+ been modified in such a way that TOS needs to update its internal
+ information about the disk.  This is especially true for floppy
+ disks.  If you suspect that TOS has not recognized such a change, you
+ can use this option to force TOS to recognize the change.  Choose the
+ the drive as the active drive, and select Force Media Change.  This
+ will force TOS to rebuild all information it has about the disk.
+ 
+ 
+ ù  Viewing, Printing and Browsing Files
+ 
+    These functions allow you to read and print text files, and to
+ look around your disk.  Selecting View File allows you to view a text
+ file on the screen.  While viewing a file, the following keys control
+ movement through the file:
+ 
+    ù  up/down arrow: move up or down a line
+    ù  shift-up/down arrow: move up or down a page
+    ù  Home: move to first line in file
+    ù  Esc: exit viewing
+ 
+ Alternatively, you may use the mouse for some of these functions:
+ 
+    ù  left button: move down a line
+    ù  right button: move down a page
+
+    Selecting Print File will allow you to print a text file of your
+ choice on your printer: this is useful for examining and printing
+ Disk Medic Error reports or Validation Error reports.
+
+    Selecting Browse will give you access to the GEM File Selector to
+ look around your disk.
+ 
+
+ ù  Partition Zeroing
+ 
+    Diamond Edge provides several methods of erasing information from
+ your disk.  In order to minimise the possibility that you will do
+ this accidentally, you must enable the zeroing functions by selecting
+ Enable Zeroing from the Utility Menu.
+
+    The basic Zeroing function erases all of the information in the
+ disk's FAT and root folder sectors.  The result will be a partition
+ that appears to be completely empty to TOS and normal application
+ programs.
+ 
+    To Zero a partition, make the partition you want to zero, the
+ active drive.  Then select Zero Partition from the Utility menu.
+ Regardless of the warning level specified in the user preferences,
+ you will always be warned before a zeroing operation.  If you decide
+ to continue with the zeroing, select Yes; to abort, select No.
+ 
+    After you have confirmed your intent to zero the partition, but
+ before the zeroing is actually performed, all of the critical disk
+ information will be saved to a disk information file.  This will
+ allow you to Unzero the partition with absolutely no loss of data if
+ you realise that you have mistakenly zeroed the partition.
+
+ 
+ ù  Partition Unzeroing
+ 
+    To Unzero a partition, make the partition you want to Unzero the
+ active drive.  Then select Unzero Partition from the Utility menu
+ (this invokes the same procedure as would be used by the Restore Disk
+ Mirror function, since they perform the same task).
+ 
+    After selecting the disk you want to unzero, click on the Select
+ Disk Info File button to choose the disk information file to restore
+ to the selected disk.  After specifying the information file to
+ restore (which will normally be the one created most recently), the
+ disk characteristics from the disk information file will be displayed.
+ If this is correct then select Proceed with Restore.  If you have any
+ doubt at all that the information you are about to restore is correct,
+ select Cancel to abort the restore.  
+
+ 
+ ù  Wipe Partition
+ 
+    Wiping a partition is a special kind of Zeroing.  When you wipe a
+ partition, first the FAT tables and root folder sectors are erased,
+ and then every sector of the partition is overwritten.  This allows
+ you to completely eliminate confidential data.  You should use this
+ function with care: if you Wipe a partition, Diamond Edge will not be
+ able to recover the lost data.
+
+ 
+ ù  Hotkeys
+ 
+    For ease of use, keyboard equivalents and hotkeys are provided for
+ every major program function.  In addition there are special keyboard
+ commands that control the operation of various program functions.
+ 
+    During functions that scroll data, such as Creating a Validation
+ file or Validating files, you may pause the display by selecting
+ Control-S; pressing Control-Q will restart the process.  Control-C is
+ the universal abort key and applies to every abortable function, such
+ as Mapping Bad Sectors or Validating a disk drive.  For safety, the
+ Optimizing and Disk Medic functions are NOT abortable via Control-C.
+ 
+    The program functions and their associated hotkeys are described
+ below:
+ 
+ Function:                 Hotkey:
+ 
+ Window Icon Block
+   Change Active Drive     Drive Letter (A thru P)
+   Disk Information        Alt-I
+   Fragmentation Map       Alt-M
+   Test Disk               Alt-T
+   Optimize                Alt-O
+   Undelete                Alt-U
+   All Disk Information    Alt-A
+   Print                   Alt-P
+   
+ File Menu
+   Preferences             Alt-F
+   Open Window             Alt-W
+   Quit                    Control-Q
+   
+ Medic Menu
+   Test Disk Structure     Alt-T
+   Test Multiple           Control-T
+   Map Bad Sectors         Alt-B
+   Map Bad Multiple        Control-B
+   Create CRC File         Alt-R
+   Create Checksum File    Alt-C
+   Validate Files          Alt-V
+   Validate Multiple       Control-V
+   Partition Hard Disk     Alt-H
+ 
+ Optimize Menu
+   Optimize Drive          Alt-O
+   Optimize Multiple       Control-O
+   
+ Undelete Menu
+   Configure Mirror        Alt-N
+   Save Disk Mirror        Alt-S
+   Restore Disk Mirror     Alt-Y
+   Save SCSI Mirror        Control-S
+   Restore SCSI Mirror     Control-Y
+   Undelete Files          Alt-U
+ 
+ Utility Menu
+   Copy Drive Defrag       Control-C
+   Copy Drive Image        Control-I
+   Force Media Change      Control-M
+   View File               Control-F
+   Print File              Control-P
+   Browse Disk             Control-R
+   Zero Disk               Control-Z
+   Unzero Disk             Control-X
+   Wipe Partition          Control-W
+ 
+ 
+ ù  Technical Support
+ 
+    Diamond Edge is backed by Anodyne Software's experienced technical
+ support. If you require assistance beyond that which the manual, help
+ features, and README files can provide, then we are available to help
+ you.
+ 
+    Before calling technical support, please attempt to recreate the
+ problem so that you can provide us with an exact sequence of events.
+ If the problem reoccurs, then contact us with the following
+ information:
+ 
+    ù  Product Information:  The name, version number, and file
+       date/time of the application program.  The version number
+       appears in the About box.
+ 
+    ù  Your user registration number:  This appears on the master disk
+       label.
+ 
+    ù  System Information: The model of TOS-compatible system that you
+       own, including memory configuration, operating system version
+       used, and the name/version of your hard disk driver software.
+ 
+    ù  Disk Drives:  The model and capacity of all of your internal
+       and external disk drives, and the vendor of your hard disk host
+       adapter (if using an ACSI port).
+ 
+    ù  Additional Hardware:  You should also know the manufacturer and
+       model of any additional hardware that you have connected to
+       your system.  This includes printers, modems, accelerators,
+       custom video cards, PC emulators etc.
+ 
+    ù  Desk Accessories (DAs) and AUTO folder programs:  You will need
+       a list of all AUTO folder programs and DAs active in your
+       system.
+ 
+    ù  Error Messages:  Write down the EXACT wording of any error
+       messages that you receive from the program.
+ 
+    ù  Attempted solutions:  Make a careful note of any steps you took
+      to solve the problem and what the results were.
+ 
+    ù  Contact Information:
+ 
+       Mail:     Anodyne Software
+                 6 Cobbler Court
+                 Ottawa
+                 Ontario  K1V 0B8
+                 CANADA
+ 
+       Phone:    (613) 523-7498
+ 
+       Email:    support@anodynesoftware.com
+ 
+       Web site: www.anodynesoftware.com
+
+

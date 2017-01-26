@@ -1,0 +1,234 @@
+ Diamond Edge Extensible Help System
+ File: UNDELETE.HLP
+ Topics covered:
+ 
+    ù  Saving Disk Mirror
+    ù  Restoring Disk Mirror
+    ù  Saving SCSI Mirror
+    ù  Restoring SCSI Mirror
+    ù  Configuring Diamond Mirror
+    ù  Choosing your Undelete method
+    ù  Undeleting Files
+    ù  What to do after you undelete a file
+ 
+ In the following discussion, the terms disk mirror files and disk
+ information files are used interchangeably.
+ 
+ 
+ ù  Saving Disk Mirror
+ 
+    To save critical disk partition structure information (boot
+ sector, FAT table, directory sectors), select Save Disk Mirror from
+ the Undelete menu.  The Save Disk Mirror dialog will appear.
+ 
+    Select all of the drives for which you want to create disk mirror
+ files, and then click on Save.  A GEM file selector will appear,
+ prompting you for the folder in which to save the mirror files.  The
+ default folder is that specified in the Diamond Edge Preferences
+ dialog.  Note that you need only select the appropriate folder, not
+ a specific filename, since disk information file names are generated
+ automatically.  Select OK from the file selector to save the disk
+ information files; select Cancel to abort the process.
+
+ 
+ ù  Restoring Disk Mirror
+ 
+    To restore the critical disk information to a disk, select Restore
+ Disk Info from the Undelete menu.  You have the option of restoring
+ one or more of the boot sector, the FAT table and the root directory
+ sector.  Then choose which drive you want the information restored
+ to.  As a first step, it is often advisable to reinstall only the
+ boot sector, and then perform a Disk Medic check with Auto-Fix OFF.
+ If significant problems remain, then reinstall the FAT table and root
+ directory sectors as well.
+ 
+    ù  If the boot sector is severely damaged, TOS may not recognize
+       the disk as valid.  It may not be listed as active or it may
+       not be recognized at all (you may see one less drive than you
+       thought you had).  If this occurs, it will first be necessary
+       to reinstall a valid boot sector: refer to "Partitioning Your
+       Hard Drive" in the Diamond Edge manual.  Then you can reinstall
+       the archived disk information.
+ 
+     Click on the Select Disk Info File button to choose the disk
+ information file to restore to the selected disk.  After specifying
+ the information file to restore, the disk characteristics from the
+ disk information file will be displayed.  If this is correct then
+ select Proceed with Restore.  If you have any doubt at all that the
+ information you are about to restore is correct, select Cancel to
+ abort the restore.
+
+ 
+ ù  Saving SCSI Mirror (requires installed SCSIDRV driver)
+ 
+    Physical sector 0 of each hard disk drive contains information on
+ how the drive is partitioned.  If this information is lost, then all
+ the information in all the partitions on that drive will become
+ unavailable!  So it is highly advisable to keep a copy of this
+ information elsewhere so that it can be restored in the event of a
+ catastrophe.  That is the purpose of Save SCSI Mirror.
+
+    To create a SCSI Mirror file, select Save SCSI Mirror from the
+ Undelete menu.  Diamond Edge will query the SCSIDRV driver for
+ installed hard disk devices on the ACSI, SCSI, and IDE buses.  The
+ devices found will be displayed in the Select SCSI device dialog.
+ Select the devices that you wish to create mirror files for.
+ 
+    ù  If a hard disk drive that should be available does not show up
+       in the list of available devices, choose Rescan, and Diamond
+       Edge will request the SCSIDRV driver to rescan all buses, to
+       try to locate it.
+
+    Selecting Save SCSI Info File will bring up a GEM file selector
+ prompting you for the folder in which to save the SCSI Mirror files.
+ The default folder is that specified in the Diamond Edge Preferences
+ dialog.  Note that you need only select the appropriate folder, not
+ a specific filename, since SCSI information file names are generated
+ automatically.  Select OK from the file selector to save the SCSI
+ information files; select Cancel to abort the process.
+
+ 
+ ù  Restoring SCSI Mirror (requires installed SCSIDRV driver)
+ 
+    To restore the disk partitioning information to a hard disk drive,
+ select Restore SCSI Info from the Undelete menu.  Choose the physical
+ drive that you want the information restored to, and click on Select
+ SCSI Info File.  A GEM file selector will appear, allowing you to
+ select the SCSI Mirror file to restore to the selected drive.  Click
+ on OK to proceed with the SCSI Mirror restore.  If you have any
+ doubts at all that the information you are about to restore is
+ correct, select Cancel to abort the restore.
+
+  
+ ù  Configuring Diamond Mirror
+ 
+    One of the keys to successful recovery of deleted files is a good
+ knowledge of the FAT structure prior to the file deletion.  Diamond
+ Mirror is an AUTO-folder program which saves FAT and root folder
+ information at user-specified intervals; it also has the capability
+ of testing your disk partitions.  Both of these functions can be very
+ useful and we strongly recommend that you use Diamond Mirror.
+ 
+    Diamond Mirror is configured from within Diamond Edge by selecting
+ "Configure Mirror..." from the Undelete menu.  The following items
+ may be specified:
+ 
+    ù  Which drives to Test/Mirror:  Select the drive(s) that you want
+       to Test and/or Mirror by clicking on the appropriate drive
+       buttons.  You may select as many or as few of your active
+       devices as you wish, and you may select different drives to
+       Test and Mirror.
+ 
+    ù  How often to Test/Mirror:  Diamond Mirror can Test and/or
+       Mirror the selected drives every time your machine is booted
+       up, once per day, or once per week.  You can select different
+       schedules for Test and Mirror.
+ 
+    ù  Where to put your Mirror files:  Specify the folder in which
+       the files created by Diamond Mirror will be stored.
+ 
+    After you are satisfied with your configuration, select Save
+ Configuration.  If you want to exit without changing the existing
+ configuration, select Cancel.
+ 
+ 
+ ù  Choosing your Undelete method
+ 
+    Two methods of recovering deleted files are provided by Diamond
+ Edge: Simple Undelete and Mirror Undelete.  Select Mirror Undelete if
+ you have a recent Mirror file for the drive that contains the deleted
+ file.  Otherwise, you should select Simple Undelete.  
+ 
+    A Simple Undelete calculates the number of clusters the file would
+ have occupied on the disk.  Then it locates the starting cluster of
+ the deleted file and calculates the number of consecutive clusters
+ from the beginning cluster that are not currently allocated to other
+ files.  These unused clusters are then recovered.  This method works
+ best when the partition is not highly fragmented.
+ 
+    A Mirror Undelete uses FAT and root folder information stored in
+ the disk Mirror files to determine exactly what clusters the file
+ occupied prior to deletion.  Diamond Edge then recovers all clusters
+ that the file occupied that are not currently allocated to other
+ files.  This is the only method that can fully recover a fragmented
+ file.
+ 
+ 
+ ù  Undeleting Files
+ 
+    When you select Undelete Files from the Undelete menu, the
+ Undelete control screen is displayed.  This functions in a similar
+ way to the normal GEM file selector, except that only folders and
+ deleted files are shown.  To open a folder shown on the control
+ screen, click on the entry.  To move up to the parent folder again,
+ click on the close box in the Undelete control screen window.
+ 
+    Each file that appears on the Undelete control screen has an
+ additional entry that indicates whether or not the file will be
+ recoverable.  If all of the clusters belonging to a file can be
+ recovered then the entry is: Yes.  If none of the clusters belonging
+ to the deleted file can be recovered, then the entry is: No.  If only
+ some of the clusters belonging to the file are recoverable, then a
+ fraction like m/n is shown, where m is the number of recoverable
+ clusters and n is the total number of clusters.
+
+    ù  Even if a file is marked as fully recoverable, the recovered
+       file may not contain the expected data: for example, if you
+       try to recover a fragmented file without a Mirror file, only
+       the clusters prior to the first fragmentation point will be
+       valid.
+
+    Diamond Edge provides a general purpose deleted file finder within
+ the Undelete control screen.  To search for deleted files, enter a
+ deleted file search mask in the editable field labelled Search mask.
+ You can search for a specific file or enter a general-purpose
+ wildcard to find all files that match the wildcard criteria.  
+ 
+    The two standard wild cards in TOS are * and ?.  An asterisk in a
+ wildcard mask will match files containing any character string in the
+ asterisk's position.  A question mark in a wildcard mask will match
+ files containing any single character in the question mark's position.
+ 
+    ù  For example, if you want to search for all deleted files with a
+       .PI1 extension, you would enter *.PI1 for the Search mask.  To
+       search for all deleted files with an extension of PI1, PI2, or
+       PI3, you could enter *.PI? as the Search mask.  
+ 
+    To begin the search for deleted files, select Find deleted from
+ the Undelete control screen (alternatively, you can press the return
+ key).  The program will search the current drive for the first file
+ that matches the wildcard specification.  If a match is located, the
+ control screen will automatically display the folder containing the
+ file and will highlight the file.  If you want to find additional
+ deleted files that match the current Search mask, select Find next.
+ 
+    You can also browse through the displayed folders and manually
+ select a file to undelete by clicking on the file name.  Whenever an
+ entry is selected it is marked for undeletion.  You may select
+ multiple files in the same folder for undeletion by holding down the
+ shift key while selecting the file.  After you have selected all of
+ the files that you want to undelete in the current directory, click
+ on Undelete.
+ 
+    For each file selected, you will be prompted to enter the first
+ character of the filename to be undeleted.  Diamond Edge will then
+ check if there is another file in the same folder that already has
+ that name.  If a conflict is found, you will be prompted to enter a
+ different first character.
+ 
+    ù  In order to undelete files from a folder that has been deleted,
+       you must first undelete the folder.
+
+ 
+ ù  What to do after you undelete a file
+ 
+    After you have undeleted all of the files that you require, you
+ should verify the validity of the recovered files.  If you have a
+ current validation file for the drive, then perform a validation pass
+ to assess the state of the undeleted files.  This will tell you if
+ the undeleted file is the same as before or if the file's data has
+ been corrupted.  If you do not have a current validation file, then
+ you should manually examine the files you just undeleted to determine
+ if they are valid.
+
+

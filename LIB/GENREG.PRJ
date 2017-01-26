@@ -1,0 +1,9 @@
+GENREG.TTP
+.C	[-b4 -r6 -cf -cu -d0 -fl -m0 -rs -fm]
+.S	[-m0]
+=
+C.O
+GENREG.C	(ENCRYPT.H)
+ENCRYPT.LIB
+LCM.LIB
+LC.LIB

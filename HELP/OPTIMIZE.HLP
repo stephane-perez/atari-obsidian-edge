@@ -1,0 +1,117 @@
+ Diamond Edge Extensible Help System
+ File: OPTIMIZE.HLP
+ Topics covered:
+ 
+    ù  Choosing the Optimization Method
+    ù  Choosing the Optimization Priority
+    ù  Other Optimization Options
+    ù  Optimizing your Drive
+
+
+ ù  Choosing the Optimization Method
+ 
+    Diamond Edge provides two optimization methods: Full Optimization,
+ and Compress Free Space.  You select the method by choosing the
+ appropriate entry under the Optimize menu.
+ 
+    Full Optimization provides complete optimization of a drive.
+ First, all of the sectors of a given folder are consolidated, then
+ each file within the folder is defragmented, then all of the files
+ within a folder are located consecutively on the disk.
+ 
+    Compress Free Space eliminates free space from the area of used
+ space by moving it all to the end or beginning of the drive.  If
+ there is any free space within the allocated space on the drive, it
+ will be eliminated.  Compress Free Space does NOT defragment files or
+ folders; it simply moves data between clusters so there is no free
+ space within the allocated area.  This essentially segments the drive
+ into two areas: all of the used space is together and all of the free
+ space is together.
+ 
+    We recommend that all partitions be fully optimized when you first
+ receive Diamond Edge.  After that you can use Compress Free Space to
+ keep the free space contiguous between full optimizations.  Use the
+ disk fragmentation maps and statistics to assist you in determining
+ the amount of fragmentation on each of your partitions.
+ 
+ 
+ ù  Choosing the Optimization Priority
+ 
+    Diamond Edge provides two optimization priorities: Prioritize
+ Reading and Prioritize Writing.  You select the desired priority by
+ choosing the appropriate entry under the Optimize menu.  The basic
+ distinction between the two priorities is where the allocated space
+ is moved to.
+ 
+    If you select Prioritize Reading, all of the allocated space will
+ be moved to the beginning of the partition.  This will improve the
+ reading performance of the disk because all of the clusters assigned
+ to files and folders will be physically closer to the FAT tables,
+ significantly reducing the amount of disk head movement required to
+ find and then read a file.  Since disk head movement is the slowest
+ component of any disk operation, the amount of disk head movement is
+ critical to disk performance.
+ 
+    If you select Prioritize Writing, all of the allocated space will
+ be moved to the end of the partition.  This will improve the writing
+ performance of the disk because the free cluster entries in the FAT
+ tables will be at the start of the tables, and all of the free space
+ will be physically close to the FAT tables.  The operating system
+ will not have to work very hard to find the free space and when it
+ does the disk head will not have to move very far to write the
+ information.
+
+    ù  In practice, most modern hard disk drives are fast enough that
+       either method will provide good performance, and you may wish
+       to base your choice on other considerations.  For example,
+       backup programs that create image backups (such as CDbackup
+       by Anodyne Software) may require more space for the backup if
+       you choose Prioritize Writing.
+ 
+ 
+ ù  Other Optimization Options
+
+    Optimization of a drive that contains any errors in its logical
+ structure is not allowed, since it would probably fail and result in
+ an unusable partition.  Therefore, before optimization starts, the
+ drive is automatically subjected to a Disk Medic pass to ensure that
+ there are no errors.  If ANY disk errors are detected in the Disk
+ Medic pass, they must be fixed before the optimization can proceed.
+ For this automatic Disk Medic pass, the same four options that are
+ applicable to the normal Disk Medic also apply: Auto-Fix errors,
+ Ignore Illegal File Names, Save Lost Clusters, and Visual Update.
+ These function exactly as described in the Medic section.
+ 
+    One other option involves the disposition of deleted files within
+ folders.  A full description of what happens when you delete a file
+ is given in the Diamond Edge manual.  When you optimize a partition,
+ it greatly reduces the probability of successfully recovering a
+ deleted file; in most cases, in fact, it essentially eliminates any
+ chance of doing so.  Because of this, retaining entries for deleted
+ files in folders usually serves no useful purpose.  If you select
+ Remove Deleted, deleted entries in folders will be removed.  This
+ will help speed up directory searches.  
+ 
+ 
+ ù  Optimizing your Drive
+ 
+    Before you perform an optimization there is one thing left to do:
+ backup your drive!  Diamond Edge provides secure protection against,
+ and recovery from, a wide variety of disk-related problems.  However,
+ many errors can occur which Diamond Edge cannot prevent: for example,
+ a power outage during an optimization.  In such circumstances, there
+ is NO SUBSTITUTE for a valid up-to-date backup.  Depending on what
+ other hardware you have, either Diamond Back or CDbackup will provide
+ fast and reliable hard disk backups.
+ 
+    You may optimize either just the active drive, or multiple drives,
+ by selecting the appropriate item from the Optimize menu.  Before
+ each partition is optimized, it is automatically examined by Disk
+ Medic for problems.  Any problems detected by Disk Medic must be
+ fixed before optimization will be allowed.  After the disk has passed
+ the Disk Medic examination, the optimization will begin.  During
+ optimization, the movement of disk data is displayed in the graphic
+ window.  Diamond Edge will ring the keyboard 'bell' to indicate when
+ the optimization is complete.
+
+

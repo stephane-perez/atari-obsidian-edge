@@ -1,0 +1,11 @@
+INSTALL.PRG
+.C	[-b4 -r6 -cf -cu -d0 -fl -m0 -rs -fm]
+.S	[-m0]
+.L	[TTMALLOC TTLOAD NODEBUG]
+=
+C.O
+INSTALL.C	(INSTALL.H,..\LIB\ENCRYPT.H)
+..\LIB\ENCRYPT.LIB
+LCG.LIB
+LCM.LIB
+LC.LIB

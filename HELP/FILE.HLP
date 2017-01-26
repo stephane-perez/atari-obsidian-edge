@@ -1,0 +1,167 @@
+ Diamond Edge Extensible Help System
+ File: FILE.HLP
+ Topics covered:
+ 
+    ù  User Preferences
+    ù  User Mode
+    ù  Warn Mode
+    ù  Medic Pause Delay
+    ù  Active Drive
+    ù  The Disk Information Display
+    ù  The Fragmentation Map Display
+    ù  The All Drives Information Display
+    ù  The Print Function
+ 
+ 
+ ù  Preferences
+ 
+    User selectable preferences are available through the Preferences
+ option under the File menu.  These preferences are automatically set
+ during the installation process and you may modify them at any time.
+ The selectable options include the default path where you want both
+ Diamond Edge Information and Validation files to be saved.
+ 
+    ù  Note that ALL of the currently selected menu options and
+       switches are saved in the configuration file. This includes
+       options set by menu check marks.
+ 
+    To save the current configuration, select Save Preferences; to
+ exit without any modification to the current preferences, select
+ Cancel.
+ 
+ 
+ ù  User Mode
+  
+    The User Mode defines the level of experience with disk functions
+ that YOU say you have.  There are two levels: Novice and Expert.
+ Although all program functions are available in either mode, you will
+ receive additional warnings and explanations of the effects of your
+ actions if you select Novice mode.  If you select Expert user mode,
+ it is assumed that you know what you are doing when you select an
+ action.  Be certain that you do!
+ 
+ 
+ ù  Warn Mode
+ 
+    Warn mode affects the amount of warning that you will receive
+ before the program performs certain types of actions.  There are two
+ warning modes: Only before potential loss of data, and Never.  Note
+ that even if you select Expert mode and Never warn, you will still
+ receive warnings before critical actions such as repartitioning your
+ hard disk or zeroing drive C.
+ 
+    ù  Until you are very comfortable with the operation of Diamond
+       Edge, it is strongly suggested that you select both the Novice
+       user mode and the Warn before potential loss of data mode.
+ 
+ 
+ ù  Medic Pause Delay
+ 
+    There are many situations (such as when no errors are found) where
+ automatic continuation after a Disk Medic pass is convenient.  If you
+ enter a value (0 to 9) here, Diamond Edge will pause for that number
+ of seconds between displaying the Disk Medic Report and continuing
+ with the next task.  If you leave the value blank, the program will
+ always wait for user input before continuing.  The program will also
+ wait for user input if any disk errors are found during a Disk Medic
+ pass.
+ 
+ 
+ ù  Active Drive
+ 
+    There is one operating principle that applies to nearly every
+ program function: the Active Drive.  ALMOST ALL PROGRAM FUNCTIONS
+ ARE PERFORMED ON THE ACTIVE DRIVE; the only exceptions to this rule
+ are the SCSI level operations and Disk to Disk copy operations.  To
+ change the Active Drive, select the Active Drive icon in the main
+ window, and click on the appropriate drive button within the popup
+ window.  Alternatively, you can switch active drives directly from
+ the main window by pressing the keyboard letter corresponding to the
+ desired drive.
+
+    ù  To avoid misleading error messages, only letters assigned to
+       hard disk partitions should be selected.  If a modern CD-ROM
+       driver (such as ExtenDOS Gold) is in use, drive letters that
+       are assigned to CD-ROM drives are automatically NOT selectable.
+
+ 
+ ù  The Disk Information Display
+ 
+    When you select Disk Info from the main window (or press Alt-I),
+ critical information is displayed for the Active Drive.  For a
+ complete description of all of the items contained in the Disk
+ Information display, please refer to "Inside a Disk Partition" in
+ your manual.
+
+ 
+ ù  The Fragmentation Map Display
+ 
+    Selecting Frag Map from the main window (or pressing Alt-M) will
+ create a visual display of the fragmentation level of the active
+ drive, as well as showing additional drive statistics.  Fragmentation
+ occurs when parts of a file or folder become spread across a hard
+ disk partition (or a floppy disk) in locations.  This occurs as a
+ normal by-product of creating files, deleting files, and adding more
+ files.  
+ 
+    The fragmentation map is generated in the order that an actual
+ folder search would take.  What you see is not only the amount of
+ file fragmentation on the drive, but also the amount of folder
+ fragmentation.  If you have a heavily fragmented drive, you might
+ notice that the map seems to fill in at seemingly random locations.
+ This demonstrates how hard your disk has to work to perform a simple
+ folder search.
+ 
+    The fragmentation map also displays a number of useful drive
+ statistics and graphs that allow you to assess the fragmentation
+ level of your drive.  For the purposes of the statistics, each
+ interruption to the consecutive assignment of clusters to a file
+ is defined as one fragment.  So a file that is separated into two
+ pieces on a drive has one fragment, a file that is in three
+ separate pieces on a drive has two fragments, etc.  A file that
+ has all of its clusters consecutive has no fragments.
+ 
+    The summary statistics shown include the total number of folders,
+ the total number of files, and the total number of fragmented files
+ on your drive.  Additional information is provided for the fragmented
+ files: the average number of fragments contained in each fragmented
+ file, plus the average number of fragments contained in 100K bytes
+ of fragmented files.
+ 
+    The graph in the fragmentation map display is a relative frequency
+ histogram showing the distribution of the sizes of files on your
+ drive and the average fragmentation level for each size class.  Each
+ bar represents a range of file sizes and the height of the bar shows
+ the percentage of the total number of files on your drive that are in
+ that size category.  The shading on each bar represents the average
+ number of fragments for files contained within that size category.
+ 
+    This information is useful in determining the level and severity
+ of fragmentation.  It provides you with a quick summary of how much
+ fragmentation you have, where the fragmentation is, and what type of
+ files it affects.  This information can be used to determine whether
+ it is necessary to optimize the drive to regain performance.
+ 
+ 
+ ù  The All Drives Information Display
+ 
+    Selecting All Info (Alt-A) provides a list of the capacities of
+ all of your hard disk partitions, as well as the current usage.
+ Total capacity, bytes used, bytes free, and percentage bytes free
+ are given for each partition individually.  The total for all your
+ partitions is displayed at the bottom of the All Drives Information
+ display.
+
+    ù  If you have some drive letters assigned to CD-ROM drives and
+       you are NOT using a modern CD-ROM driver, Diamond Edge may
+       attempt to access these drives, resulting in error messages.
+
+ 
+ ù  The Print Function
+
+    You can print out the information from any of the displays listed
+ above by selecting Print (Alt-P) from the main window icons.  It is
+ a good idea to have a printout of all your critical disk information
+ for emergency recovery purposes.
+
+

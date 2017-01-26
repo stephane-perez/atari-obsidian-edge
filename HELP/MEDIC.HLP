@@ -1,0 +1,375 @@
+ Diamond Edge Extensible Help System
+ File: MEDIC.HLP
+ Topics covered:
+ 
+    ù  Testing Your Disk Structure
+    ù  Running Disk Medic
+    ù  Disk Medic Report
+    ù  Mapping Bad Sectors on Your Disk
+    ù  Map Bad Report
+    ù  Creating Validation Files
+    ù  Validating Files
+    ù  What to do if a Validation Error is Identified
+    ù  Partitioning Your Hard Disk
+    ù  Partitioning Tools
+    ù  Partitioning Actions
+ 
+ 
+ ù  Testing Your Disk Structure
+ 
+    As with all of Diamond Edge's functions, the Disk Medic can be
+ performed on either floppy disks or hard disk partitions.  We
+ strongly recommend that you run Disk Medic on ALL of your hard disk
+ partitions at least once a week.  Another way of performing the same
+ function is through the use of the Test option of Diamond Mirror:
+ refer to "Configuring Diamond Mirror" in your manual for further
+ details.
+ 
+    The actions of Disk Medic are controlled via options in the Medic
+ menu.  If you select Auto-Fix Errors, Diamond Edge will automatically
+ correct all disk errors found during the Disk Medic evaluation of the
+ active drive.  A log of all errors found will be written to the file
+ MEDIC_X.ERR where X is the active drive (Disk Medic error files are
+ saved in the folder specified in the Preferences dialog).  After the
+ Disk Medic pass, you may view the error file for information on what
+ errors were found and fixed.  Error files are for information only
+ and may be safely deleted after exiting Diamond Edge.
+ 
+    If you do not select Auto-Fix, Disk Medic will perform a test pass
+ on the active drive first.  If errors are found during the test pass,
+ Disk Medic will then pause and allow you to view the error file from
+ the Disk Medic Report to find out what errors were found and what
+ files are affected.  At this point you may either cancel without
+ fixing the errors or instruct the Disk Medic to fix the errors in a
+ second pass.
+
+    It is possible for clusters on a drive to be marked as in use,
+ but not to be assigned to a file.  Such clusters are known as lost
+ clusters, and can be created by application errors.  When you select
+ Save Lost Clusters from the Medic menu, any lost clusters will be
+ saved to files named LOSTnnnn.DAT (where nnnn is a four digit number)
+ in the root folder of the active drive.  If Save Lost Clusters is not
+ selected, the data in lost clusters will be discarded (the clusters
+ will be returned to the pool of available clusters).
+
+    ù  In the event that you have lost data due to a previous program
+       crash on a drive, you MAY be able to recover it from one of
+       these files.  If you choose not to do so, you may safely delete
+       these files after exiting Diamond Edge.
+
+
+ ù  Running Disk Medic
+ 
+    To start Disk Medic on the active drive, select Test Disk from
+ the Medic Menu.  Remember that the drive you are testing is the
+ Active drive.  If you want to test more than one drive in a single
+ pass, select Test Multiple from the Medic Menu: the Test Multiple
+ selection dialog will then be displayed.  Select all of the drives
+ that you want to run Disk Medic on, then select Test Drives.
+ 
+    Disk Medic will then examine the entire partition structure
+ looking for errors.  As the pass proceeds, the part of the partition
+ being examined is displayed in the graphic window, if you have
+ Visual Update selected.  Areas with errors are displayed in red
+ (cross hatch on a monochrome display).  When the Disk Medic pass is
+ complete, the Disk Medic report screen is displayed.
+
+
+ ù  Disk Medic Report
+ 
+    This screen gives the total number of each type of disk error
+ found on the active drive.  If Auto-Fix was selected, any errors
+ detected have already been corrected during the Disk Medic pass.
+ This is indicated by the message "Disk errors have been fixed" on
+ the report screen.
+ 
+    If Auto-Fix was not selected, and errors were detected, this
+ is indicated by the message "Disk errors must be fixed" and the
+ appearance of a "Fix now" button on the Disk Medic report screen.
+ 
+    The errors detected and the files they affect can be viewed from
+ the Disk Medic report screen by selecting View.  If Auto-Fix was not
+ selected and you want to fix the disk errors, then select "Fix now"
+ from the report screen.  This will start another Disk Medic pass
+ that will fix all of the disk errors.  If you do not want to fix the
+ errors now, select Cancel.  If no errors were found, or after they
+ have been fixed, select Continue.
+ 
+ 
+ ù  Mapping Bad Sectors on Your Disk
+ 
+    You may either Map Bad sectors on just the active drive or on
+ multiple drives.  The status of the Auto-Fix option in the Medic
+ menu selects whether bad sectors are automatically marked bad or
+ just recorded for review.  When you select Map Bad Sectors from the
+ Medic Menu, the Bad Sector Mapping Preferences Dialog is displayed.
+ Three types of Bad Sector Mapping are available:
+ 
+    ù  Read-Read Non-destructive:  This method reads each sector of
+       the active drive twice and compares the data.  If there is a
+       difference, that sector is identified as bad.  The data already
+       existing on your drive is not affected.
+ 
+    ù  Read-Write-Read Non-destructive:  This method reads each sector
+       of the active drive and writes it back to the same place.  The
+       sector is then re-read and compared to the data originally read.
+       If the information differs, that sector is identified as bad.
+       Data in sectors that are not found to be bad is not affected.
+ 
+    ù  Write-Read Destructive:  This method writes a quasi-random bit
+       pattern to each sector of the active drive and then reads that
+       sector back.  If the information read back is not the same as
+       the bit pattern that was written, then that sector is marked as
+       bad.  This is a destructive test: all data existing on the
+       drive will be destroyed.
+ 
+    The effectiveness of each method can be increased by performing
+ multiple bad sector mapping passes.  The number of passes that you
+ want to perform is entered in the Mapping Bad Sectors preferences
+ dialog.  Note that the more passes you specify, the longer it will
+ take to complete the process.  When you are ready to begin mapping
+ bad sectors, select Map Bad Sectors Now.
+ 
+    Map Bad Sector then examines the entire drive looking for errors.
+ As each pass proceeds, the part of the disk being examined is
+ displayed in the graphic window.  Areas where errors are detected
+ are displayed in red (cross hatch on a monochrome display).  When
+ Map Bad is complete, the Map Bad Report screen is displayed.
+
+ 
+ ù  Map Bad Report
+ 
+    The cluster numbers corresponding to each bad sector found are
+ displayed in the Map Bad Report screen.  If Auto-Fix was not selected
+ and errors were detected, this is indicated by the message "Disk
+ errors must be fixed" and the appearance of a "Fix now" button on the
+ Map Bad Report screen.
+ 
+ 
+ ù  Creating Validation Files
+ 
+    To create a validation file for the active drive, select Create
+ CRC File or Create Checksum File from the Medic Menu.  Although
+ creating a checksum file is slightly quicker, we recommend creating
+ a CRC file since it provides better detection of file alterations.
+ By default, the Ignore Program Header option is set, which causes the
+ CRC/checksum calculation to exclude the first few bytes of files.
+ The purpose of this is to ensure that changing just the execution
+ flags of a program (e.g. to make it run in TT RAM) will not cause
+ a false validation error.
+
+    Whichever method you choose, the validation file will be
+ automatically created in the folder specified in the Preferences
+ dialog.  Validation files are named DRIVE_X.VAL where X is the
+ relevant drive.
+ 
+ 
+ ù  Validating Files
+ 
+    To perform a validation of the active drive, select Validate
+ Files from the Medic Menu.  A standard GEM file selector will be
+ displayed, prompting you for the reference validation file to use.
+ 
+    After you have selected the validation file you will be asked what
+ action to take when the program encounters a file that is not in the
+ reference validation file.  You may choose to automatically add the
+ new file to the existing validation file; to skip all new files; or
+ to be prompted for action each time such a file is encountered.
+ 
+    At any time during the creation of a validation file, or during
+ file validation, you may pause the process to study the screen by
+ selecting Control-S; to resume the process, select Control-Q.  You
+ may abort the entire process by selecting Control-C.
+ 
+ 
+ ù  What to do if a Validation Error is Identified
+ 
+    A file validation error occurs when the calculated CRC or Checksum
+ value does not match the value stored in the reference validation
+ file.  Each time this occurs the affected file will be recorded in a
+ file named VALID_X.ERR where X is the drive concerned.  At the end of
+ a validation run, you will be notified if any errors were recorded.
+
+    If a validation error is recorded, DON'T panic.  After the
+ validation is complete, view the affected files recorded in the
+ validation error file.   Even though a validation error is observed,
+ you may not actually have a corrupted file; refer to your manual for
+ additional information.
+ 
+ 
+ ù  Partitioning Your Hard Disk
+ 
+    In order to partition your hard disk, Diamond Edge must access
+ sectors outside the normal hard disk partitions.  To do this on all
+ of the many Atari-compatible systems available, Diamond Edge uses
+ the SCSIDRV interface.  If you do not have a SCSIDRV driver on your
+ system, the partition function will NOT be available.
+
+    We strongly suggest that you consult the section "Partitioning
+ Your Hard Drive" in the Diamond Edge manual before attempting to use
+ this function.  This will give you the basic understanding of disk
+ and partition structure required.  
+ 
+    After you select Partition Hard Disk, Diamond Edge will query the
+ SCSIDRV driver for installed hard disk devices on the ACSI, SCSI,
+ and IDE buses.  The devices found will be displayed in the Select
+ SCSI Device dialog.  Select the device you wish to partition and
+ click on Partition SCSI device; physical sector 0 of the hard disk
+ will then be read into memory.  If valid partitioning information
+ exists in sector 0 it will be displayed as the basis to begin the
+ partitioning session.
+ 
+    When entering information into the partitioning dialog, there are
+ three basic editing modes: Start/End sectors, Size, and Partition
+ Type.  The current editing mode is displayed at the bottom of the
+ partition window.  To change fields within an edit mode, you may use
+ the usual Arrow and Tab keys.  You may also move the mouse pointer
+ to the desired field and click the left button; this also serves to
+ change edit modes.
+ 
+    As you edit your partition definitions, there are two basic rules
+ to remember regarding the sizes and locations of partitions:
+
+    ù  Partitions must be sequential, e.g. the start of partition #2
+       is the next sector following the end of partition #1, and
+
+    ù  You cannot create partitions whose total size exceeds the size
+       of your hard disk.
+ 
+ 
+ ù  Disk Partitioning Tools
+ 
+    The following partitioning aids are provided to expedite the task
+ of partitioning your disk:
+ 
+    ù  Display Size Mode:  You can select to have the disk and
+       partition size information displayed in either Sectors or Megs
+       (MBytes).  Diamond Edge displays MBytes consistent with the ICD
+       definition of 1 MB = 1,000,000 bytes.  Note that this differs
+       from the usual Atari definition (1 MB = 1,048,576 bytes).
+ 
+    ù  Split:  Selecting split will split your hard disk into a number
+       of partitions of equal size.  You will be prompted for the
+       number of partitions to create.  An easy way to partition your
+       hard disk into one large partition is to split the disk into
+       one partition.
+ 
+    ù  Maximum:  Selecting this option will divide your hard disk into
+       multiple partitions of the maximum allowable size, according to
+       the ROM version that is currently selected via the TOSxxx
+       button (see below).  For a ROM version of 1.00, the partition
+       type will be GEM, with a size of 16MB: this is suitable for
+       small hard disks only.  For other ROM versions, the partition
+       type will be BGM.  In either case, an additional partition will
+       be created containing any excess hard disk space.
+ 
+    ù  Clear:  Selecting this option will clear all entered
+       partitioning information.
+ 
+    ù  Reset:  This option will reset the displayed partitioning
+       information to the original information read off the hard disk.
+ 
+    ù  Atari/ICD:  Selecting this button will toggle the state of the
+       extended partitioning mode.  If Atari is selected, extended
+       partitions (more than 4 partitions on the same hard disk) will
+       be set up in accordance with the Atari extended partition
+       standard.  If ICD is selected, extended partitions will be set
+       up according to the ICD/Supra extended partition standard.
+       Please refer to "Physical Sector 0" in your Diamond Edge manual
+       for a description of extended partitions.
+ 
+    ù  TOSxxx:  Selecting this button will toggle the state of the ROM
+       dependence mode.  If TOS1.00 is selected, then partitions (both
+       GEM and BGM) will be limited to 32,767 sectors.  These disks
+       will be readable on any TOS system regardless of ROM version.
+       If you select TOS1.04, partitions may include up to 65,535
+       sectors; these disks cannot be accessed by TOS 1.00 or 1.02.
+       Selecting TOS4.00 will allow logical sector sizes of up to
+       16384 bytes; these disks cannot be read by versions of TOS
+       lower than 4.00 (although they are accessible if you use MagiC,
+       MiNT, or BigDOS).
+ 
+    ù  Save:  You can save the currently-displayed partitioning
+       information to a file for future reference or installation.
+       This option creates a SCSI information file in the same format
+       as that created by the Save SCSI Mirror function of the
+       Undelete menu.
+ 
+    ù  Load:  This allows you to load previously saved partition
+       information files.  One use of this is to partition a new disk
+       "just like" another disk.  Once loaded, the information is
+       fully editable.
+ 
+    ù  Print:  This option will print a copy of the currently
+       displayed partition information on your printer; we recommend
+       that you use this whenever you partition a disk.  Although the
+       partitioning information in physical sector 0 is not frequently
+       lost, the impact of such an event is very severe!  You should
+       always have a printout of your partition parameters, plus a
+       SCSI information file saved offline (e.g. to a floppy disk).
+ 
+    ù  Recalculate:  At any time during your editing session you can
+       recalculate the amount of available space on your disk.  You
+       can either click on the Recalculate button or press the Return
+       key to update the available information.  All of the currently
+       selected options are taken into account and some of the
+       partitions may begin in a slightly different place after
+       recalculation.  This is due to the different control sector
+       requirements of the different extended partitioning methods.  
+ 
+    ù  Active:  Remember to specify which partitions you want to be
+       active.  Diamond Edge allows up to 64 different partitions to
+       be installed on each disk.  However, GEMDOS only allows a total
+       of 14 active partitions (C thru P) on all your hard drives.
+       One use of extra partitions is as "Secret" partitions, which
+       can be activated by changing their Active status and using the
+       Install Information Only option to activate them.
+ 
+ 
+ ù  Disk Partitioning Actions
+ 
+    After you are satisfied with the partitioning information
+ currently displayed you have the following action choices:
+ 
+    ù  Install and rebuild all:  Use this option to repartition your
+       entire hard disk.  The current disk partitioning information
+       will be installed and all partitions will be rebuilt.  ALL
+       EXISTING DATA ON THE ENTIRE HARD DISK WILL BE LOST.
+
+    ù  Install and rebuild one:  This will install the displayed
+       partition information and rebuild one specified partition.
+       When rebuilding a partition, Diamond Edge creates a boot
+       sector, FAT sectors, and root directory sectors on the
+       specified partition and then zeroes them.  ALL EXISTING DATA
+       ON THE AFFECTED PARTITION WILL BE LOST.
+ 
+       If you accidentally rebuild a partition and need information
+       that was previously in that partition, you may be able to
+       recover it by reinstalling the old partitioning information
+       and reinstalling the disk information from a saved Disk Mirror
+       File.  Please refer to the Help file for Undelete for further
+       information.
+  
+    ù  Install partition info only:  Select this option if you only
+       want to install the current partition information without
+       rebuilding any partitions.  This can be used to change the
+       activation status of hidden partitions, or to reinstall the
+       partition information after a hard disk crash without changing
+       any of the data in the hard disk partitions.
+ 
+    ù  Install boot sector only:  This option should be used only to
+       install a valid boot sector on a partition whose boot sector
+       has been damaged.  When you choose this option, a dialog will
+       give you the choice of installing an Atari or ICD boot sector.
+       You must install the same kind of boot sector as was originally
+       there, or you will not be able to access the information on
+       this partition after completing this operation.
+ 
+    ù  Cancel:  If you have not performed any other action, then
+       selecting Cancel will return you to the Diamond Edge main
+       window.  However, if you have installed partition information,
+       or rebuilt one or more partitions, then selecting Cancel will
+       perform a cold boot of your system.  This is required for the
+       operating system to become aware of the new disk structure.
+
+

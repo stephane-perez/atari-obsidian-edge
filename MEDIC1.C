@@ -4,12 +4,25 @@
  *				the 'map bad' function
  *
  *	version 2.10 (december/2002)		roger burrows
- *		a highly cleaned up and reorganised version of
- *		the DE v2.04 source; no new function
+ *		a highly cleaned up and reorganised version of the DE v2.04
+ *		source; no new function
  *
- *	version 2.12 (january/2003)			roger burrows
- *		we now display bad sectors in the FAT/root area,
- *		in do_wr()
+ *	version 2.50 (april/2003)			roger burrows
+ *		we now display bad sectors in the FAT/root area, in do_wr()
+ *
+ *	version 2.53 (july/2003)			roger burrows
+ *		1. do_tdisk() now returns the maximum number (i.e. high-water mark) of
+ *		   directory clusters (excluding the root) that it had to store while
+ *		   making its pass over the whole partition.  this is used by the
+ *		   optimisation routines in opt2.c to ensure that enough memory is
+ *		   available before they start to modify the partition ...
+ *		2. fix multi_pause() to handle times > 65 secs (precautionary,
+ *		   currently max time is 9 secs anyway)
+ *		3. for multiple map bad, control-C now aborts back to main window
+ *		4. code cleanup:
+ *			. eliminate mapx/mapy (no longer used by dmap.c) and gmap (no
+ *			  longer used by medic1.c)
+ *			. remove unnecessary setting of opt.visual in do_tdisk()
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,10 +60,10 @@ extern STATUS status;
 extern OPT opt;
 extern OBJECT *badpref, *medic, *menu, *text;
 
-extern GRECT gmap;			//added by rfb as (future) replacement for mapx/mapy
+//extern GRECT gmap;				/* for cluster map */
 
 // the following variables are shared with dmap.c
-extern short mapx, mapy;	/* screen coords of start of cluster map */
+//extern short mapx, mapy;	/* screen coords of start of cluster map */
 
 
 
@@ -142,6 +155,16 @@ MLOCAL unsigned short *fat16;
 
 MLOCAL int fix;
 
+/*
+ *	the following variables track the max# of directory clusters stored.
+ *	this info is used by the optimisation routines to check that there is
+ *	sufficient memory before they start to modify the partition
+ *
+ *	variables are initialised in test_disk(), incremented in down_dirlist(),
+ *	decremented in up_dirlist()
+ */
+MLOCAL int cur_clusters, max_clusters;
+
 
 /*
  *	function prototypes
@@ -160,6 +183,7 @@ PRIVATE int do_rr(int passes,char *buf,long bufsize);
 PRIVATE int do_rwr(int passes,char *buf,long bufsize);
 PRIVATE void do_visblock(short start,short flag);
 PRIVATE int do_wr(int passes,char *buf,long bufsize);
+PRIVATE int down_dirlist(int ncl);
 PRIVATE int fix_collision(DIRENTRY *file,short start,short fixstart,short prev);
 PRIVATE void free_all_bad(void);
 PRIVATE void free_all_fatbad(void);
@@ -170,7 +194,7 @@ PRIVATE int load_directory(short *dirstart,int *ncl,short *mustwrite,char *pathi
 PRIVATE int load_directory_bad(short *dirstart,int *ncl,short *mustwrite);
 PRIVATE char *load_root(short *mwrite,char *pathin);
 PRIVATE int mark_bad_clusters(void);
-PRIVATE int multi_pause(short numsec);
+PRIVATE int multi_pause(int numsec);
 PRIVATE int open_errfile(void);
 PRIVATE int process_bad(void);
 PRIVATE void redraw_special(OBJECT *tree,short idex,short width);
@@ -178,6 +202,7 @@ PRIVATE int rr_bysector(char *ptr1,char *ptr2,short nread,short clus);
 PRIVATE int rwr_bysector(char *ptr1,char *ptr2,short nread,short clus);
 PRIVATE int test_disk(int called,int *problems);
 PRIVATE int test_loop(short dstart,char *enddir,short twrite,char *pathin);
+PRIVATE void up_dirlist(void);
 PRIVATE void update_activity(int obj,int mode);
 PRIVATE int val_bad(DIRENTRY *dirstart,char *end,short *needtowrite);
 PRIVATE int val_direntries(DIRENTRY *dirstart,char *end,short *needtowrite,char *pathin);
@@ -188,22 +213,25 @@ PRIVATE void write_errfile(char *fmt, ...);
 
 
 
-/*****************************************************************************/
+/*
+ *	perform test disk
+ *
+ *	returns -ve for failure, else max# dir clusters stored
+ */
 PUBLIC int do_tdisk(int called)
 {
 int problems = 0;
-short fail = 0;
+int rc;
 
 	toggle_bottom(BTESTD);
 	fix = opt.autofix;
 
-	if (menu[OVISUAL].ob_state & CHECKED)
-		opt.visual = TRUE;
-	else opt.visual = FALSE;
+	rc = test_disk(called,&problems);
+	if (rc == 0)				/* problems found, fix was 0, user wants to fix */
+		rc = test_disk(called,&problems);
 
-	fail = test_disk(called,&problems);
-	if (fail > 0)				/* problems found, fix was 0, user wants to fix */
-		fail = test_disk(called,&problems);
+	if (rc > 0)					/* ok */
+		rc = max_clusters;
 
 	if (efile) {
 		fclose(efile);
@@ -230,14 +258,14 @@ short fail = 0;
 		break;
 	}
 
-	return fail;
+	return rc;
 }
 
 /*
  *	do the actual disk test
  *
- *	returns	1	retry (test completed with fix = 0, user wants to fix)
- *			0	OK, done
+ *	returns	1	OK, done (max# clusters stored is in max_clusters)
+ *			0	retry (test completed with fix = 0, user wants to fix)
  *			-1	fail
  */
 PRIVATE int test_disk(int called,int *problems)
@@ -295,7 +323,7 @@ static char title[MAX_DISPLAYSIZE];
 		strcpy(medic[VBOOTS].ob_spec,text[MISC_ERROR].ob_spec);
 		redraw_object(medic,VBOOTS);
 		xform_alert(1,MD_BADBOOT_ALERT);
-		return 0;
+		return 1;
 	}
 	strcpy(medic[VBOOTS].ob_spec,text[MISC_OK].ob_spec);
 	redraw_object(medic,VBOOTS);
@@ -306,7 +334,7 @@ static char title[MAX_DISPLAYSIZE];
 	if (dpb.isfat16) {										/* fat16 */
 		if ((fat1=(char *)fat16=malloc(dpb.bpf * 2L)) == NULL) {
 			error(dpb.bpf*2,MEMALLOC,"");
-			return 0;
+			return 1;
 		}
 		fat2 = fat1 + dpb.bpf;
 		tfat = (unsigned short *)fat2;
@@ -321,7 +349,7 @@ static char title[MAX_DISPLAYSIZE];
 	} else {												/* fat12 */
 		if ((fat12=fat1=malloc(dpb.bpf * 4L)) == NULL) {
 			error(dpb.bpf*4,MEMALLOC,"");
-			return 0;
+			return 1;
 		}
 		fat2 = fat1 + 2 * dpb.bpf;
 		rc = compare_fats(fat1,fat2);
@@ -332,7 +360,7 @@ static char title[MAX_DISPLAYSIZE];
 
 		if ((fat16=malloc(dpb.bpf * 4L)) == NULL) {
 			error(dpb.bpf*4,MEMALLOC,"");
-			return 0;
+			return 1;
 		}
 		fat12_to_fat16(fat12,fat16);
 		tfat = fat16 + dpb.bpf;
@@ -346,8 +374,8 @@ static char title[MAX_DISPLAYSIZE];
 
 	wind_update(BEG_UPDATE);
 	mouse_off();
-	objc_offset(medic,MDAREA,&mapx,&mapy);					//rfb: aren't mapx == gmap.g_x etc?
-	assert((mapx==gmap.g_x)&&(mapy==gmap.g_y));				//rfb: test theory
+//	objc_offset(medic,MDAREA,&mapx,&mapy);					//rfb: aren't mapx == gmap.g_x etc?
+//	assert((mapx==gmap.g_x)&&(mapy==gmap.g_y));				//rfb: test theory
 	set_clip();
 
 	if (opt.visual) {
@@ -355,6 +383,8 @@ static char title[MAX_DISPLAYSIZE];
 		draw_block(1,CLUSTER_OK);
 		do_block = &do_visblock;
 	} else do_block = &do_novisblock;
+
+	cur_clusters = max_clusters = 0L;		/* track memory usage in terms of clusters */
 
 	if (test_loop(0,end,0,drv) < 0) {
 		mouse_on();
@@ -411,7 +441,7 @@ static char title[MAX_DISPLAYSIZE];
 	else if (opt.mpause != PAUSE_FOREVER) {
 		if (multi_pause(opt.mpause) == REPCAN)
 			return -1;
-		return 0;
+		return 1;
 	}
 
 	while(TRUE) {
@@ -432,14 +462,14 @@ static char title[MAX_DISPLAYSIZE];
 		if (obj == FIXNOW) {
 			fix = 1;
 			free_pointers();
-			return 1;			/* try again ... */
+			return 0;			/* try again ... */
 		}
 		return -1;
 	}
 	if (obj == REPCAN)
 		return -1;
 
-	return 0;
+	return 1;
 }
 
 /*
@@ -488,14 +518,38 @@ int saveans;
 	return 1;
 }
 
-/*****************************************************************************/
-/*****************************************************************************/
 /*
- *	go 'up' the dirlist
+ *	go 'down' the dirlist, i.e. allocate buffer for next lower directory
+ *	note that 'dirlevel' has already been incremented
+ *
+ *	if allocation fails, issue error msg, backup to higher directory, return -1
+ *	else return 0
  */
-PUBLIC void up_dirlist()
+PRIVATE int down_dirlist(int ncl)
+{
+	if ((dirlist[dirlevel].dirbuf=calloc(ncl,dpb.bpc)) == NULL) {
+		error(ncl*dpb.bpc,MEMALLOC,"");
+		dirlevel--;
+		if (dirlevel > 0)
+			up_dirlist();
+		return -1;
+	}
+
+	dirlist[dirlevel].size = ncl;
+	cur_clusters += ncl;
+	if (cur_clusters > max_clusters)
+		max_clusters = cur_clusters;
+
+	return 0;
+}
+
+/*
+ *	go 'up' the dirlist, i.e. free directory buffer and return to higher directory
+ */
+PRIVATE void up_dirlist(void)
 {
 	free(dirlist[dirlevel].dirbuf);
+	cur_clusters -= dirlist[dirlevel].size;
 	memset(&dirlist[dirlevel],0x00,sizeof(DIRLIST));
 	dirlevel--;
 }
@@ -555,13 +609,8 @@ char pathout[MAX_ERRFILEMSGSIZE];
 			ncl++;
 		}
 
-		if ((dirlist[dirlevel].dirbuf=calloc(ncl,dpb.bpc)) == NULL) {
-			error(ncl*dpb.bpc,MEMALLOC,"");
-			dirlevel--;
-			if (dirlevel > 0)
-				up_dirlist();
+		if (down_dirlist(ncl) < 0)
 			return -1;
-		}
 
 		while((rc=load_directory(&dirstart,&ncl,&mustwrite,pathin)) > 0)
 			;
@@ -1405,8 +1454,8 @@ static char title[MAX_DISPLAYSIZE];
 	} else {
 		wind_update(BEG_UPDATE);
 		mouse_off();
-		objc_offset(medic,MDAREA,&mapx,&mapy);			//rfb: see prev comment about gmap
-		assert((mapx==gmap.g_x)&&(mapy==gmap.g_y));		//rfb: test theory
+//		objc_offset(medic,MDAREA,&mapx,&mapy);			//rfb: see prev comment about gmap
+//		assert((mapx==gmap.g_x)&&(mapy==gmap.g_y));		//rfb: test theory
 		format_cpb(blocks->te_ptext);
 		redraw_object(medic,MBLOCKS);
 		fail = process_bad();
@@ -1456,7 +1505,15 @@ char *iobuf;
 	}
 	free(iobuf);
 	if (rc < 0)
-		return 0;
+		return rc;
+
+	/*
+	 *	since mark_bad_clusters() calls bad_loop() which calls down_dirlist()
+	 *	& up_dirlist(), both of which update cur_clusters/max_clusters, we
+	 *	initialise them here.  however it's really for neatness only, since
+	 *	we don't actually use the results in this logic path.
+	 */
+	cur_clusters = max_clusters = 0L;
 
 	rc = mark_bad_clusters();
 	if (rc > 0)				/* problems found, fix was 0, user wants to fix */
@@ -1789,13 +1846,8 @@ char *temp;
 			}
 		}
 		dirlevel++;
-		if ((dirlist[dirlevel].dirbuf=calloc(ncl,dpb.bpc)) == NULL) {
-			error(ncl*dpb.bpc,MEMALLOC,"");
-			dirlevel--;
-			if (dirlevel > 0)
-				up_dirlist();
+		if (down_dirlist(ncl) < 0)
 			return -1;
-		}
 
 		while((rc=load_directory_bad(&dirstart,&ncl,&mustwrite)) > 0)
 			;
@@ -2502,19 +2554,18 @@ PRIVATE int open_errfile()
 /*
  *	wait specified time for mouse click
  *
- *	note: if 'numsec' exceeds 65, the time actually waited will be wrong
- *	... but this is currently only used for pauses up to 9 seconds ...
  */
-PRIVATE int multi_pause(short numsec)
+PRIVATE int multi_pause(int numsec)
 {
 short event;
 short mx, my, dummy;
 
+	numsec *= 1000;		/* convert to millisecs */
 	event = evnt_multi(MU_KEYBD | MU_TIMER | MU_BUTTON,
 					   NUM_CLICKS, LEFT_BUTTON, BUTTON_DOWN,
 					   0, 0, 0, 0, 0,
 					   0, 0, 0, 0, 0,
-					   NULL, 1000 * numsec, 0,
+					   NULL, numsec&0xffff, numsec>>16,
 					   &mx, &my, &dummy, &dummy, &dummy, &dummy);
 
 	if (event & MU_BUTTON)

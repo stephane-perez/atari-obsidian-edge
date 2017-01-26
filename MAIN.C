@@ -6,8 +6,19 @@
  *		a highly cleaned up and reorganised version of
  *		the DE v2.04 source; no major new function
  *
- *	version 2.11 (december 2002)		roger burrows
+ *	version 2.11 (december/2002)		roger burrows
  *		updated for new preferences handling
+ *
+ *	version 2.53 (july/2003)			roger burrows
+ *		general code cleanup:
+ *		  .	in set_opt(), check OFULL/OCOMP and set opt.optfull
+ *			accordingly
+ *		  .	replace tests for menu items OFULL & MAUTOFIX with tests
+ *			for opt.optfull & opt.autofix
+ *		  .	combine set_opt()/set_test() (prepare for elimination of
+ *			duplicate menu options & move to options dialog)
+ *		  .	call set_opt() before calling do_bad()
+ 
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -129,7 +140,6 @@ PRIVATE void redraw(short h,GRECT rect);
 PRIVATE void send_initial_message(void);
 PRIVATE void set_app_path(char *app_name);
 PRIVATE void set_opt(void);
-PRIVATE void set_test(void);
 PRIVATE void set_window(void);
 PRIVATE void set_work(OBJECT *tree);
 PRIVATE int stdkey(int key_code);
@@ -817,7 +827,7 @@ short title, item;
 			if (opt.novice)
 				if (xform_alert(2,OP_WARN_ALERT) == 2)
 					break;
-			if (menu[OFULL].ob_state & CHECKED)
+			if (opt.optfull)
 				do_opt();
 			else do_opt_compress(1);							//MAGNUM
 			break;
@@ -889,12 +899,12 @@ short title, item;
 			do_multi(VALM);
 			break;
 		case TDISK:
-			set_test();
+			set_opt();
 			do_tdisk(0);				//MAGNUM
 			force_update(-1);
 			break;
 		case TDISKM:			/* multiple tests */
-			set_test();
+			set_opt();
 			do_multi(TESTM);
 			break;
 		case IGNOREPH:
@@ -902,11 +912,13 @@ short title, item;
 			opt.noheader = (menu[IGNOREPH].ob_state&CHECKED) ? 1 : 0;
 			break;
 		case MAPBAD:
+			set_opt();
 			if (bad_prefs())
 				break;
-			do_bad(menu[MAUTOFIX].ob_state & CHECKED);
+			do_bad(opt.autofix);
 			break;
 		case MAPBADM:			/* multiple mark bad */
+			set_opt();
 			if (bad_prefs())
 				break;
 			do_multi(MBADM);
@@ -1084,13 +1096,13 @@ int rc;
 		if (opt.novice)
 			if (xform_alert(2,OP_WARN_ALERT) == 2)
 				break;
-		if (menu[OFULL].ob_state & CHECKED)
+		if (opt.optfull)
 			do_opt();
 		else do_opt_compress(1);					//MAGNUM
 		break;
 
 	case BTESTD:
-		set_test();
+		set_opt();
 		do_tdisk(0);								//MAGNUM
 		force_update(-1);
 		break;
@@ -1265,8 +1277,15 @@ PRIVATE void redraw(short h,GRECT rect)
 }
 
 /***************************************************************************/
+/*
+ *	set 'opt' values to correspond to currently-selected menu items
+ */
 PRIVATE void set_opt()
 {
+	if (menu[OFULL].ob_state & CHECKED)
+		opt.optfull = TRUE;
+	else opt.optfull = FALSE;
+
 	if (menu[OWRITE].ob_state & CHECKED)
 		opt.priority = WRITE;
 	else opt.priority = READ;
@@ -1275,39 +1294,23 @@ PRIVATE void set_opt()
 		opt.rmdel = TRUE;
 	else opt.rmdel = FALSE;
 
-	if (menu[OAUTOFIX].ob_state & CHECKED)
+	if ((menu[OAUTOFIX].ob_state & CHECKED)
+	 || (menu[MAUTOFIX].ob_state & CHECKED))
 		opt.autofix = TRUE;
 	else opt.autofix = FALSE;
 
-	if (menu[OIGNORE].ob_state & CHECKED)
+	if ((menu[OIGNORE].ob_state & CHECKED)
+	 || (menu[MIGNORE].ob_state & CHECKED))
 		opt.ignore = TRUE;
 	else opt.ignore = FALSE;
 
-	if (menu[OSAVLOST].ob_state & CHECKED)
+	if ((menu[OSAVLOST].ob_state & CHECKED)
+	 || (menu[MSAVLOST].ob_state & CHECKED))
 		opt.savelost = TRUE;
 	else opt.savelost = FALSE;
 
-	if (menu[OVISUAL].ob_state & CHECKED)
-		opt.visual = TRUE;
-	else opt.visual = FALSE;
-}
-
-/*********************************************************************/
-PRIVATE void set_test()
-{
-	if (menu[MAUTOFIX].ob_state & CHECKED)
-		opt.autofix = TRUE;
-	else opt.autofix = FALSE;
-
-	if (menu[MIGNORE].ob_state & CHECKED)
-		opt.ignore = TRUE;
-	else opt.ignore = FALSE;
-
-	if (menu[MSAVLOST].ob_state & CHECKED)
-		opt.savelost = TRUE;
-	else opt.savelost = FALSE;
-
-	if (menu[MVISUAL].ob_state & CHECKED)
+	if ((menu[OVISUAL].ob_state & CHECKED)
+	 || (menu[MVISUAL].ob_state & CHECKED))
 		opt.visual = TRUE;
 	else opt.visual = FALSE;
 }
@@ -1412,16 +1415,17 @@ char *titlep, *buttonp, *alertp;
 		switch(type) {
 		case OPTM:
 			set_opt();
-			if (menu[OFULL].ob_state & CHECKED)
+			if (opt.optfull)
 				rc = do_opt();
 			else rc = do_opt_compress(0);
 			break;
 		case TESTM:
-			set_test();
+			set_opt();
 			rc = do_tdisk(1);							//MAGNUM
 			break;
 		case MBADM:
-			rc = do_bad(menu[MAUTOFIX].ob_state & CHECKED);
+			set_opt();
+			rc = do_bad(opt.autofix);
 			break;
 		case VALM:
 			do_valid(CHECKVAL,0);

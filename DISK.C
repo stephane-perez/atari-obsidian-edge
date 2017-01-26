@@ -24,6 +24,11 @@
  *			  buffer and the number of the last cluster used, this would cause:
  *				. the last cluster not to be copied, or
  *				. the progress bar code to detect a 'greater than 100%' condition
+ *
+ *	version 2.53 (july/2003)		roger burrows
+ *		replace call to max_allocatable_clusters() with call to allocate_max_units().
+ *		see misc.c for explanation/comments.
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -483,11 +488,9 @@ char *rootbuf;
 		rc = log_write(dev2,dpb.rds,dpb.nfat*dpb.spf+1,rootbuf,DIR);
 	free(rootbuf);
 
-	nclus = max_allocatable_clusters(dpb.bpc);
-	if (nclus)
-		readbuf = malloc(nclus*dpb.bpc);
-	if (!readbuf) {
-		error(nclus*dpb.bpc,MEMALLOC,"");
+	nclus = allocate_max_units(1,dpb.bpc,&readbuf);
+	if (!nclus) {
+		error(dpb.bpc,MEMALLOC,"");
 		return -1;
 	}
 

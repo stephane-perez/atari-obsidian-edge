@@ -8,6 +8,16 @@
  *
  *	version 2.12 (november/2002)	roger burrows
  *		merge frag.c into this module
+ *
+ *	version 2.53 (july/2003)		roger burrows
+ *		1. modify Zero/Wipe per Bela's suggestion:
+ *			a) for Zero/Wipe, preserve partition label (conditional
+ *			   compilation at this time, future option)
+ *			b) for Wipe, use 0x00 rather than 0xe5 as fill
+ *		2. replace call to max_allocatable_clusters() with call to
+ *		   allocate_max_units().  see misc.c for explanation/comments.
+ *		3. eliminate mapx/mapy (same as gmap.g_x/gmap.g_y)
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,13 +46,13 @@ extern DIRLIST dirlist[MAX_DIR_DEPTH];
 extern FILEINFO finfo;
 extern OPT opt;
 extern STATUS status;
-extern GRECT gmap;
+extern GRECT gmap;				/* for cluster map */
 extern OBJECT *dinfo, *dmap, *text;
 
 
 // the following variables are shared with medic1.c
 // however, they are almost certainly identically equal to gmap.g_x, g_y
-short mapx, mapy;		/* screen cords of cluster map */
+//short mapx, mapy;		/* screen cords of cluster map */
 
 
 /*
@@ -313,8 +323,8 @@ char *f12;
 
 	objc_draw(dmap,0,MAX_DEPTH,dmap->ob_x,dmap->ob_y,dmap->ob_width,dmap->ob_height);
 
-	objc_offset(dmap,MAPAREA,&mapx,&mapy);		//rfb: why do we need this? isn't this the same as gmap.g_x, g_y?
-	assert((mapx==gmap.g_x)&&(mapy==gmap.g_y));	//rfb: test theory
+//	objc_offset(dmap,MAPAREA,&mapx,&mapy);		//rfb: why do we need this? isn't this the same as gmap.g_x, g_y?
+//	assert((mapx==gmap.g_x)&&(mapy==gmap.g_y));	//rfb: test theory
 	dirlevel = 0;
 	memset(&dirlist[0],0x00,MAX_DIR_DEPTH*sizeof(DIRLIST));
 
@@ -698,8 +708,8 @@ short rect[4];
 	row = block / MAP_BLKS_PER_ROW;
 	yoff = row * blockheight;
 	xoff = (block - row * MAP_BLKS_PER_ROW) * 2;
-	rect[0] = mapx + xoff;
-	rect[1] = mapy + yoff;
+	rect[0] = gmap.g_x + xoff;
+	rect[1] = gmap.g_y + yoff;
 	rect[2] = rect[0] + 1;
 	rect[3] = rect[1] + blockheight - 1;
 
@@ -729,8 +739,8 @@ short rect[4];
 	row = block / MAP_BLKS_PER_ROW;
 	yoff = row * blockheight;
 	xoff = (block - row * MAP_BLKS_PER_ROW) * 2;
-	rect[0] = mapx + xoff;
-	rect[1] = mapy + yoff;
+	rect[0] = gmap.g_x + xoff;
+	rect[1] = gmap.g_y + yoff;
 	rect[2] = rect[0] + 1;
 	rect[3] = rect[1] + blockheight - 1;
 
@@ -850,8 +860,12 @@ PUBLIC int zero_fats_and_root(void)
 {
 int i, rc = 0;
 long nbytes;
-char *fatrootbuf;
+char *fatrootbuf, *root;
 unsigned short *f16;
+#ifdef BELA_SUGGESTION
+char *p;
+DIRENTRY label = { 0x00 };
+#endif
 
 	if (dpb.isfat16)
 		nbytes = dpb.bpf * 2L + dpb.rdb;
@@ -881,7 +895,28 @@ unsigned short *f16;
 		fat16_to_fat12(f16,fatrootbuf);
 	}
 	fast_copy(fatrootbuf+dpb.bpf,fatrootbuf,dpb.bpf);	/* make second copy of FAT */
-	memset(fatrootbuf+dpb.bpf*2L,0x00,dpb.rdb);			/* ensure root is zeroed */
+
+	root = fatrootbuf + (dpb.bpf * 2L);			/* point to start of root */
+
+#ifdef BELA_SUGGESTION
+	if (log_read(dev,dpb.rds,1+2*dpb.spf,root,ROOTDIR)) {
+		free(fatrootbuf);
+		return -1;
+	}
+	for (p = root; p < root + dpb.bpf; p += sizeof(DIRENTRY)) {
+		if (((DIRENTRY *)p)->attr == FA_VOLUME) {
+			memcpy(&label,p,sizeof(DIRENTRY));
+			break;								/* always use first label if > 1 */
+		}
+	}
+#endif
+
+	memset(root,0x00,dpb.rdb);					/* ensure root is zeroed */
+
+#ifdef BELA_SUGGESTION
+	if (label.name[0])
+		memcpy(root,&label,sizeof(DIRENTRY));	/* restore label if present */
+#endif
 
 	if (log_write(dev,2*dpb.spf+dpb.rds,1,fatrootbuf,BOOT))
 		rc = -1;
@@ -898,14 +933,13 @@ PRIVATE int zero_data()
 short nout, ndo, nclus;
 char *readbuf = NULL;
 
-	nclus = max_allocatable_clusters(dpb.bpc);
-	if (nclus)
-		readbuf = malloc(nclus*dpb.bpc);
-	if (!readbuf) {
-		error(nclus*dpb.bpc,MEMALLOC,"");
+	nclus = allocate_max_units(1,dpb.bpc,&readbuf);
+	if (!nclus) {
+		error(dpb.bpc,MEMALLOC,"");
 		return -1;
 	}
-	memset(readbuf,DELETION_MARK,nclus*dpb.bpc);		//rfb: why not use 0x00 ...
+
+	memset(readbuf,0x00,nclus*dpb.bpc);		/* we used to use 0xe5 ... */
 
 	for (nout = 2; nout < dpb.maxc; nout += ndo) {
 		ndo = min(dpb.maxc-nout,nclus);

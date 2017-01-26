@@ -8,21 +8,64 @@
  *
  *	version 2.51 (may/2003)			roger burrows
  *		fix bug in opt_full():
- *			instead of using dpb.rds for the size of the root (in logical sectors), we
- *			calculated it from the number of directory entries, but did not round up.
- *			in some cases (e.g. logical sector size = 16K, # root dir entries = 256),
- *			this caused fewer sectors to be written than should have been, which munged
- *			a partition if any entries in the root were deleted AND the 'Remove deleted
- *			entries' option was set.
+ *			instead of using dpb.rds for the size of the root (in logical sectors),
+ *			we calculated it from the number of directory entries, but did not
+ *			round up.  in some cases (e.g. logical sector size = 16K, # root dir
+ *			entries = 256), this caused fewer sectors to be written than should
+ *			have been, which munged a partition if any entries in the root were
+ *			deleted AND the 'Remove deleted entries' option was set.
  *
  *	version 2.52 (june/2003)		roger burrows
  *		fix bug in a_index():
- *			the sort of indx[] looped forever iff n == 1.  this occurred when a_index()
- *			was entered with one remaining cluster to move.  the simplest situation is
- *			when optimizing a partition from which all files have been deleted except
- *			one, which itself occupies only a single cluster.  however, this could occur
- *			any time the number of clusters to move is (n * M + 1), where M is the size
- *			of the input buffer in clusters.
+ *			the sort of indx[] looped forever iff n == 1.  this occurred when
+ *			a_index() was entered with one remaining cluster to move.  the simplest
+ *			situation is when optimizing a partition from which all files have been
+ *			deleted except one, which itself occupies only a single cluster.
+ *			however, this could occur any time the number of clusters to move was
+ *			(n * M + 1), where M is the size of the input buffer in clusters.
+ *
+ *	version 2.53 (july/2003)			roger burrows
+ *		1. fix bugs in full optimisation:
+ *			a) it was possible for setup_defrag_dir() to fail due to lack of memory
+ *			   to store directory clusters, AFTER it had partially modified the
+ *			   partition.  this mangled the partition :-(.  do_tdisk() now returns
+ *			   the maximum number of directory clusters stored, and opt_full()
+ *			   verifies that this amount of space is available before starting to
+ *			   modify.  this bug could also theoretically occur in free-space
+ *			   compression, although only on FAT12 disks due to the different
+ *			   pattern of memory allocation.  found by inspection.
+ *			b) circumvent the 'Wayne Martz problem', where malloc() failed after
+ *		       max_allocatable_clusters() had already done a malloc()/free() of
+ *			   that amount of memory.  fixed by using allocate_max_units()
+ *			   routine instead.  see misc.c for further explanation/comments.
+ *			c) good data could be silently overwritten during a full optimisation
+ *			   under rare circumstances :-(.  the conditions were:
+ *				. the file cluster did not need to be moved
+ *				. a lower-numbered file cluster needed to be moved, and the cluster
+ *				  that it displaced needed to be stored somewhere temporarily
+ *			   the bug occurred because, when a file cluster did not need to be
+ *			   moved, up_map_good()/up_map_bad() set its entry in fmold[] to zero
+ *			   rather than 1, and do_defrag() interpreted a zero entry as a free
+ *			   cluster.  fixed by changing up_map_good()/up_map_bad() to set the
+ *			   fmold[] entry to 1 for such clusters.
+ *		2. fix cosmetic bug in full optimisation: clusters that were not moved
+ *			(because they were already in the correct place) were not always
+ *			marked as defragged.  this relates to the fact that there are two
+ *			(unrelated) ways of defining whether a cluster is defragged:
+ *				. if it is part of a file with all clusters contiguous; this is
+ *				  the presentation used by the 'frag map' function
+ *				. if it does not need to be moved to defragment the partition;
+ *				  this is how the map is marked during optimisation.
+ *			the display starts off with the clusters marked as per the first
+ *			definition, and the clusters that don't have to be moved are not
+ *			explicitly marked during the optimisation process.  due to the
+ *			mapping of multiple clusters to one block in the map, this problem
+ *			is more noticeable when there are large files.  fixed by calling
+ *			draw_opt() from up_map_good()/up_map_bad() to mark clusters correctly.
+ *		3. added error message for "can't happen" error in do_defrag() [no disk
+ *		   space to store displaced clusters temporarily].
+ *		4. do some code optimisation in do_defrag()
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,8 +82,6 @@
 #include "proto.h"
 
 #define MODULE_NUMBER	10		/* used by error() macro */
-
-#define NEW_WAY					/* undefine this to get the old memory alloc method in do_defrag() */
 
 extern short dev, dirlevel, win1;
 extern short rez;				/* char height / 8 */
@@ -79,6 +120,7 @@ PRIVATE void a_index(short n,short *arrin,short *indx);
 PRIVATE int alloc_badclus_array(void);
 PRIVATE int alloc_hole_arrays(void);
 PRIVATE int calc_clusters(void);
+PRIVATE int can_malloc(int n);
 PRIVATE int comp_read(void);
 PRIVATE int comp_write(void);
 PRIVATE int do_defrag(int show);
@@ -92,8 +134,8 @@ PRIVATE void init_obar(long max);
 PRIVATE short next_free_cluster(short startnum);
 PRIVATE short next_nonbad_cluster(short startnum);
 PRIVATE short next_used_cluster(short startnum);
-PRIVATE int opt_compress(void);
-PRIVATE int opt_full(void);
+PRIVATE int opt_compress(int maxdirclus);
+PRIVATE int opt_full(int maxdirclus);
 PRIVATE short prev_nonbad_cluster(short startnum);
 PRIVATE short prev_used_cluster(short startnum);
 PRIVATE int setup_compress_dir(short dstart,DIRENTRY *end);
@@ -101,6 +143,7 @@ PRIVATE int setup_defrag_dir(short dstart,unsigned char *end);
 PRIVATE void start_obar(unsigned char *str1);
 PRIVATE short start_nonbad_cluster(short startnum,short maxcount);
 PRIVATE short start_used_cluster(short startnum,short maxcount);
+PRIVATE void up_dirlist(void);
 PRIVATE int up_map_bad(short start);
 PRIVATE int up_map_good(short start);
 PRIVATE void up_newfat_bad(short cnt);
@@ -120,9 +163,9 @@ PRIVATE void wrap_obar(void);
 
 PUBLIC short do_opt_compress(short display)
 {
-int rc;
+int maxdirclus, rc;
 
-	if (do_tdisk(1) < 0) {			//MAGNUM
+	if ((maxdirclus=do_tdisk(1)) < 0) {			//MAGNUM
 		force_update(-1);
 		doing_opt = 0;				/* probably unnecessary */
 		return -1;
@@ -133,7 +176,7 @@ int rc;
 
 	wind_update(BEG_UPDATE);
 	mouse_off();
-	rc = opt_compress();
+	rc = opt_compress(maxdirclus);
 	mouse_on();
 	wind_update(END_UPDATE);
 
@@ -188,6 +231,9 @@ int rc;
 /*
  *	perform freespace compression only
  *
+ *	arg is max# dir clusters that need to be stored: used to check for
+ *	sufficient memory
+ *
  *	for READ priority:
  *		startf[0] is the cluster# of the start of the first 'hole' (unallocated space), counting from cluster 2 up
  *		startf[1]                ..                   second                         ..
@@ -208,7 +254,7 @@ int rc;
  *		cumf[2] is the size in clusters of hole #1 + hole #2
  *		   ...
  */
-PRIVATE int opt_compress(void)
+PRIVATE int opt_compress(int maxdirclus)
 {
 short i, j, totfree;
 int fail;
@@ -307,6 +353,9 @@ DIRENTRY *temp;
 	temp = (DIRENTRY *) sort_root(dirlist[0].dirbuf,opt.rmdel);
 
 	update_barmsg(text[PROG_SCANFOLDER].ob_spec);
+
+	if (!can_malloc(maxdirclus))	/* check if sufficient memory */
+		return -1;
 
 	if (setup_compress_dir(0,temp) < 0)				//MAGNUM
 		return -1;
@@ -501,11 +550,9 @@ int nclus, total;
 short readpos, read_start, read_end;
 short writepos, write_start, write_end, count;
 
-	nclus = max_allocatable_clusters(dpb.bpc);
-	if (nclus)
-		newbuf = malloc(nclus*dpb.bpc);
-	if (!newbuf) {
-		error(nclus*dpb.bpc,MEMALLOC,"");
+	nclus = allocate_max_units(1,dpb.bpc,&newbuf);
+	if (!nclus) {
+		error(dpb.bpc,MEMALLOC,"");
 		return -1;
 	}
 
@@ -604,11 +651,9 @@ int nclus, total;
 short readpos, read_start, read_end;
 short writepos, write_start, write_end, count;
 
-	nclus = max_allocatable_clusters(dpb.bpc);
-	if (nclus)
-		newbuf = malloc(nclus*dpb.bpc);
-	if (!newbuf) {
-		error(nclus*dpb.bpc,MEMALLOC,"");
+	nclus = allocate_max_units(1,dpb.bpc,&newbuf);
+	if (!nclus) {
+		error(dpb.bpc,MEMALLOC,"");
 		return -1;
 	}
 
@@ -897,9 +942,9 @@ short nextc;
 
 PUBLIC short do_opt(void)
 {
-int i, rc;
+int i, maxdirclus, rc;
 
-	if (do_tdisk(1) < 0) {					//MAGNUM
+	if ((maxdirclus=do_tdisk(1)) < 0) {		//MAGNUM
 		force_update(-1);
 		doing_opt = 0;				/* probably not necessary */
 		return -1;
@@ -916,7 +961,7 @@ int i, rc;
 
 	wind_update(BEG_UPDATE);
 	mouse_off();
-	rc = opt_full();
+	rc = opt_full(maxdirclus);
 	mouse_on();
 	wind_update(END_UPDATE);
 
@@ -967,7 +1012,7 @@ int i, rc;
 	return rc;
 }
 
-PRIVATE int opt_full(void)
+PRIVATE int opt_full(int maxdirclus)
 {
 short maxcluster;
 short i;
@@ -1069,6 +1114,9 @@ static char title[MAX_DISPLAYSIZE];	/* static because it's a window title */
 	dirend = sort_root(dirlist[0].dirbuf,opt.rmdel);
 	update_obarmsg(text[PROG_SCANFOLDER].ob_spec);
 
+	if (!can_malloc(maxdirclus))	/* check if sufficient memory */
+		return -1;
+
 	if (setup_defrag_dir(0,dirend) < 0)
 		return -1;
 
@@ -1129,64 +1177,52 @@ static char title[MAX_DISPLAYSIZE];	/* static because it's a window title */
  *	n, and display it after defragmentation completes ... of course, the difference
  *	in memory usage between 2*nclus and nclus+1 entries when an entry is 2 bytes
  *	is not really significant anyway ...
+ *
+ *	buffer usage in this routine:
+ *		newbuf	contains the data from clusters that are being optimised
+ *		oldbuf	contains the data from those clusters that will be overwritten
+ *				by clusters from newbuf
+ *	tracking which cluster is where:
+ *		fmold	lists where to move each cluster:
+ *				fmold[n]		meaning
+ *				--------		-------
+ *					0			cluster n is free
+ *					1			cluster n is already defragged (don't move)
+ *					x			cluster n must be moved to cluster x
+ *		fmnew	lists where each cluster came from:
+ *				fmnew[x]		meaning
+ *				--------		-------
+ *					0			cluster x is free
+ *					1			cluster x is currently in outbuf
+ *					n			cluster x came from cluster n
  */
 PRIVATE int do_defrag(int show)
 {
 short ii, jj, kk;
-short readcnt, freeblocks;
+short iocount, freeblocks;
 short nextblocks, nextblocke;
 short ndo, sclus;
-long n, nclus;
-#ifndef NEW_WAY
-long twobpc;
-#endif
+long iostart, n, nclus;
 short *idex = NULL, *newblock, *oldblock;
 char *newbuf, *oldbuf;
 
-#ifdef NEW_WAY			//proposed new way ...
 	n = 2 * dpb.bpc + 4;
-	nclus = max_allocatable_clusters(n);
-	if (nclus)
-		idex = malloc(nclus*n);
-	if (!idex) {
-		error(nclus*n,MEMALLOC,"");
-		return -1;
-	}
-
-#else			//the old way ...
-
-	twobpc = (long) dpb.bpc * 2L;
-	n = (long) Malloc(-1L);
-	n = ~(twobpc - 1L) & (n - twobpc);
-	nclus = n / (long) dpb.bpc;
-	if ((idex=Malloc(n)) == NULL) {
+	nclus = allocate_max_units(1,n,(char **)&idex);
+	if (!nclus) {
 		error(n,MEMALLOC,"");
 		return -1;
 	}
-
-	/*
-	   n -= (long)nclus*4L;
-	   n = ~(twobpc-1L) & (n-twobpc);
-	   nclus = n/twobpc;
-	   newbuf = (char *)idex +(long)nclus*4L;
-	   oldbuf = newbuf + (long)nclus*(long)dpb.bpc;
-	*/
-
-	n -= (long) nclus * 5L;				//rfb: why 5 ???
-
-	n = ~(twobpc - 1L) & (n - twobpc);
-	nclus = n / twobpc;
-#endif
 
 	newbuf = (char *) idex + nclus * 4;
 	oldbuf = newbuf + nclus * dpb.bpc;
 
 	init_obar(nextcluster);
-	for (sclus = 2; fmnew[sclus] == 0; sclus++)
+
+	for (sclus = 2; fmnew[sclus] == 0; sclus++)	/* skip leading empty clusters */
 		if (sclus >= dpb.maxc)
 			break;
 
-	while (sclus < nextcluster) {
+	for ( ; sclus < nextcluster; sclus += ndo) {
 		ndo = min(nextcluster-sclus,nclus);
 
 		/**************** Read in new data for curblock ****************************/
@@ -1195,80 +1231,72 @@ char *newbuf, *oldbuf;
 		oldblock = &fmold[sclus];
 
 		a_index(ndo,newblock,idex);
-		for (ii = 1; ii <= ndo; ii++)
-			if (newblock[idex[ii]] > 1)
+		for (ii = 1; ii <= ndo; ii++)			/* skip clusters that don't need reading: */
+			if (newblock[idex[ii]] > 1)			/* empty ones & ones that are already in outbuf */
 				break;
-		while (ii <= ndo) {
+
+		for ( ; ii <= ndo; ii += iocount) {
 			for (jj = ii; jj < ndo; jj++) {
 				if (newblock[idex[jj]] + 1 != newblock[idex[jj + 1]])
 					break;
 				if ((idex[jj] + 1) != idex[jj + 1])
 					break;
 			}
-			readcnt = jj - ii + 1;
-			must_read(dev,readcnt*dpb.spc,logsector(newblock[idex[ii]]),newbuf+idex[ii]*dpb.bpc,HARDDISK);
-			if (show)
-				for (kk = 0; kk < readcnt; kk++)		/* clear it */
-					draw_opt(newblock[idex[ii]]+kk,1);
+			iocount = jj - ii + 1;
+			iostart = newblock[idex[ii]];
+			must_read(dev,iocount*dpb.spc,logsector(iostart),newbuf+idex[ii]*dpb.bpc,HARDDISK);
 
-			for (kk = newblock[idex[ii]]; kk < newblock[idex[ii]] + readcnt; fmold[kk++] = 0)
-				;
-			ii += readcnt;
+			for (kk = 0; kk < iocount; kk++) {			/* clear it */
+				if (show)
+					draw_opt(iostart+kk,1);
+				fmold[iostart+kk] = 0;
+			}
 		}
 
 		update_obar(sclus + (ndo / 4));
 
 		/********************* Read in data that has to be moved ********************/
 
-		ii = 0;
-		while (ii < ndo) {
-			for (jj = ii; jj < ndo; jj++) 	 	/* Skip ones that don't need moving */
-				if (oldblock[jj] > 1)
+		for (ii = 0; ii < ndo; ii += iocount) {
+			for (jj = ii; jj < ndo; jj++) 	 	/* skip clusters that don't need moving: */
+				if (oldblock[jj] > 1)			/* empty ones and ones that are already in place */
 					break;
-			ii = jj;
-			if (ii == ndo)
+			if (jj >= ndo)
 				break;
+			ii = jj;
 
-			for (jj = ii; jj < ndo; jj++) 	 	/* find run size */
+			for ( ; jj < ndo; jj++) 	 		/* find run size */
 				if (oldblock[jj] <= 1)
 					break;
-			readcnt = jj - ii;
-			must_read(dev,readcnt*dpb.spc,logsector(sclus+ii),oldbuf+ii*dpb.bpc,HARDDISK);
+			iocount = jj - ii;
+			iostart = sclus + ii;
+			must_read(dev,iocount*dpb.spc,logsector(iostart),oldbuf+ii*dpb.bpc,HARDDISK);
 			if (show)
-				for (kk = 0; kk < readcnt; kk++)	/* clear blocks */
-					draw_opt(sclus+ii+kk,1);
-
-			ii += readcnt;
+				for (kk = 0; kk < iocount; kk++)	/* clear blocks */
+					draw_opt(iostart+kk,1);
 		}
 
 		update_obar(sclus + (ndo / 2));
 
 		/***************** Write out new block **************************/
 
-		ii = 0;
-		while (ii < ndo) {
-			for (jj = ii; jj < ndo; jj++) {
-				if (newblock[jj] != 0) {
-					if (show)
-						for (kk = 0; kk < jj; kk++)			/* defragged blocks out */
-							draw_opt(sclus+kk,2);
-					break;		/* skip one that don't need writing */
-				}
-			}
-			ii = jj;
-			if (ii == ndo)
+		for (ii = 0; ii < ndo; ii += iocount) {
+			for (jj = ii; jj < ndo; jj++)		/* skip clusters that don't need writing: */
+				if (newblock[jj] != 0)			/* empty ones only */
+					break;
+			if (jj >= ndo)
 				break;
-			for (jj = ii; jj < ndo; jj++)
+			ii = jj;
+
+			for ( ; jj < ndo; jj++)					/* find run size */
 				if (newblock[jj] == 0)
-					break;					/* calc runsize */
-			readcnt = jj - ii;
-
-			must_write(dev,readcnt*dpb.spc,logsector(sclus+ii),newbuf+ii*dpb.bpc,HARDDISK);
+					break;
+			iocount = jj - ii;
+			iostart = sclus + ii;
+			must_write(dev,iocount*dpb.spc,logsector(iostart),newbuf+ii*dpb.bpc,HARDDISK);
 			if (show)
-				for (kk = 0; kk < readcnt; kk++)			/* defragged blocks out */
-					draw_opt(sclus+ii+kk,2);
-
-			ii += readcnt;
+				for (kk = 0; kk < iocount; kk++)	/* defragged blocks out */
+					draw_opt(iostart+kk,2);
 		}
 
 		update_obar(sclus + (3 * ndo / 4));
@@ -1281,13 +1309,16 @@ char *newbuf, *oldbuf;
 			nextblocke = dpb.maxc - 1;
 
 		a_index(ndo,oldblock,idex);
-		for (ii = 1; ii <= ndo; ii++)
-			if (oldblock[idex[ii]] > 1)
+		for (ii = 1; ii <= ndo; ii++)				/* skip clusters that don't need writing: */
+			if (oldblock[idex[ii]] > 1)				/* empty ones and ones that are already in place */
 				break;
 
-		while (ii <= ndo) {
-			/* what's been read in is contained in the next scheduled block */
-
+		for ( ; ii <= ndo; ii += iocount) {
+			/*
+			 *	check if what's been read in is contained in the next block to be written.
+			 *	if so, all we need to do is move it from oldbuf to newbuf, and mark fmnew[]
+			 *	so that we know it's there ...
+			 */
 			if (oldblock[idex[ii]] < nextblocke) {
 				for (jj = ii; jj < ndo; jj++) {
 					if (oldblock[idex[jj]] + 1 != oldblock[idex[jj + 1]])
@@ -1295,95 +1326,96 @@ char *newbuf, *oldbuf;
 					if ((idex[jj] + 1) != idex[jj + 1])
 						break;
 				}
-				if (oldblock[idex[jj]] < nextblocke) {
-					readcnt = jj - ii + 1;
-				} else {
-					readcnt = (nextblocke - oldblock[idex[ii]]);
-				}
-				n = (long) (((long) oldblock[idex[ii]] - (long) nextblocks)) * dpb.bpc;
-				fast_copy(newbuf+n,oldbuf+((long) idex[ii] * dpb.bpc),(long) readcnt * dpb.bpc);
-				for (jj = 0; jj < readcnt; jj++)
+				if (oldblock[idex[jj]] < nextblocke)
+					iocount = jj - ii + 1;
+				else iocount = nextblocke - oldblock[idex[ii]];
+
+				n = (oldblock[idex[ii]] - nextblocks) * dpb.bpc;
+				fast_copy(newbuf+n,oldbuf+(idex[ii] * dpb.bpc),iocount * dpb.bpc);
+				for (jj = 0; jj < iocount; jj++)
 					fmnew[oldblock[idex[ii + jj]]] = 1;
-				ii += readcnt;
-			} else {
-				/* we have to write it out, but where? */
+				continue;
+			}
 
-				/** where it will eventually go is already vacant */
-				if (fmold[oldblock[idex[ii]]] == 0) {
+			/*
+			 *	the displaced sectors are not yet needed, so we have to write them out, but where?
+			 */
 
-					/* find out how many open clusters in a row */
-					for (kk = 1; kk < ndo - ii; kk++)
-						if (fmold[oldblock[idex[ii]] + kk] != 0)
-							break;
-					for (jj = ii; jj < ndo; jj++) {
-						if (oldblock[idex[jj]] + 1 != oldblock[idex[jj + 1]])
-							break;
-						if ((idex[jj] + 1) != idex[jj + 1])
-							break;
-					}
-					readcnt = min(jj-ii+1,kk);							/* calc wrtcnt */
-
-					/* E pause(2); */
-					must_write(dev,readcnt*dpb.spc,logsector(oldblock[idex[ii]]),oldbuf+idex[ii]*dpb.bpc,HARDDISK);
-					if (show)
-						for (kk = 0; kk < readcnt; kk++)		/* defragged blocks out */
-							draw_opt(oldblock[idex[ii]]+kk,2);
-
-					for (kk = 0; kk < readcnt; kk++)
-						fmold[oldblock[idex[ii + kk]]] = 1;
-					for (kk = 0; kk < readcnt; kk++)
-						fmnew[oldblock[idex[ii + kk]]] = 0;
-
-					ii += readcnt;
-				} else {
-					for (freeblocks = nextblocks; freeblocks < dpb.maxc; freeblocks++) /* have to find a place to dump it */
-						if (fmold[freeblocks] == 0)
-							break;
-					if (freeblocks >= dpb.maxc) {
-						for (freeblocks = 2; freeblocks < dpb.maxc; freeblocks++)
-							if (fmold[freeblocks] == 0)
-								break;
-					}
-					if (freeblocks >= dpb.maxc)
-						return -1;
-
-					for (jj = freeblocks; jj < (freeblocks + ndo - ii + 1); jj++) {
-						if (jj >= dpb.maxc)
-							break;
-						if (fmold[jj] != 0)
-							break;
-					}
-					if (jj >= dpb.maxc)
-						jj = dpb.maxc;
-
-					jj -= freeblocks;	/* size of free slot on disk in clusters */
-
-					for (kk = ii; kk < ndo; kk++)
-						if (idex[kk] + 1 != idex[kk + 1])
-							break;
-					readcnt = min(jj,kk-ii+1);
-					must_write(dev,readcnt*dpb.spc,logsector(freeblocks),oldbuf+idex[ii]*dpb.bpc,HARDDISK);
-					if (show)
-						for (kk = 0; kk < readcnt; kk++)			/* defragged blocks out */
-							draw_opt(freeblocks+kk,0);
-
-					for (kk = 0; kk < readcnt; kk++)
-						fmold[freeblocks + kk] = oldblock[idex[ii + kk]];
-					for (kk = 0; kk < readcnt; kk++)
-						fmnew[oldblock[idex[ii + kk]]] = freeblocks + kk;
-					ii += readcnt;
+			/*
+			 *	if where they will eventually go is already vacant, we'll put them there now
+			 */
+			if (fmold[oldblock[idex[ii]]] == 0) {
+				for (kk = 1; kk < ndo - ii; kk++)	/* find out how many open clusters in a row */
+					if (fmold[oldblock[idex[ii]] + kk] != 0)
+						break;
+				for (jj = ii; jj < ndo; jj++) {
+					if (oldblock[idex[jj]] + 1 != oldblock[idex[jj + 1]])
+						break;
+					if ((idex[jj] + 1) != idex[jj + 1])
+						break;
 				}
+				iocount = min(jj-ii+1,kk);			/* calc write count */
+				iostart = oldblock[idex[ii]];
+
+				/* E pause(2); */
+				must_write(dev,iocount*dpb.spc,logsector(iostart),oldbuf+idex[ii]*dpb.bpc,HARDDISK);
+
+				for (kk = 0; kk < iocount; kk++) {
+					if (show)
+						draw_opt(iostart+kk,2);
+					fmold[iostart+kk] = 1;
+					fmnew[iostart+kk] = 0;
+				}
+				continue;
+			}
+
+			/*
+			 *	we've displaced some sectors and where they will eventually go is still occupied,
+			 *	so we find a free spot to dump them temporarily
+			 */
+			for (freeblocks = nextblocks; freeblocks < dpb.maxc; freeblocks++)	/* search forwards */
+				if (fmold[freeblocks] == 0)
+					break;
+			if (freeblocks >= dpb.maxc) {										/* wrap around */
+				for (freeblocks = 2; freeblocks < dpb.maxc; freeblocks++)
+					if (fmold[freeblocks] == 0)
+						break;
+			}
+			if (freeblocks >= dpb.maxc) {			/* can't happen ... */
+				error(-1L,DISKFULL,"");
+				return -1;
+			}
+
+			for (jj = freeblocks; jj < (freeblocks + ndo - ii + 1); jj++) {
+				if (jj >= dpb.maxc)
+					break;
+				if (fmold[jj] != 0)
+					break;
+			}
+			if (jj >= dpb.maxc)
+				jj = dpb.maxc;
+
+			jj -= freeblocks;						/* size of free slot on disk in clusters */
+
+			for (kk = ii; kk < ndo; kk++)
+				if (idex[kk] + 1 != idex[kk + 1])
+					break;
+			iocount = min(jj,kk-ii+1);
+			must_write(dev,iocount*dpb.spc,logsector(freeblocks),oldbuf+idex[ii]*dpb.bpc,HARDDISK);
+
+			for (kk = 0; kk < iocount; kk++) {
+				n = oldblock[idex[ii + kk]];
+				if (show)
+					draw_opt(freeblocks+kk,0);
+				fmold[freeblocks + kk] = n;
+				fmnew[n] = freeblocks + kk;
 			}
 		}
+
 		update_obar(sclus + ndo);
-		sclus = nextblocks;
 	}
 
-#ifdef NEW_WAY
 	free(idex);
-#else
-	Mfree(idex);
-#endif
 
 	ring_bell();
 
@@ -1490,15 +1522,23 @@ short nc = nextcluster;
 	do {
 		if (nc == start) {
 			fmnew[nc] = 0;
-			fmold[start] = 0;
-			nc++;
+			fmold[start] = 1;		/* mark as already defragged */
+			/* was:	fmold[start] = 0; */
+			if (opt.visual) {
+				draw_opt(start,2);	/* update opt map appropriately */
+			}
 		} else {
 			fmnew[nc] = start;
-			fmold[start] = nc++;
+			fmold[start] = nc;
+			if (opt.visual) {
+				draw_opt(start,0);	/* update opt map appropriately */
+			}
 		}
+		nc++;
 		start = fat16[start];
 		cnt++;
 	} while(start != dpb.bitmask);
+
 	return cnt;
 }
 
@@ -1521,14 +1561,20 @@ short nc = nextcluster;
 	do {
 		if (nc == start) {
 			fmnew[nc] = 0;
-			fmold[start] = 0;
-			nc++;
+			fmold[start] = 1;		/* mark as already defragged */
+			/* was:	fmold[start] = 0; */
+			if (opt.visual) {
+				draw_opt(start,2);	/* update opt map appropriately */
+			}
 		} else {
 			fmnew[nc] = start;
-			fmold[start] = nc++;
+			fmold[start] = nc;
+			if (opt.visual) {
+				draw_opt(start,0);	/* update opt map appropriately */
+			}
 		}
-		while (fat16[nc] == dpb.badmask)
-			nc++;
+		while (fat16[++nc] == dpb.badmask)
+			;
 		start = fat16[start];
 		cnt++;
 	} while(start != dpb.bitmask);
@@ -1551,6 +1597,66 @@ short i, nc;
 	while (fat16[++nextcluster] == dpb.badmask)
 		;
 }
+
+/***************************************************************************/
+/*
+ *	creates index array
+ *
+ *	first, fills indx[1..n] with values 0..n-1
+ *	then sorts indx[1..n] so that arrin[indx[n]]<arrin[indx[arrin[n+1]]
+ *
+ *	this is used e.g. to collect fragmented clusters when reading so that
+ *	they can be written out consecutively
+ *
+ */
+PRIVATE void a_index(short n,short arrin[],short indx[])
+{
+short l, j, i;
+short ir, indxt;
+long q;
+
+	if (n < 2) {		/* handle degenerate case */
+		indx[1] = 0;
+		return;
+	}
+
+	for (j = 1; j <= n; j++)
+		indx[j] = j - 1;
+
+	l = (n >> 1) + 1;
+	ir = n;
+	for ( ; ; ) {
+		if (l > 1)
+			q = arrin[(indxt = indx[--l])];
+		else {
+			q = arrin[(indxt = indx[ir])];
+			indx[ir] = indx[1];
+			if (--ir == 1) {
+				indx[1] = indxt;
+				return;
+			}
+		}
+		i = l;
+		j = l << 1;
+		while (j <= ir) {
+			if ((j < ir) && (arrin[indx[j]]) < (arrin[indx[j + 1]]))
+				j++;
+			if (q < arrin[indx[j]]) {
+				indx[i] = indx[j];
+				j += (i = j);
+			} else
+				j = ir + 1;
+		}
+		indx[i] = indxt;
+	}
+}
+
+
+/********************************************/
+/*											*/
+/*		C O M M O N   R O U T I N E S		*/
+/*											*/
+/********************************************/
 
 /*
  *	sort directory into the following order:
@@ -1773,58 +1879,34 @@ int volume_labels_allowed;
 	return endpoint;
 }
 
-/*************************************************************************/
+/*
+ *	go 'up' the dirlist
+ */
+PRIVATE void up_dirlist()
+{
+	free(dirlist[dirlevel].dirbuf);
+	memset(&dirlist[dirlevel],0x00,sizeof(DIRLIST));
+	dirlevel--;
+}
 
 /*
- *	creates index array
+ *	check if we can allocate N clusters
  *
- *	first, fills indx[1..n] with values 0..n-1
- *	then sorts indx[1..n] so that arrin[indx[n]]<arrin[indx[arrin[n+1]]
+ *	NOTE: if the memory pool is fragmented, this may fail where the individual
+ *	mallocs would have succeeded, but better that than a mangled partition ...
  *
- *	this is used e.g. to collect fragmented clusters when reading so that
- *	they can be written out consecutively
- *
+ *	returns TRUE or FALSE
  */
-PRIVATE void a_index(short n,short arrin[],short indx[])
+PRIVATE int can_malloc(int n)
 {
-short l, j, i;
-short ir, indxt;
-long q;
+char *temp;
 
-	if (n < 2) {		/* handle degenerate case */
-		indx[1] = 0;
-		return;
-	}
+	temp = malloc(n*(dpb.bpc+16));	/* kludge to allow for multiple malloc overhead */
+	if (!temp)
+		return FALSE;
 
-	for (j = 1; j <= n; j++)
-		indx[j] = j - 1;
-
-	l = (n >> 1) + 1;
-	ir = n;
-	for ( ; ; ) {
-		if (l > 1)
-			q = arrin[(indxt = indx[--l])];
-		else {
-			q = arrin[(indxt = indx[ir])];
-			indx[ir] = indx[1];
-			if (--ir == 1) {
-				indx[1] = indxt;
-				return;
-			}
-		}
-		i = l;
-		j = l << 1;
-		while (j <= ir) {
-			if ((j < ir) && (arrin[indx[j]]) < (arrin[indx[j + 1]]))
-				j++;
-			if (q < arrin[indx[j]]) {
-				indx[i] = indx[j];
-				j += (i = j);
-			} else
-				j = ir + 1;
-		}
-		indx[i] = indxt;
-	}
+	free(temp);
+	return TRUE;
 }
 
 /************************************************************************/
@@ -1885,3 +1967,4 @@ PRIVATE void wrap_obar(void)
 {
 	refresh_now(obar,0);
 }
+

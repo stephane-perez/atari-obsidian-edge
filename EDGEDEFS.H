@@ -289,6 +289,7 @@ typedef struct dta {
 struct dir_list {
 	char *dirbuf;
 	long offset;
+	unsigned short size;			/* in clusters */
 	short firstcluster;
 	struct dir_list *xtradir;		/* rfb: was char * ... */
 };

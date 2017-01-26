@@ -10,6 +10,19 @@
  *			decode_date_time()
  *			change_mode()
  *			CDmap()
+ *
+ *	version 2.53 (july/2003)			roger burrows
+ *		replaced max_allocatable_clusters() with allocate_max_units(); this
+ *		should circumvent a very peculiar incident noted by Wayne Martz:
+ *			do_defrag() called max_allocatable_clusters(), which returned a
+ *			value of 256 because it had successfully malloced (then freed)
+ *			256*(2*dpb.bpc+4) bytes.  however, when do_defrag() immediately
+ *			tried to malloc the same number of bytes itself, the malloc
+ *			failed !?!  this is probably something strange in the malloc code,
+ *			but since the new routine doesn't free up the memory after
+ *			allocating it (and therefore the caller doesn't have to malloc it
+ *			again), we should avoid this problem ...
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,8 +60,8 @@
 
 #define _hz_200			(*((long *) 0x4ba))
 
-#define MIN_CLUSTERS	2				/* see max_allocatable_clusters() */
-#define MAX_CLUSTERS	256
+#define MAX_UNITS		256				/* arbitrary: see allocate_max_units() */
+
 
 
 /*************externally referenced**************/
@@ -88,24 +101,18 @@ PRIVATE long nullfunction(long error);
 #define sup_off()	Super(savessp); }
 
 /*
- *	returns available memory (in 'cluster_size' units)
+ *	allocates max available memory (in 'unit_size' units)
+ *	returns # units allocated & ptr to allocated memory
  */
-PUBLIC long max_allocatable_clusters(long cluster_size)
+PUBLIC long allocate_max_units(int min_units,long unit_size,char **ptr)
 {
-long m, n;
-char *p;
+long n;
 
-	for (n = MAX_CLUSTERS, m = 0; n >= MIN_CLUSTERS; n = (n*3)/4) {
-		if (p=malloc(n*cluster_size)) {
-			free(p);
-			break;
-		}
-	}
+	for (n = MAX_UNITS; n >= min_units; n = (n*3)/4)
+		if (*ptr=malloc(n*unit_size))
+			return n;
 
-	if (n < MIN_CLUSTERS)
-		n = 0L;
-
-	return n;
+	return 0L;		/* *ptr is already NULL ... */
 }
 
 /*

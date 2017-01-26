@@ -25,6 +25,12 @@
  *	version 2.10 (august/2002)	roger burrows
  *		a highly cleaned up and reorganised version of
  *		the DE v2.04 source; no new function
+ *
+ *	version 2.53 (july/2003)	roger burrows
+ *		fix bug in display of total/available space in MB, caused by
+ *		arithmetic overflow when the size exceeded 2GB.  fixed by
+ *		using secs_to_cmegs() routine to perform conversion
+ *		
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -2091,9 +2097,9 @@ int phigh, plow;
 		neg = TRUE;
 	}
 
-	n = size * PHYSICAL_SECSIZE;
-	phigh = n / MBYTE;
-	plow = (n - phigh * MBYTE) / (10*KBYTE);
+	n = secs_to_cmegs(size);
+	phigh = n / 100;
+	plow = n - phigh * 100;
 	if (neg)
 		phigh = -phigh;
 	if (dot)

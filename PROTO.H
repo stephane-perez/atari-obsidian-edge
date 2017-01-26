@@ -75,13 +75,13 @@ PUBLIC int main(void);
 PUBLIC int bad_prefs(void);
 PUBLIC int do_bad(int autofix);
 PUBLIC int do_tdisk(int called);
-PUBLIC void up_dirlist(void);
 
 /* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\MIRROR.C */
 PUBLIC void config_mirror(void);
 PUBLIC int init_mirror_prefs(void);
 
 /* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\MISC.C */
+PUBLIC long allocate_max_units(int min_units,long unit_size,char **ptr);
 PUBLIC void blank(short color);
 PUBLIC void browse(void);
 PUBLIC unsigned long CDmap(void);
@@ -99,7 +99,6 @@ PUBLIC int get_src_dest(void);
 PUBLIC short get_sys(short *p);
 PUBLIC unsigned short get_word(unsigned char *in);
 PUBLIC void init_bar(long max);
-PUBLIC long max_allocatable_clusters(long cluster_size);
 PUBLIC int mouse_off(void);
 PUBLIC int mouse_on(void);
 PUBLIC short nflop(void);

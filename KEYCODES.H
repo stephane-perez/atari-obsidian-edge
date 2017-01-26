@@ -1,3 +1,13 @@
+/*
+ *	keycodes.h
+ *
+ *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
 #define a_keycode	0x1e61
 #define b_keycode	0x3062
 #define c_keycode	0x2e63

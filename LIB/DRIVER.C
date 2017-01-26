@@ -1,9 +1,19 @@
 /*
  *	interface from edge stuff to hardware
  *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	v2.5	roger burrows, anodyne software
  *		. rewritten to use the scsidrv interface
  *		. does i/o via a smallish buffer in ST RAM
+ *
+ *	v2.57	roger burrows (january/2017)
+ *		prepare for public release
  */
 #include <cookie.h>
 #include <ctype.h>
@@ -11,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <scsidrv.h>
+#include "scsidrv.h"
 
 #define MAXDEV			32				/* max # hard disks supported ... */
 #define HDSECTOR_LENGTH	512				/* manifest constant */

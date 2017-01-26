@@ -1,10 +1,19 @@
 /*
  *	install: install Diamond Edge
  *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	version 2.5	roger burrows	26/april/2003
  *		totally rewritten to implement new protection scheme,
  *		and numbered to correspond to Edge
  *
+ *	version 2.57 roger burrows	18/January/2017
+ *		disable protection scheme for public release
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,6 +29,13 @@
 
 #include "install.h"
 #include "../lib/encrypt.h"
+
+#define NOPROTECT		/* disable protection */
+
+#ifdef NOPROTECT
+#define NOPROTECT_SERNUM	"E-0000-25"
+#define NOPROTECT_REGCODE	"DSFMDSCN"
+#endif
 
 /*
  *	typedefs
@@ -303,6 +319,14 @@ int check_install(void)
 {
 int i, dev;
 unsigned long hexreg;
+
+#ifdef NOPROTECT
+	strcpy(address1->te_ptext," ");
+	strcpy(address2->te_ptext," ");
+	strcpy(address3->te_ptext," ");
+	strcpy(sernum->te_ptext,NOPROTECT_SERNUM);
+	strcpy(regcode->te_ptext,NOPROTECT_REGCODE);
+#endif
 
 	hexreg = external_to_hex(regcode->te_ptext);
 

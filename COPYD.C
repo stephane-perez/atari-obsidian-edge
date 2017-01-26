@@ -5,6 +5,13 @@
  *	but preserves the dates and times of folders as well as files
  *
  *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	version 2.10 (november/2002)		roger burrows
  *		a highly cleaned up and reorganised version of
  *		the DE v2.04 source; no new function
@@ -18,6 +25,9 @@
  *		empty files inadvertently contained the next cluster number
  *		to be assigned, rather thn zero.  this created a file collision
  *		in the output partition.
+ *
+ *	version 2.57 (january/2017)	roger burrows
+ *		prepare for public release
  */
 #include <stdio.h>
 #include <stdlib.h>

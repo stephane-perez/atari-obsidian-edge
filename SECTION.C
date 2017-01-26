@@ -1,6 +1,14 @@
 /*
  *	section.c
  *
+ *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	this code was stolen from windform.  the following minimal changes
  *	have been made for integration:
  *		. the include for windform.h has been removed; as a result:
@@ -109,6 +117,8 @@
  *		section specified via open_section().  Fixed by generating the
  *		fully-qualified filename in open_section() rather than open_file().
  *
+ *	version 2.57 (january/2017)
+ *		prepare for public release
  */
 #include <stdio.h>
 #include <stdlib.h>

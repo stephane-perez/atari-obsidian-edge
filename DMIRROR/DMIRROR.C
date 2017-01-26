@@ -1,10 +1,20 @@
 /*
  *	dmirror.c: Diamond Mirror
  *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	version 2.50	roger burrows (january/2003)
  *		rewritten, based on
  *			. revised edge code (as of 14jan2003)
  *			. new-style control file
+ *
+ *	version 2.57	roger burrows (january/2017)
+ *		prepare for public release
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,8 +26,8 @@
 #include <unistd.h>
 #include <vdi.h>
 
-#include <extendos.h>
-#include <misc.h>
+#include "../lib/extendos.h"
+#include "../lib/misc.h"
 #include "../edgedefs.h"
 #include "../section.h"
 
@@ -25,10 +35,10 @@
  *	stuff (currently) exclusive to dmirror
  */
 #ifdef BETA
-#define PROGRAM_VERSION	"2.50á1"
-#define EXPIRY_DATE		( ((2003-1980)<<9)+(6<<5)+30 )		/* 30 June 2003 */
+#define PROGRAM_VERSION	"2.57á1"
+#define EXPIRY_DATE		( ((2017-1980)<<9)+(6<<5)+30 )		/* 30 June 2017 */
 #else
-#define PROGRAM_VERSION	"2.50"
+#define PROGRAM_VERSION	"2.57"
 #endif
 
 #define ABORT_KEY		0x03				/* control-C */
@@ -110,7 +120,7 @@ int test_rotate = FALSE;		/* TRUE => rotate tests */
 struct control mirror;
 char mirror_path[MAX_EDGEPATH] = "";	/* path for mirror files */
 
-char *copyright = "Diamond Mirror: Copyright ½ 2002-2003 Roger Burrows.  All Rights Reserved";
+char *copyright = "Diamond Mirror: Copyright ½ 2002-2017 Roger Burrows.  All Rights Reserved";
 
 
 /*

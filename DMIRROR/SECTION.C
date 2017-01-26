@@ -1,6 +1,13 @@
 /*
  *	section.c
  *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	this code was stolen from windform.  the following minimal changes
  *	have been made for integration:
  *		. the include for windform.h has been removed; as a result:

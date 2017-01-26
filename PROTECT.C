@@ -20,13 +20,25 @@
  *
  *	if we find an error, we return -1 & let the caller figure out what to do
  *
+ *	NOTE: as of v2.57, this is moot because the installation program fudges
+ *	things.
  *
+ *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	version 2.50 (april/2003)			roger burrows
  *		original version
  *
  *	version 2.54 (august/2003)			roger burrows
  *		. add DEMO support (no protection)
  *
+ *	version 2.57 (january/2017)			roger burrows
+ *		prepare for public release
  */ 
 #include <stdio.h>
 #include <stdlib.h>

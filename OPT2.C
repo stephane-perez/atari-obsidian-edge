@@ -2,6 +2,13 @@
  *	opt2.c: implements the optimisation functions
  *
  *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	version 2.50 (april/2003)		roger burrows
  *		a cleaned up and reorganised version of
  *		the DE v2.04 source; no new function
@@ -78,6 +85,9 @@
  *	version 2.56 (august/2016)		roger burrows
  *		. fix bug: if do_diskmap() returns an error code, we should not proceed
  *		  with optimisation
+ *
+ *	version 2.57 (january/2017)		roger burrows
+ *		prepare for public release
  */
 #include <stdio.h>
 #include <stdlib.h>

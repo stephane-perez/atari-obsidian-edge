@@ -1,6 +1,13 @@
 /*
  *	global function prototypes
+ *
+ *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
  */
+
 /* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\COPYD.C */
 PUBLIC void do_copydefrag(void);
 

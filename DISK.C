@@ -8,6 +8,13 @@
  *	(these should probably be in misc.c)
  *
  *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	version 2.50 (april/2003)		roger burrows
  *		a highly cleaned up and reorganised version of
  *		the DE v2.04 source; no new function
@@ -29,6 +36,8 @@
  *		replace call to max_allocatable_clusters() with call to allocate_max_units().
  *		see misc.c for explanation/comments.
  *
+ *	version 2.57 (january/2017)		roger burrows
+ *		prepare for public release
  */
 #include <stdio.h>
 #include <stdlib.h>

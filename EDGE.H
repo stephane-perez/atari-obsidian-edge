@@ -64,9 +64,9 @@
 #define ABVERSION        3   /* STRING in tree ABOUT */
 #define MEDICIC          4   /* USERDEF in tree ABOUT */
 #define AB2DB3           6   /* BOX in tree ABOUT */
-#define USERNAME         7   /* STRING in tree ABOUT */
-#define SERNUM           9   /* STRING in tree ABOUT */
-#define ABEXIT           18  /* BUTTON in tree ABOUT */
+#define USERNAME         7   /* TEXT in tree ABOUT */
+#define SERNUM           9   /* TEXT in tree ABOUT */
+#define ABEXIT           16  /* BUTTON in tree ABOUT */
 
 #define BOTTOM           2   /* Form/Dialog-box */
 #define BACTIVEH         9   /* USERDEF in tree BOTTOM */

@@ -4,12 +4,22 @@
  *	performs the following major functions:
  *		undelete: save/restore disk and scsi info
  *
+ *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	version 2.10 (december/2002)	roger burrows
  *
  *	version 2.54 (august/2003)		roger burrows
  *		. add DEMO support for save_disk_info(), restore_disk_info()
  *		  [also handles Unzero function]
  *
+ *	version 2.57 (january/2017)		roger burrows
+ *		prepare for public release
  */
 #include <stdio.h>
 #include <stdlib.h>

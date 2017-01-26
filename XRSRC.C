@@ -1,3 +1,13 @@
+/*
+ *	xrsrc.c
+ *
+ *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
 /******************************************************************************
  * XRSRC.C
  *
@@ -14,11 +24,6 @@
  *	You *may* call term_xrsrc() at program termination (although at the
  *	moment it does nothing).
  *
- *	This Source is copyrighted material by
- *		Oliver Groeger
- *		Graf-Konrad-Str.25
- *		8000 Munich 40
- *		Germany
  *
  *
  * Version	:  1.00
@@ -68,6 +73,12 @@
  * Changes:   -	in proto.h, the declaration of xrsrc_load() includes CONST,
  *				so we restore it to the definition & related called functions
  *				(CONST is defined in xrsrc.h)
+ *
+ *
+ * Version:	2.57
+ * Date:	January 2017
+ * Author:  Roger Burrows
+ * Changes:	  - prepare for public release
  *
  *
  * Issues:	form_error() is sometimes issued for initialisation errors, and

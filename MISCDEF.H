@@ -1,3 +1,13 @@
+/*
+ *	miscdef.h
+ *
+ *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
 					/* used by evnt_multi() */
 #define LEFT_BUTTON		0x0001
 #define RIGHT_BUTTON	0x0002

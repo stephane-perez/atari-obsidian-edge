@@ -1,3 +1,13 @@
+/*
+ *	part1.c
+ *
+ *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
 //NOTE: at the moment, a Load of SCSI info overwrites the original data in orgbuf,
 // which may have been loaded from the hard disk. this means that a subsequent Reset
 // will restore the Loaded info rather than the hard disk info: this differs from
@@ -20,8 +30,6 @@
 //
 
 /*
- *	part1.c
- *
  *	version 2.10 (august/2002)	roger burrows
  *		a highly cleaned up and reorganised version of
  *		the DE v2.04 source; no new function
@@ -33,7 +41,9 @@
  *		
  *	version 2.54 (augudt/2003)	roger burrows
  *		. add DEMO support
- *		
+ *
+ *	version 2.57 (january/2017)	roger burrows
+ *		prepare for public release
  */
 #include <stdio.h>
 #include <stdlib.h>

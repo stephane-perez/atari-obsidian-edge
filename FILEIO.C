@@ -6,6 +6,14 @@
  *		handles preferences
  *		utility:  print file
  *
+ *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	version 2.20 (january/2003)	roger burrows
  *		moved view_file() function to new module
  *
@@ -15,6 +23,9 @@
  *		  are planning to rewrite preference handling anyway, the
  *		  option must currently be set manually in the INF file.
  *		. add DEMO support
+ *
+ *	version 2.57 (january/2017)		roger burrows
+ *		prepare for public release
  */
 #include <stdio.h>
 #include <stdlib.h>

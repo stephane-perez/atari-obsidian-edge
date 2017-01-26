@@ -2,6 +2,13 @@
  *	misc.c: contains many utility functions
  *
  *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	version 2.10 (december/2002)		roger burrows
  *		a highly cleaned up and reorganised version of
  *		the DE v2.04 source; added the following public
@@ -26,6 +33,8 @@
  *	version 2.54 (august/2003)			roger burrows
  *		. add DEMO support to get_src_dest() [used by copy image & copy defrag]
  *
+ *	version 2.57 (january/2017)			roger burrows
+ *		prepare for public release
  */
 #include <stdio.h>
 #include <stdlib.h>

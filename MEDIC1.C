@@ -3,6 +3,14 @@
  *				the test/repair disk function
  *				the 'map bad' function
  *
+ *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	version 2.10 (december/2002)		roger burrows
  *		a highly cleaned up and reorganised version of the DE v2.04
  *		source; no new function
@@ -33,6 +41,9 @@
  *	version 2.55 (february/2007)		roger burrows
  *		. add cluster number to file collision message
  *		. removed commented-out code (neatness)
+ *
+ *	version 2.57 (january/2017)			roger burrows
+ *		prepare for public release
  */
 #include <stdio.h>
 #include <stdlib.h>

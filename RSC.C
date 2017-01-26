@@ -1,6 +1,14 @@
 /*
  *	rsc.c: resource handling
  *
+ *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	version 2.11 (november/2002)	roger burrows
  *		merged in the remnant of initrsc.c, after splitting out the
  *		original xrsrcfix.c into a separate file.  the added functions
@@ -26,6 +34,9 @@
  *
  *	Temporary(?) changes:
  *		#ifdef out fix_objs() & friends (trans_gimage(), vdi_trans(), vdi_fix())
+ *
+ *	version 2.57 (january/2017)		roger burrows
+ *		prepare for public release
  */
 #include <stdio.h>
 #include <stdlib.h>

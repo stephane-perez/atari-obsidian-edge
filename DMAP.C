@@ -6,6 +6,14 @@
  *		diskmap:  display disk fragmentation map
  *		utility:  zeros partition / wipes partition
  *
+ *
+ *	Copyright (C) 2002-2017 Roger Burrows
+ *
+ *	This file is distributed under the GPL, version 2 or at your
+ *	option any later version.  See DOC\LICENSE.TXT for details.
+ */
+
+/*
  *	version 2.12 (november/2002)	roger burrows
  *		merge frag.c into this module
  *
@@ -36,6 +44,8 @@
  *		  end-of-directory; previously the code could run off the end
  *		  and process garbage entries, usually causing an erroneous alert
  *
+ *	version 2.57 (january/2017)		roger burrows
+ *		prepare for public release
  */
 #include <stdio.h>
 #include <stdlib.h>

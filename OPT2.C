@@ -74,6 +74,10 @@
  *		  always fail.  in addition, there was no descriptive error message
  *		  issued, just the general "Cannot complete operation" alert.
  *
+ *
+ *	version 2.56 (august/2016)		roger burrows
+ *		. fix bug: if do_diskmap() returns an error code, we should not proceed
+ *		  with optimisation
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -976,7 +980,8 @@ int i, rc;
 	return -1;
 #else
 	if (opt.visual) {
-		do_diskmap();
+		if (do_diskmap() < 0)
+			return -1;
 	} else {
 		redraw_object(dmap,0);
 		change_mode(DISKMAP);

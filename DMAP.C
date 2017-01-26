@@ -28,6 +28,14 @@
  *		  in v2.53, went past the end of the in-memory copy of the
  *		  root directory
  *
+ *	version 2.56 (august/2016)		roger burrows
+ *		. fix bug: if 'bigbad' is set (by frag_loop()), the return code
+ *		  from do_diskmap() is now forced to -1 to indicate an error
+ *		. fix bug: process_dir() no longer assumes that there will be
+ *		  at least one never-used entry in the root directory to mark
+ *		  end-of-directory; previously the code could run off the end
+ *		  and process garbage entries, usually causing an erroneous alert
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -58,11 +66,6 @@ extern OPT opt;
 extern STATUS status;
 extern GRECT gmap;				/* for cluster map */
 extern OBJECT *dinfo, *dmap, *text;
-
-
-// the following variables are shared with medic1.c
-// however, they are almost certainly identically equal to gmap.g_x, g_y
-//short mapx, mapy;		/* screen cords of cluster map */
 
 
 /*
@@ -240,8 +243,10 @@ int rc;
 	rc = diskmap();
 	mouse_on();
 	wind_update(END_UPDATE);
-	if (bigbad)
+	if (bigbad) {
 		xform_alert(1,DM_DISKERR_ALERT);
+		rc = -1;
+	}
 
 	if (rc == 0) {
 		save_map();
@@ -548,8 +553,13 @@ short prev, st, numfrags, sz, fill;
 
 	while(get_fileinfo(curdir)) {
 		curdir->offset += sizeof(DIRENTRY);
-		if ((curdir->offset == dpb.bpc) && (dirlevel > 0))	/* chain to next directory cluster for next time */
-			curdir = curdir->xtradir;
+		if (dirlevel > 0) {
+			if (curdir->offset == dpb.bpc)		/* chain to next directory cluster for next time */
+				curdir = curdir->xtradir;
+		} else {
+			if (curdir->offset == dpb.rdb)		/* end of root dir */
+				curdir = NULL;
+		}
 
 		/*
 		 *	ignore uninteresting entries

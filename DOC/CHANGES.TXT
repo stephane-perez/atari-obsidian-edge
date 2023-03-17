@@ -1,0 +1,236 @@
+Diamond Edge change summary
+===========================
+
+This is a summary of the changes in Diamond Edge v2.5x (versions
+released by Anodyne Software) compared to v2.04 (the last version
+released by Oregon Research).  For more details, refer to the
+source code comments.
+
+Bugs fixed
+==========
+General
+-------
+  . memory leaks could take place under many circumstances; these
+    could cause subsequent 'out of memory' error messages
+
+  . file handle leaks could take place under a few circumstances;
+    these could cause subsequent 'unable to open file' messages
+
+  . selecting the 'About' item could leave the menu title highlighted
+
+  . there was screen residue in the main window display (just above the
+    horizontal dividing line) when run under MagiC
+
+  . the colour icons on the main screen and in the drive popup were
+    displayed incorrectly for TrueColor (non-palette) screens
+
+  . in Falcon 4-colour mode without double lines (i.e. 640x480), the
+    icons displayed were ST medium-style.  since this is set up for
+    double lines, icons were half-height and quite ugly.  changed to
+    use monochrome icons in this situation
+
+  . some buttons were not redrawn correctly under a colour AES (e.g.
+    those in the scsi info dialog)
+
+All info
+--------
+  . the individual lines and totals of disk space were incorrect for
+    large partition sizes
+
+  . the background colour was black when run under MagiC on a mono
+    monitor
+
+Copy image/Copy defrag
+----------------------
+  . the Copy defrag function did not work correctly for files on the
+    source that were larger than the largest buffer that could be
+    allocated in memory.  the symptoms varied, depending on the
+    relative sizes of source and destination drives: large files were
+    not copied correctly; clusters were allocated on the destination
+    drive but not allocated to files ("lost clusters"); the copy could
+    fail with a bios write failure; the progress bar could exceed 100%;
+    and the program could crash
+
+  . when being prompted for source/destination, if the user clicked
+    outside the selection dialog, an invalid drive letter was generated
+
+Frag map
+--------
+  . in monochrome and TrueColor modes, a block (representing a group of
+    clusters) that was initially marked as containing a fragmented file
+    could be incorrectly changed to show that it did *not* contain such
+    a file
+
+Medic
+-----
+  . the 'fix collisions' function always failed
+
+  . in 'validate files', errors were reported incorrectly if the 'check
+    program header' option differed between the creation and checking
+    of a validation file
+
+  . in 'validate files', errors were reported incorrectly if two files
+    in different folders had the same name/date/time/size, but the
+    contents differed
+
+  . when attempting to fix duplicate filenames, each failed attempt at
+    choosing a new one caused the 'bad filename' count to increment
+
+  . invalid clusters in subdirectories were not handled properly under
+    certain circumstances
+
+  . under some circumstances, a bad sector in a directory cluster could
+    cause the 'Map bad' function to crash
+
+  . a memory overlay could occur in rare circumstances when using the
+    'Write-Read' option in 'Map bad'
+
+  . a spurious error was reported if any file occupied either of the
+    last two clusters of a drive (this will not happen under TOS, but
+    can happen under MagiC)
+
+Optimize
+--------
+  . compress free space with write priority mangled the partition when
+    bad sectors were present
+
+  . if a read error occurred during full optimisation, the retry was
+    incorrect; this could cause the partition to be mangled
+ 
+  . for compress free space with read priority, the progress bar did
+    not run to 100% properly
+
+  . if a frag map was done for a drive, followed by a diskinfo, and
+    then a compress free space, a subsequent frag map did not reflect
+    the changes made by the compress free space function
+
+Partition
+---------
+  . when rebuilding a partition, a memory overlay could occur
+
+  . choosing 'Max' when rebuilding a partition table would cause a
+    memory overlay if the disk capacity exceeded 1 GB
+	
+  . when setting up partitioning, if two or more consecutive partitions
+    were eliminated by blanking out their sizes, each redraw of the
+    partition display only removed one blank line
+
+  . some bugs existed in partition size handling when switching between
+    ICD and Atari modes
+
+  . after reading in a partition file, the file was not closed; if this
+    was done a number of times, a subsequent open would fail due to a
+    shortage of file handles
+
+Preferences
+-----------
+  . three of the four options that appear under both the Medic and the
+    Optimize menu items (ignore illegal names, save lost clusters,
+    visual update) were implemented wrongly: each pair of options
+    shared a common variable, but the check marks in the menu were
+    not synchronised, and the options were saved separately in the
+    preferences file, leading to obscure bugs
+
+  . when loading a saved preferences file during initialisation, if the
+    saved file had the 'Remove deleted' option *not* set, then the
+    'Prioritize read' menu item would be set
+
+Undelete
+--------
+  . if there were no previously-deleted entries in a directory, the
+    function failed with a misleading memory allocation failure message
+
+View file
+---------
+  . 'mouse droppings' could occur due to the mouse pointer not being
+    hidden during a screen blit
+
+
+Improvements
+============
+General
+-------
+  . the background colour of dialogs has been changed to light grey for
+    readability
+
+  . CD devices are now detected and omitted from display and selection
+    (e.g. in the 'All info' table)
+
+  . devices on buses other than the standard Atari ACSI/SCSI/IDE are
+    now accessible (through the use of the SCSIDRV interface)
+
+  . the AP_TERM message is now handled
+
+  . the 'Edge' icon, used in 'About', 'Preferences' and 'Mirror', now
+    has a 4-colour version for correct display in medium-res
+
+  . in the 'multiple' dialog, when doing a 'clear all', only objects
+    that are currently selected are redrawn, reducing screen flicker
+
+  . the help files have been updated, and you can now scroll through
+    them backwards as well as forwards
+
+Medic
+-----
+  . for consistency, lost clusters are now displayed as errors in the
+    medic map, and a list of the lost cluster numbers is written to the
+    medic log file
+
+  . for invalid folders or FAT errors, the medic log now contains more
+    precise information
+
+  . the run time of the 'map bad' function has been reduced by speeding
+    up the internal compare memory routine
+
+  . in the 'map bad' function, if write errors occurred when testing
+    FAT/root sectors, the previous code still attempted to write the
+    FAT/root when creating a new file system.  we now display these
+    errors, and avoid trying to create the FAT/root
+
+  . in 'map bad', if write errors occur due to the disk being
+    write-protected, the user is now informed via an alert
+
+Partition
+---------
+  . partition sizes are now validated before the new partition table is
+    written to the disk
+
+  . the function of the 'TOS x.xx' button has been changed: it now
+    rotates through 1.00/1.04/4.00, and its setting controls the
+    checking of partition sizes
+
+  . the function of the 'Maximum' button has been changed.  it now
+    generates either GEM or BGM maximum-size partitions, depending on
+    the currently-displayed TOS version in the same dialog
+
+Utility
+-------
+  . when Zeroing a drive, if the save of the Unzero information fails,
+    the user is notified
+
+  . when Zeroing a drive, if the Unzero information is being saved
+    to the drive that's about to be Zeroed, the user is notified
+
+Print file
+----------
+  . the system remained busy for an excessive time if printing was
+    requested while the printer was offline; we now detect this
+    situation and report it via an alert
+
+View file
+---------
+  . the file viewer has been completely rewritten and now supports
+    scrolling backwards as well as forwards
+
+
+
+Features and functions that have been dropped
+=============================================
+  . the DADE disk editor is no longer supplied with Edge
+
+  . the disk partitioning feature now requires a SCSIDRV driver (such
+    as HDDRIVER) to be installed; if a SCSIDRV driver is unavailable,
+    the related menu-bar features are disabled
+
+  . because of the use of SCSIDRV, the dialog for selecting a device
+    manually is now obsolete, and has been dropped

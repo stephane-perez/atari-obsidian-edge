@@ -14,7 +14,6 @@
 #define OE_DOS_H
 
 #include <osbind.h>
-#include <mintbind.h>
 
 /* file attributes */
 #ifndef FA_SUBDIR

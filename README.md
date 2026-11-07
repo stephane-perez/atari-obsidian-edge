@@ -55,11 +55,18 @@ sudo apt-get install cross-mint-essential
 or, where the PPA cannot be reached, build it from his packaging repository
 (about 16 minutes): `sh scripts/get-cross-mint.sh`.
 
+The programs are linked with [libcmini](https://github.com/freemint/libcmini),
+a small C library for TOS, instead of MiNTLib (which adds about 100 KB to
+each program, for features they do not use). `scripts/get-libcmini.sh`
+fetches it at a pinned commit, builds it and installs it in `.tools/libcmini`.
+
 Then:
 
 ```sh
+sh scripts/get-libcmini.sh
 make            # build/EDGE.PRG, build/DMIRROR.PRG, build/INSTALL.PRG
 make zip        # build/obsidian-edge-<version>.zip, ready to copy to the Atari
+make LIBC=mintlib BUILD=build/mintlib   # the same with MiNTLib, for comparison
 ```
 
 ### Testing in Hatari
@@ -79,8 +86,10 @@ been tested on real hardware.**
 ### Continuous integration
 
 `.github/workflows/build.yml` builds the programs on every push and pull
-request, runs the smoke test with EmuTOS, and keeps the Atari files and the
-screenshots as workflow artifacts.
+request (with libcmini, and with MiNTLib for comparison), writes a table of
+the program sizes compared with Diamond Edge 2.57 in the run summary, runs
+the smoke test with EmuTOS on the libcmini build, and keeps the Atari files
+and the screenshots as workflow artifacts.
 
 ## Versioning
 

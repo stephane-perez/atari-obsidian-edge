@@ -18,6 +18,7 @@ what that needs, so that the original sources stay almost unchanged.
 | `mediach.S` | `_mediach()`: forces GEMDOS to see a media change (hooks `hdv_bpb`, `hdv_rw`, `hdv_mediach`) |
 | `edgeasm.S`, `compmem.S` | GNU as versions of `edgeasm.s` and `lib/compmem.s` |
 | `xmode.c` | `_XMODE` for DMIRROR.PRG (3 when run from the AUTO folder) |
+| `cmini/` | for the libcmini build (`LIBC=cmini`, the default): headers libcmini lacks (`<osbind.h>`, `<compiler.h>` for GEMlib, `<math.h>`), our own `stat()` and `struct stat`, `access()`, `mkdir()`, `rindex()` |
 | `README.TXT` | the README of the distribution (plain ASCII, for the Atari) |
 
 The Makefile also generates `build/include/mt_gem.h`: a copy of GEMlib's
@@ -46,6 +47,19 @@ header where `OBJECT.ob_spec` is a `void *` (as in Lattice C) instead of the
   rewritten.
 - **Assembler**: Lattice/Devpac syntax was translated to GNU as;
   `fast_copy()` now preserves `d2`, which GCC expects.
+
+## C library
+
+The default build uses libcmini (`scripts/get-libcmini.sh`), compiled with
+`-nostdinc` so that no MiNTLib header can be mixed in; `printf()` and
+friends come from `libiiomini` (no floating point: the sources use none).
+`make LIBC=mintlib` builds with MiNTLib instead; the objects of the two
+builds are kept apart (`build/obj-cmini`, `build/obj-mintlib`).
+
+libcmini has no `<sys/stat.h>`, and the layout of the `struct stat` its
+`stat()` fills in depends on the headers found when libcmini is compiled:
+we use our own minimal `stat()` instead (the sources only need the size of
+a file).
 
 ## Not ported
 

@@ -6,6 +6,8 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: prototype matches the function definition
  */
 
 /*
@@ -77,7 +79,7 @@ MLOCAL int internal_error;
 /*
  *	function prototypes
  */
-PRIVATE int do_line(FILE *f,long linenum);
+PRIVATE int do_line(FILE *f,int linenum);
 PRIVATE void do_page(FILE *f,int lines);
 PRIVATE void free_textblock(void);
 PRIVATE int get_fkey(void);

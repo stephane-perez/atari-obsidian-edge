@@ -6,6 +6,8 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: no casts as lvalues
  */
 
 /*
@@ -161,8 +163,8 @@ PRIVATE int opt_full(int maxdirclus);
 PRIVATE short prev_nonbad_cluster(short startnum);
 PRIVATE short prev_used_cluster(short startnum);
 PRIVATE int setup_compress_dir(short dstart,DIRENTRY *end);
-PRIVATE int setup_defrag_dir(short dstart,unsigned char *end);
-PRIVATE void start_obar(unsigned char *str1);
+PRIVATE int setup_defrag_dir(short dstart, char *end);
+PRIVATE void start_obar(char *str1);
 PRIVATE short start_nonbad_cluster(short startnum,short maxcount);
 PRIVATE short start_used_cluster(short startnum,short maxcount);
 PRIVATE void up_dirlist(void);
@@ -173,7 +175,7 @@ PRIVATE void up_newfat_good(short cnt);
 PRIVATE void update_compread(short oldstart);
 PRIVATE void update_compwrite(short oldstart);
 PRIVATE void update_obar(long num);
-PRIVATE void update_obarmsg(unsigned char *strng);
+PRIVATE void update_obarmsg(char *strng);
 PRIVATE void wrap_obar(void);
 
 
@@ -801,7 +803,7 @@ DIRENTRY *dirend;
 			st = fat16[st];
 			ncl++;
 		}
-		if ((newdir=(DIRENTRY *)dirlist[dirlevel].dirbuf=calloc(ncl,dpb.bpc)) == NULL) {
+		if ((newdir=(DIRENTRY *)(dirlist[dirlevel].dirbuf=calloc(ncl,dpb.bpc))) == NULL) {
 			error(ncl*dpb.bpc,MEMALLOC,"");
 			dirlevel--;
 			if (dirlevel > 0)
@@ -1078,7 +1080,7 @@ static char title[MAX_DISPLAYSIZE];	/* static because it's a window title */
 			error(2*dpb.bpf,MEMALLOC,"");
 			return -1;
 		}
-		(char *)fmnew = (char *)fmold + dpb.bpf;
+		fmnew = (void *)((char *)fmold + dpb.bpf);
 
 		if ((newfat=calloc(1,dpb.bpf)) == NULL) {
 			error(dpb.bpf,MEMALLOC,"");
@@ -1096,7 +1098,7 @@ static char title[MAX_DISPLAYSIZE];	/* static because it's a window title */
 			error(4*dpb.bpf,MEMALLOC,"");
 			return -1;
 		}
-		(char *)fmnew = (char *)fmold + dpb.bpf * 2;
+		fmnew = (void *)((char *)fmold + dpb.bpf * 2);
 
 		if ((newfat=calloc(2,dpb.bpf)) == NULL) {
 			error(2*dpb.bpf,MEMALLOC,"");
@@ -1492,7 +1494,7 @@ char *dirend;
 			st = fat16[st];
 			ncl++;
 		}
-		if ((newdir=(DIRENTRY *)dirlist[dirlevel].dirbuf=calloc(ncl,dpb.bpc)) == NULL) {
+		if ((newdir=(DIRENTRY *)(dirlist[dirlevel].dirbuf=calloc(ncl,dpb.bpc))) == NULL) {
 			error(ncl*dpb.bpc,MEMALLOC,"");
 			dirlevel--;
 			if (dirlevel > 0)

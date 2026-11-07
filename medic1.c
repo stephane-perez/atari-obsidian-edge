@@ -8,6 +8,8 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: no cast as lvalue
  */
 
 /*
@@ -347,7 +349,7 @@ static char title[MAX_DISPLAYSIZE];
 	redraw_object(medic,MBLOCKS);
 
 	if (dpb.isfat16) {										/* fat16 */
-		if ((fat1=(char *)fat16=malloc(dpb.bpf * 2L)) == NULL) {
+		if ((fat1=(char *)(fat16=malloc(dpb.bpf * 2L))) == NULL) {
 			error(dpb.bpf*2,MEMALLOC,"");
 			return 1;
 		}

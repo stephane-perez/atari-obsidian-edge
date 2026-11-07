@@ -6,6 +6,8 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: prototypes match the function definitions
  */
 
 /*
@@ -89,16 +91,16 @@ PRIVATE void cleanup_old_directory(void);
 PRIVATE int dirok(void);
 PRIVATE int garbage(DIRENTRY *dir);
 PRIVATE int get_uinfo(DIRENTRY *dir);
-PRIVATE void load_finfo_to_string(unsigned char *temp,DELENTRY *de);
+PRIVATE void load_finfo_to_string(char *temp,DELENTRY *de);
 PRIVATE unsigned short *load_mirror(void);
 PRIVATE void udesel_all(void);
 PRIVATE void udo_child(DIRENTRY *f);
-PRIVATE short ufind(unsigned char *path,short sclus);
+PRIVATE short ufind(char *path,short sclus);
 PRIVATE int uload_dir(unsigned short sclus);
 PRIVATE void undelete_one_file(DIRENTRY *entry);
-PRIVATE void update_barmask(unsigned char *str);
+PRIVATE void update_barmask(char *str);
 PRIVATE void uw_fat(void);
-PRIVATE int wildc(unsigned char *s,unsigned char *p);
+PRIVATE int wildc(char *s,char *p);
 
 
 /*

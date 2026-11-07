@@ -6,6 +6,8 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: prototypes match the function definitions (char vs unsigned char)
  */
 
 /* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\COPYD.C */
@@ -17,19 +19,19 @@ PUBLIC int critical_read(short dev,short numsec,long start,char *buf,int errmsgn
 PUBLIC int critical_write(short dev,short numsec,long start,char *buf,int errmsgno,int pgmloc);
 PUBLIC void do_chart(int device);
 PUBLIC void do_copyimage(void);
-PUBLIC void fat12_to_fat16(char *f12,unsigned short *f16);
-PUBLIC void fat16_to_fat12(unsigned short *f16,char *f12);
+PUBLIC void fat12_to_fat16(unsigned char *f12,unsigned short *f16);
+PUBLIC void fat16_to_fat12(unsigned short *f16,unsigned char *f12);
 PUBLIC long gemdos_read(short fh,long count,void *buf,char *name,int loc);
 PUBLIC long gemdos_write(short fh,long count,void *buf,char *name,int loc);
 PUBLIC int get_mybpb(MYBPB *mybpb,short device);
 PUBLIC int get_name(DIRENTRY *dir,char *fname);
-PUBLIC void loadboot(unsigned char *buf,MYBPB *mybpb);
-PUBLIC int load_mybpb(unsigned char *buf,MYBPB *mybpb,BPB *tbpb);
+PUBLIC void loadboot(char *buf,MYBPB *mybpb);
+PUBLIC int load_mybpb(char *buf,MYBPB *mybpb,BPB *tbpb);
 PUBLIC long logical_read(short dev,short numsec,long start,void *buf,int errmsgno,int loc);
 PUBLIC long logical_write(short dev,short numsec,long start,void *buf,int errmsgno,int loc);
 PUBLIC unsigned short logsector(short cluster);
 PUBLIC void mark_chart(int device);
-PUBLIC void permanent_error(long errnum,int type,unsigned char *msg,int loc);
+PUBLIC void permanent_error(long errnum,int type,char *msg,int pgmloc);
 PUBLIC int read_no_retry(short dev,short numsec,long start,char *buf);
 PUBLIC int write_no_retry(short dev,short numsec,long start,char *buf);
 
@@ -71,7 +73,7 @@ PUBLIC long read_info_file(char *buf,long maxsize);
 PUBLIC void restore_disk_info(int unzero);
 PUBLIC void restore_scsi_info(void);
 PUBLIC void save_disk_info(void);
-PUBLIC int save_info(short savedev,unsigned char *path);
+PUBLIC int save_info(short savedev,char *path);
 PUBLIC void save_scsi_info(void);
 
 /* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\MAIN.C */
@@ -100,11 +102,11 @@ PUBLIC void delay(long time);
 PUBLIC void force_update(int device);
 PUBLIC void full_bar(void);
 PUBLIC int get_key(void);
-PUBLIC long get_long(unsigned char *in);
-PUBLIC int get_newname(unsigned char *fname,unsigned char *path,unsigned char *name);
+PUBLIC long get_long(char *in);
+PUBLIC int get_newname(char *fname,char *path,char *name);
 PUBLIC int get_src_dest(void);
 PUBLIC short get_sys(short *p);
-PUBLIC unsigned short get_word(unsigned char *in);
+PUBLIC unsigned short get_word(char *in);
 PUBLIC void init_bar(long max);
 PUBLIC int mouse_off(void);
 PUBLIC int mouse_on(void);
@@ -112,16 +114,16 @@ PUBLIC short nflop(void);
 PUBLIC void putword(IWORD *w,unsigned short val);
 PUBLIC void putlong(ILONG *l,long val);
 PUBLIC void refresh_screen(OBJECT *tree);
-PUBLIC void start_bar(unsigned char *str1);
+PUBLIC void start_bar(char *str1);
 PUBLIC void update_bar(long num);
-PUBLIC void update_barmsg(unsigned char *strng);
+PUBLIC void update_barmsg(char *strng);
 PUBLIC void wrap_bar(void);
 
 /* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\OPT2.C */
 PUBLIC short do_opt(void);
 PUBLIC short do_opt_compress(short display);
-PUBLIC unsigned char *sort_dir(unsigned char *curdir,int ncl,int rmdel);
-PUBLIC unsigned char *sort_root(unsigned char *dirbuf,int rmdel);
+PUBLIC char *sort_dir(char *curdir,int ncl,int rmdel);
+PUBLIC char *sort_root(char *dirbuf,int rmdel);
 
 /* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\PART1.C */
 PUBLIC void do_down_one(void);

@@ -10,6 +10,8 @@
  *		protected against redefinition of EXTENDOS_COOKIE
  *
  * Copyright ½ 1993-2001 Roger Burrows
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: EDinit() binding for GCC
  */
 #ifndef _EXTENDOS_H
 #define _EXTENDOS_H
@@ -73,6 +75,12 @@ long __lesn(int,int,long *);
 #define	EDset_songtime(a,b,c,d)		__lessll(61,a,b,c,d)
 #define	EDget_toc(a,b,c)			__lessn(62,a,b,c)
 #define	EDdisc_info(a,b)			__lesn(63,a,b)
+
+#elif defined(__GNUC__)
+#include <osbind.h>		/* for the trap_14_xxx() macros */
+
+/* only EDinit() is used by Obsidian Edge */
+#define	EDinit(a)					((void)trap_14_wl(48,(long)(a)))
 
 #else
 #include <tos.h>		/* for xbios() prototype */

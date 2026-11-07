@@ -5,6 +5,8 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: <sys/stat.h> included for GCC, local vsscanf() renamed
  */
 
 /*
@@ -127,9 +129,13 @@
 #ifdef __TURBOC__
 	#include <ext.h>
 #endif
-#ifdef LATTICE
+#if defined(LATTICE) || defined(__GNUC__)
 	#include <sys/types.h>
 	#include <sys/stat.h>
+#endif
+
+#ifdef __GNUC__
+	#define vsscanf section_vsscanf		/* MiNTLib has its own vsscanf() */
 #endif
 
 #include "../edgedefs.h"			/* these two are just for trmalloc() stuff ... */

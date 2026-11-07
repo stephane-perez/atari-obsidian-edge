@@ -1,0 +1,56 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  EMUTOS_URL: https://sourceforge.net/projects/emutos/files/emutos/1.3/emutos-512k-1.3.zip/download
+  EMUTOS_SHA256: 65fcee085560745aaa8d9938bd35f7b2fe6277b035cc8146c349dcad4a5bc4c5
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the m68k-atari-mint cross toolchain
+        run: |
+          sudo add-apt-repository -y ppa:vriviere/ppa
+          sudo apt-get update
+          sudo apt-get install -y cross-mint-essential
+          m68k-atari-mint-gcc --version | head -1
+
+      - name: Build
+        run: make -j"$(nproc)" all zip
+
+      - name: Upload the Atari files
+        uses: actions/upload-artifact@v4
+        with:
+          name: obsidian-edge-${{ github.sha }}
+          path: build/dist/
+          if-no-files-found: error
+
+      - name: Install Hatari and get EmuTOS
+        run: |
+          sudo apt-get install -y hatari xvfb xdotool
+          for i in 1 2 3; do
+            curl -sSfL -o emutos.zip "$EMUTOS_URL" && break
+            sleep 10
+          done
+          echo "$EMUTOS_SHA256  emutos.zip" | sha256sum -c -
+          unzip -q emutos.zip -d "$RUNNER_TEMP"
+
+      - name: Smoke test in Hatari (EmuTOS)
+        run: make smoke-test EMUTOS="$RUNNER_TEMP/emutos-512k-1.3/etos512uk.img"
+
+      - name: Upload the smoke test screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-${{ github.sha }}
+          path: |
+            build/smoke/
+            !build/smoke/drive_c/
+          if-no-files-found: ignore

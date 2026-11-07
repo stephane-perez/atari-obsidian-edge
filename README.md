@@ -40,10 +40,47 @@ to 3.06 supports FAT16 partitions up to 512 MiB.
 
 ## Building
 
-The upstream project provides the C and 68000 assembly sources (`*.C`, `*.H`,
-`EDGEASM.S`), the GEM resource files and the original project files
-(`EDGE.PRJ`). Build instructions for this fork will be added here once the
-toolchain is set up.
+The programs are cross-compiled on Linux with GCC (`m68k-atari-mint` toolchain,
+MiNTLib and GEMlib). The original Lattice C project files (`*.PRJ`) are kept
+for reference; the GCC build uses a small compatibility layer described in
+[`port/README.md`](port/README.md).
+
+Install the toolchain (Ubuntu/Debian), from Vincent Rivière's PPA:
+
+```sh
+sudo add-apt-repository ppa:vriviere/ppa
+sudo apt-get install cross-mint-essential
+```
+
+or, where the PPA cannot be reached, build it from his packaging repository
+(about 16 minutes): `sh scripts/get-cross-mint.sh`.
+
+Then:
+
+```sh
+make            # build/EDGE.PRG, build/DMIRROR.PRG, build/INSTALL.PRG
+make zip        # build/obsidian-edge-<version>.zip, ready to copy to the Atari
+```
+
+### Testing in Hatari
+
+`make smoke-test EMUTOS=/path/to/etos512uk.img` runs `tools/smoke_test.py`:
+in Hatari (ST, 4 MB, monochrome), it runs `INSTALL.PRG`, fills in and
+validates its dialog, checks the installed files, then starts the installed
+`EDGE.PRG` and checks that it gets past the registration check. Screenshots
+and logs are kept in `build/smoke/`. It needs `hatari`, `xvfb` and
+`xdotool`, and an EmuTOS image (free, from <https://emutos.sourceforge.io/>)
+or a TOS ROM image you own (never commit TOS ROMs).
+
+This only proves that the programs start and that their user interface
+works in the emulator. **No disk function is tested yet, and nothing has
+been tested on real hardware.**
+
+### Continuous integration
+
+`.github/workflows/build.yml` builds the programs on every push and pull
+request, runs the smoke test with EmuTOS, and keeps the Atari files and the
+screenshots as workflow artifacts.
 
 ## Versioning
 

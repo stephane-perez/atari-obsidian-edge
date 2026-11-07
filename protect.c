@@ -28,6 +28,8 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: the protection structure is volatile
  */
 
 /*
@@ -67,7 +69,16 @@ extern OBJECT *about;
  *	private variables
  */
 #if !defined(BETA) && !defined(DEMO)
+#ifdef __GNUC__
+/*
+ *	INSTALL.PRG finds this structure in the data segment of EDGE.PRG and
+ *	writes the registration data into it: GCC must keep it, and must not
+ *	replace its fields by their initial values
+ */
+MLOCAL volatile struct pgm_protect prot = { PROTECT_MAGIC1, 0UL, 0UL, PROTECT_MAGIC2 };
+#else
 MLOCAL struct pgm_protect prot = { PROTECT_MAGIC1, 0UL, 0UL, PROTECT_MAGIC2 };
+#endif
 #endif
 
 int protect()

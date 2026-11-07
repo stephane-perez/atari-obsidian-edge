@@ -5,6 +5,8 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): search for the protection structure in steps of 2 bytes, and write nothing if it is not found
  */
 
 /*
@@ -566,7 +568,9 @@ FILE *fp;
 PROGRAM_HEADER header;
 long hexreg, hexname;
 int c, rc;
-long n, seekpos;
+long n, seekpos, start;
+char *data;
+struct pgm_protect *prot;
 
 	/*
 	 *	first, store registration code & encrypted name in program
@@ -588,15 +592,28 @@ long n, seekpos;
 		return GENERAL_ERROR;
 	}
 
-	for (n = 0, seekpos = -1L; (n < header.datalen) && !feof(fp); n += 4) {
-		seekpos = ftell(fp);
-		if (fgetl(fp) == PROTECT_MAGIC1)
-			if (fgetl(fp) == 0UL)
-				if (fgetl(fp) == 0UL)
-					if (fgetl(fp) == PROTECT_MAGIC2) {
-						seekpos = ftell(fp) - 12;
-						break;
-					}
+	/*
+	 *	look for the pgm_protect structure in the data segment.  Obsidian Edge:
+	 *	scan in steps of 2 bytes, since the structure is only guaranteed to be
+	 *	word-aligned, and do not write anything if it is not found (the
+	 *	original loop left seekpos at the last position read)
+	 */
+	start = ftell(fp);
+	seekpos = -1L;
+	if ((data = malloc(header.datalen)) != NULL) {
+		if (fread(data,header.datalen,1,fp) == 1) {
+			for (n = 0; n + 16 <= header.datalen; n += 2) {
+				prot = (struct pgm_protect *)(data + n);
+				if ((prot->protect_magic1 == PROTECT_MAGIC1)
+				 && (prot->registration_code == 0UL)
+				 && (prot->encrypted_name == 0UL)
+				 && (prot->protect_magic2 == PROTECT_MAGIC2)) {
+					seekpos = start + n + 4;
+					break;
+				}
+			}
+		}
+		free(data);
 	}
 
 	rc = -1;

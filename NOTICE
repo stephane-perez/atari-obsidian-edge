@@ -1,0 +1,53 @@
+Obsidian Edge
+=============
+
+Obsidian Edge is a fork of Diamond Edge, a disk management program for Atari
+systems (FAT12/FAT16: validation, defragmentation, partition copying and file
+undeletion).
+
+Original work
+-------------
+Diamond Edge
+  Copyright (C) Robert D. Luneski / Oregon Research Associates
+  Copyright (C) Roger Burrows / Anodyne Software
+  Upstream source release: version 2.57 (26 January 2017)
+  https://sourceforge.net/p/diamond-edge/
+
+The original copyright notices are kept unchanged in every source file.
+
+Modifications
+-------------
+Obsidian Edge
+  Copyright (C) <YEAR> <YOUR NAME>
+  https://github.com/<YOUR_GITHUB_ACCOUNT>/obsidian-edge-atari
+
+As required by section 2(a) of the GNU General Public License, version 2,
+files modified in this fork carry a notice stating that they were changed, by
+whom, and the date of the change. The complete list of changes is also available
+in the git history, which includes the full history of the upstream repository.
+
+Change log:
+  <DATE>  Version 0.0.1: initial fork of Diamond Edge 2.57 (renamed to
+          Obsidian Edge; no functional changes yet).
+
+License
+-------
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; version 2 of the License, June 1991. See the file COPYING.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+Source code
+-----------
+The complete corresponding source code is available in this repository. Any
+binary distribution (for example a .PRG file attached to a release) must be
+accompanied by, or give a link to, the matching source code.
+
+Trademarks and affiliation
+--------------------------
+"Diamond Edge" is the name of the original product. Obsidian Edge is an
+independent project and is not affiliated with, or endorsed by, Oregon Research
+Associates, Anodyne Software or the authors of Diamond Edge.

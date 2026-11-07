@@ -12,10 +12,10 @@ Back up your disks before using it.
 
 What has been tested
 --------------------
-Only in the Hatari emulator (ST, 4 MB, monochrome), with EmuTOS 1.3 and
-with TOS 1.04: INSTALL.PRG installs Diamond Edge, and EDGE.PRG starts and
-shows its menus.  NO DISK FUNCTION HAS BEEN TESTED YET, and nothing has
-been tried on a real machine.
+Only in the Hatari emulator (ST, 4 MB, monochrome), with EmuTOS 1.3:
+INSTALL.PRG installs Diamond Edge, and EDGE.PRG starts and shows its
+menus.  NO DISK FUNCTION HAS BEEN TESTED YET, Diamond Mirror has not been
+tried from the AUTO folder, and nothing has been tried on a real machine.
 
 How to install
 --------------

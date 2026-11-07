@@ -44,8 +44,9 @@ CPPFLAGS := -nostdinc -I$(GENINC) -Iport/include -Iport/cmini -I$(LIBCMINI)/incl
             -isystem $(GCCINC) -include lattice.h -include cmini.h -DNDEBUG
 STARTUP  := $(LIBCMINI)/lib/crt0.o
 LDFLAGS  := -nostdlib -L$(LIBCMINI)/lib
-# libiiomini: printf() & co without floating point
-LDLIBS   := -lgem -liiomini -lcmini -lgcc
+# libiiomini: printf() & co without floating point.  libcmini is named
+# again after libgcc, whose __main() (constructors) needs atexit()
+LDLIBS   := -lgem -liiomini -lcmini -lgcc -lcmini
 LIBC_OBJS := port/cmini/cmini.o
 ifeq ($(wildcard $(LIBCMINI)/lib/libcmini.a)$(filter clean,$(MAKECMDGOALS)),)
 $(error libcmini not found in $(LIBCMINI): run scripts/get-libcmini.sh, or build with LIBC=mintlib)

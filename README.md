@@ -49,6 +49,7 @@ Install the toolchain (Ubuntu/Debian), from Vincent Rivière's PPA:
 
 ```sh
 sudo add-apt-repository ppa:vriviere/ppa
+sudo apt-get update
 sudo apt-get install cross-mint-essential
 ```
 

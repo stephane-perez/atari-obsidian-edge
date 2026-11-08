@@ -25,16 +25,32 @@ E_CHNG		= -14
 	.text
 	.globl	__mediach
 
+/*
+ * The whole sequence (hooking, Fopen(), unhooking) runs in supervisor
+ * mode, exactly as in the Lattice C library that the original binaries
+ * were linked with.
+ */
 __mediach:
 	move.l	4(%sp),%d0
 	move.w	%d0,drive
 	add.b	#'A',%d0
 	move.b	%d0,fspec
+	movem.l	%d2/%a2,-(%sp)		/* the traps may clobber d0-d2/a0-a2 */
 
-	pea	install(%pc)
-	move.w	#38,-(%sp)		/* Supexec(install) */
-	trap	#14
+	move.l	#1,-(%sp)		/* Super(1): already in supervisor mode? */
+	move.w	#0x20,-(%sp)
+	trap	#1
 	addq.l	#6,%sp
+	clr.l	oldssp
+	tst.l	%d0
+	bne.s	1f			/* yes (-1): stay as we are */
+	clr.l	-(%sp)			/* no: Super(0L) */
+	move.w	#0x20,-(%sp)
+	trap	#1
+	addq.l	#6,%sp
+	move.l	%d0,oldssp
+1:
+	bsr	install
 
 	clr.w	-(%sp)			/* Fopen(fspec,0): GEMDOS checks the media */
 	pea	fspec
@@ -42,17 +58,22 @@ __mediach:
 	trap	#1
 	addq.l	#8,%sp
 	tst.l	%d0
-	bmi.s	1f
+	bmi.s	2f
 	move.w	%d0,-(%sp)		/* opened (unlikely): Fclose() it */
 	move.w	#0x3e,-(%sp)
 	trap	#1
 	addq.l	#4,%sp
-1:
-	pea	remove(%pc)		/* make sure the vectors are restored */
-	move.w	#38,-(%sp)		/* Supexec(remove) */
-	trap	#14
-	addq.l	#6,%sp
+2:
+	bsr	remove			/* make sure the vectors are restored */
 
+	move.l	oldssp,%d0		/* back to user mode if we switched */
+	beq.s	3f
+	move.l	%d0,-(%sp)		/* Super(oldssp) */
+	move.w	#0x20,-(%sp)
+	trap	#1
+	addq.l	#6,%sp
+3:
+	movem.l	(%sp)+,%d2/%a2
 	moveq	#0,%d0
 	rts
 
@@ -123,5 +144,6 @@ fspec:	.ascii	"X:\\X"
 old_bpb:	.ds.l	1
 old_rw:		.ds.l	1
 old_mediach:	.ds.l	1
+oldssp:		.ds.l	1
 drive:		.ds.w	1
 hooked:		.ds.b	1

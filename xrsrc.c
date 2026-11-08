@@ -6,6 +6,9 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: xdraw_cicon() runs
+ *	on a private stack (the AES calls it on its own, small, stack)
  */
 
 /******************************************************************************
@@ -197,6 +200,21 @@ static WORD test_rez(VOID);
 static VOID xfill_farbtbl(VOID);
 static WORD fill_cicon_liste(LONG *cicon_liste,ULONG header,RSXHDR *rsxhdr);
 static int __saveds xdraw_cicon(PARMBLK *pb);
+#ifdef __GNUC__
+/*
+ *	The AES calls xdraw_cicon() in supervisor mode, on its own small stack,
+ *	and GEMlib's VDI bindings need several KB of stack: run it on a private
+ *	stack (see port/callstack.S)
+ */
+long oe_call_on_stack(long (*fn)(void *),void *arg,void *stack_top);
+static long cicon_stack[8192/sizeof(long)];
+
+static int xdraw_cicon_on_own_stack(PARMBLK *pb)
+{
+	return (int)oe_call_on_stack((long (*)(void *))xdraw_cicon,pb,
+								 cicon_stack + sizeof(cicon_stack)/sizeof(cicon_stack[0]));
+}
+#endif
 
 
 /*****************************************************************************/
@@ -980,7 +998,11 @@ CICON *max_icn = NULL;
 	ub = (OBBLK *) *(LONG *)rs_global;
 	ub[nub].old_type = G_CICON;
 	ub[nub].ublk.ub_parm = (long)obj->ob_spec;
+#ifdef __GNUC__
+	ub[nub].ublk.ub_code = (void *)xdraw_cicon_on_own_stack;
+#else
 	ub[nub].ublk.ub_code = (int (*)(PARMBLK *))&xdraw_cicon;		/* need cast because of __saveds */
+#endif
 	obj->ob_spec = (void *) &ub[nub].ublk;
 	obj->ob_type = (obj->ob_type & 0xff00) | G_USERDEF;
 

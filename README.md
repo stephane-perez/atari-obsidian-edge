@@ -74,7 +74,11 @@ make LIBC=mintlib BUILD=build/mintlib   # the same with MiNTLib, for comparison
 `make smoke-test EMUTOS=/path/to/etos512uk.img` runs `tools/smoke_test.py`:
 in Hatari (ST, 4 MB, monochrome), it runs `INSTALL.PRG`, fills in and
 validates its dialog, checks the installed files, then starts the installed
-`EDGE.PRG` and checks that it gets past the registration check. Screenshots
+`EDGE.PRG` and checks that it gets past the registration check. Then, on an
+STE in medium resolution (colour icons), it drops down a menu and checks
+that the menu appears and that nothing crashed: this catches stack overflows
+in the code the AES calls (see `port/callstack.S`). With a TOS 1.62 image,
+add `SMOKE_MACHINE=ste`. Screenshots
 and logs are kept in `build/smoke/`. It needs `hatari`, `xvfb` and
 `xdotool`, and an EmuTOS image (free, from <https://emutos.sourceforge.io/>)
 or a TOS ROM image you own (never commit TOS ROMs).

@@ -66,7 +66,7 @@ jobs:
 
       - name: Install Hatari and get EmuTOS
         run: |
-          sudo apt-get install -y hatari xvfb xdotool
+          sudo apt-get install -y hatari xvfb xdotool python3-pil
           for i in 1 2 3; do
             curl -sSfL -o emutos.zip "$EMUTOS_URL" && break
             sleep 10

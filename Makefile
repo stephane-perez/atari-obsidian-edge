@@ -69,7 +69,7 @@ PORT_OBJS := port/lattice.o port/mediach.o $(LIBC_OBJS)
 EDGE_SRCS := main.c copyd.c disk.c dmap.c fileio.c info.c medic1.c mirror.c \
              misc.c opt2.c part1.c protect.c rsc.c section.c undel.c valid.c \
              viewfile.c xrsrc.c lib/driver.c lib/encrypt.c
-EDGE_OBJS := $(EDGE_SRCS:.c=.o) lib/scsidrv.o port/edgeasm.o port/compmem.o \
+EDGE_OBJS := $(EDGE_SRCS:.c=.o) lib/scsidrv.o port/edgeasm.o port/compmem.o port/callstack.o \
              $(PORT_OBJS)
 
 DMIRROR_OBJS := dmirror/dmirror.o dmirror/section.o dmirror/xmode.o \
@@ -171,9 +171,11 @@ zip: dist
 	cd $(BUILD)/dist && zip -q -r -X ../obsidian-edge-$(VERSION).zip OBSIDIAN
 
 # --- test in Hatari ------------------------------------------------------
+# EMUTOS: an EmuTOS (or TOS) image; SMOKE_MACHINE=ste for TOS 1.62
 EMUTOS ?=
+SMOKE_MACHINE ?= st
 smoke-test: dist
-	python3 tools/smoke_test.py --dist $(DIST) --tos "$(EMUTOS)" --out $(BUILD)/smoke
+	python3 tools/smoke_test.py --dist $(DIST) --tos "$(EMUTOS)" --machine $(SMOKE_MACHINE) --out $(BUILD)/smoke
 
 clean:
 	rm -rf $(BUILD)

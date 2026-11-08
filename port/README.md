@@ -17,6 +17,7 @@ what that needs, so that the original sources stay almost unchanged.
 | `lattice.c` | implementation of the functions above |
 | `mediach.S` | `_mediach()`: forces GEMDOS to see a media change (hooks `hdv_bpb`, `hdv_rw`, `hdv_mediach`) |
 | `edgeasm.S`, `compmem.S` | GNU as versions of `edgeasm.s` and `lib/compmem.s` |
+| `callstack.S` | `oe_call_on_stack()`: runs `xdraw_cicon()` (colour icons, called by the AES) on a private 8 KB stack |
 | `xmode.c` | `_XMODE` for DMIRROR.PRG (3 when run from the AUTO folder) |
 | `cmini/` | for the libcmini build (`LIBC=cmini`, the default): headers libcmini lacks (`<osbind.h>`, `<compiler.h>` for GEMlib, `<math.h>`), our own `stat()` and `struct stat`, `access()`, `mkdir()`, `rindex()` |
 | `README.TXT` | the README of the distribution (plain ASCII, for the Atari) |
@@ -43,6 +44,13 @@ header where `OBJECT.ob_spec` is a `void *` (as in Lattice C) instead of the
   itself, only patched into the file by INSTALL.PRG: GCC removed it and used
   its initial values, so it is declared `volatile`. GCC (a.out) only aligns
   it on 2 bytes, so INSTALL.PRG now searches for it in steps of 2 bytes.
+- **Code called by the AES** (USERDEF objects: `xdraw_cicon()`, which draws
+  the colour icons under TOS versions whose AES cannot) runs on the AES's
+  own small supervisor stack. GEMlib's VDI bindings put their parameter
+  arrays on the stack (`v_gtext()`: more than 2 KB), Lattice's used static
+  arrays: the stack overflowed into AES variables, and the AES crashed
+  (TOS 1.62, STE, colour: 2 then 3 bombs as soon as a menu dropped down).
+  `xdraw_cicon()` now runs on its own stack.
 - **Casts as lvalues** (`(char *)p = ...`), accepted by Lattice, were
   rewritten.
 - **Assembler**: Lattice/Devpac syntax was translated to GNU as;

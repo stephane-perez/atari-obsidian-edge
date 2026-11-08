@@ -3,3 +3,4 @@ build/
 *.img
 *.rom
 tos/
+__pycache__/

@@ -130,7 +130,6 @@ MLOCAL short ap_id;								/* application id */
 MLOCAL short byebye = 0;
 MLOCAL short lastdev;
 MLOCAL short initial_msg_type = MN_SELECTED;	/* see send_initial_message() */
-MLOCAL int protect_error = 1;					/* protection scheme ... */
 
 
 /*
@@ -261,8 +260,6 @@ short dummy, j;
 		return;
 	}
 
-	protect_error = protect();				/* for later tests */
-
 	if (Xw < MAX_WINDOW_WIDTH-1) {
 #ifdef _DEBUG
 		if (form_alert(1,WIDTH_WARNING) != 1)
@@ -280,18 +277,8 @@ short dummy, j;
 		objc_sysvar(0,INDBUTCOL,0,0,&indcolor,&dummy);
 	}
 
-#if !defined(BETA) && !defined(DEMO)
-	if (strncmp(gettext(about,USERNAME),UNREGISTERED,sizeof(UNREGISTERED)-1) == 0) {
-		xform_alert(1,REG_WARNING);
-		return;
-	}
-#endif
-
 	fix_rsrc();
 	update_menu(dev);
-
-	if (protect_error)						/* delayed check to make it harder to defeat ... */
-		initial_msg_type = AP_TERM;			/* quit immediately ... */
 
 	wind_get(0,WF_WORKXYWH,&fullx,&fully,&j,&fullh);
 	fullw = 640;										//MAGNUM
@@ -435,9 +422,6 @@ char *adr_text;
 	title = adr_menu[titles_box].ob_head;
 
 	options_box = adr_menu[adr_menu[ROOT].ob_tail].ob_head;
-
-	if (protect_error)		/* a little extra protection ... */
-		key = 0;
 
 	while (title != titles_box) {
 		if (!(adr_menu[title].ob_state & DISABLED)) {
@@ -750,8 +734,6 @@ short title, item;
 	title = msg_buf[3];		/* remember because msg_buf[] may get overwritten */
 	item = msg_buf[4];
 
-	byebye |= protect_error;	/* obscure, in case previous check was zapped */
-
 	switch(title) {
 	case DESKBAR:
 		handle_dial(about,0,0,0);
@@ -796,9 +778,6 @@ short title, item;
 			menu[ORMDEL].ob_state ^= CHECKED;
 			break;
 		case OAUTOFIX:
-#ifdef DEMO
-			form_alert(1,DEMO_UNAVAIL);
-#else
 			if (menu[OAUTOFIX].ob_state & CHECKED) {
 				menu[OAUTOFIX].ob_state &= ~CHECKED;
 				menu[MAUTOFIX].ob_state &= ~CHECKED;
@@ -806,7 +785,6 @@ short title, item;
 				menu[OAUTOFIX].ob_state |= CHECKED;
 				menu[MAUTOFIX].ob_state |= CHECKED;
 			}
-#endif
 			break;
 		case OIGNORE:
 			if (menu[OIGNORE].ob_state & CHECKED) {
@@ -940,9 +918,6 @@ short title, item;
 			do_multi(MBADM);
 			break;
 		case MAUTOFIX:
-#ifdef DEMO
-			form_alert(1,DEMO_UNAVAIL);
-#else
 			if (menu[MAUTOFIX].ob_state & CHECKED) {
 				menu[OAUTOFIX].ob_state &= ~CHECKED;
 				menu[MAUTOFIX].ob_state &= ~CHECKED;
@@ -950,7 +925,6 @@ short title, item;
 				menu[OAUTOFIX].ob_state |= CHECKED;
 				menu[MAUTOFIX].ob_state |= CHECKED;
 			}
-#endif
 			break;
 		case MIGNORE:
 			if (menu[MIGNORE].ob_state & CHECKED) {
@@ -1314,14 +1288,10 @@ PRIVATE void set_opt()
 		opt.rmdel = TRUE;
 	else opt.rmdel = FALSE;
 
-#ifdef DEMO
-	opt.autofix = FALSE;
-#else
 	if ((menu[OAUTOFIX].ob_state & CHECKED)
 	 || (menu[MAUTOFIX].ob_state & CHECKED))
 		opt.autofix = TRUE;
 	else opt.autofix = FALSE;
-#endif
 
 	if ((menu[OIGNORE].ob_state & CHECKED)
 	 || (menu[MIGNORE].ob_state & CHECKED))

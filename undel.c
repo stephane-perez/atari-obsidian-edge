@@ -990,14 +990,9 @@ char fname2[MAX_FILENAME];
 				}
 			}
 
-#ifdef DEMO
-			form_alert(1,DEMO_UNAVAIL);
-			break;
-#else
 			ddir[j].entry->name[0] = *c;
 			undelete_one_file(ddir[j].entry);
 			writedir = 1;
-#endif
 		}
 	}
 

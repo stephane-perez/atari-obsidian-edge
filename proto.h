@@ -10,10 +10,10 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: prototypes match the function definitions (char vs unsigned char)
  */
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\COPYD.C */
+/* Prototypes for functions defined in copyd.c */
 PUBLIC void do_copydefrag(void);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\DISK.C */
+/* Prototypes for functions defined in disk.c */
 PUBLIC void cleanup_allinfo(void);
 PUBLIC int critical_read(short dev,short numsec,long start,char *buf,int errmsgno,int pgmloc);
 PUBLIC int critical_write(short dev,short numsec,long start,char *buf,int errmsgno,int pgmloc);
@@ -35,7 +35,7 @@ PUBLIC void permanent_error(long errnum,int type,char *msg,int pgmloc);
 PUBLIC int read_no_retry(short dev,short numsec,long start,char *buf);
 PUBLIC int write_no_retry(short dev,short numsec,long start,char *buf);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\DMAP.C */
+/* Prototypes for functions defined in dmap.c */
 PUBLIC void cleanup_diskinfo(void);
 PUBLIC void cleanup_diskmap(void);
 PUBLIC int do_diskinfo(void);
@@ -48,11 +48,11 @@ PUBLIC void draw_opt(short cluster,short mode);
 PUBLIC void format_cpb(char *text);
 PUBLIC int zero_fats_and_root(void);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\EDGEASM.S */
+/* Prototypes for functions defined in edgeasm.s */
 PUBLIC void cold_boot(void);
 PUBLIC void fast_copy(void *to,void *from,long size);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\FILEIO.C */
+/* Prototypes for functions defined in fileio.c */
 PUBLIC int check_path(char *path);
 PUBLIC void copy_to_edgepath(char *t,char *s);
 PUBLIC void copy_to_tedinfo(TEDINFO *t,char *s);
@@ -67,7 +67,7 @@ PUBLIC void print_file(void);
 PUBLIC int print_string(char *str);
 PUBLIC void save_prefs(OPT *opt);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\INFO.C */
+/* Prototypes for functions defined in info.c */
 PUBLIC void handle_scsiinfo_dialog(void(*)(short,short));
 PUBLIC long read_info_file(char *buf,long maxsize);
 PUBLIC void restore_disk_info(int unzero);
@@ -76,20 +76,20 @@ PUBLIC void save_disk_info(void);
 PUBLIC int save_info(short savedev,char *path);
 PUBLIC void save_scsi_info(void);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\MAIN.C */
+/* Prototypes for functions defined in main.c */
 PUBLIC void handle_messages(void);
 PUBLIC int main(void);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\MEDIC1.C */
+/* Prototypes for functions defined in medic1.c */
 PUBLIC int bad_prefs(void);
 PUBLIC int do_bad(int autofix);
 PUBLIC int do_tdisk(int called);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\MIRROR.C */
+/* Prototypes for functions defined in mirror.c */
 PUBLIC void config_mirror(void);
 PUBLIC int init_mirror_prefs(void);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\MISC.C */
+/* Prototypes for functions defined in misc.c */
 PUBLIC long allocate_max_units(int min_units,long unit_size,char **ptr);
 PUBLIC void blank(short color);
 PUBLIC void browse(void);
@@ -119,13 +119,13 @@ PUBLIC void update_bar(long num);
 PUBLIC void update_barmsg(char *strng);
 PUBLIC void wrap_bar(void);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\OPT2.C */
+/* Prototypes for functions defined in opt2.c */
 PUBLIC short do_opt(void);
 PUBLIC short do_opt_compress(short display);
 PUBLIC char *sort_dir(char *curdir,int ncl,int rmdel);
 PUBLIC char *sort_root(char *dirbuf,int rmdel);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\PART1.C */
+/* Prototypes for functions defined in part1.c */
 PUBLIC void do_down_one(void);
 PUBLIC void do_down_page(void);
 PUBLIC void do_edisksize(void);
@@ -140,10 +140,7 @@ PUBLIC long load_root_sectors(short id,short lun,char *buf);
 PUBLIC int scsi_op_failed(short id,short lun);
 PUBLIC void write_partinfo_file(char *path,short id,short lun,char *buf,long size);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\PROTECT.C */
-PUBLIC int protect(void);
-
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\RSC.C */
+/* Prototypes for functions defined in rsc.c */
 PUBLIC void cleanup_rsrc(void);
 PUBLIC int do_dial(OBJECT *tree,short txt,short start,short dohot);
 PUBLIC void draw_dial(OBJECT *tree,short start);
@@ -175,13 +172,13 @@ PUBLIC void toggle_bottom(short obj);
 PUBLIC void wait_for_redraw(short win);
 PUBLIC int xform_alert(int dft,int index, ...);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\SECTION.C */
+/* Prototypes for functions defined in section.c */
 PUBLIC void close_section(void);
 PUBLIC int open_section(char *basename,char *mode,char *sectionname);
 PUBLIC void read_section_line(char *pattern,char *fmt,...);
 PUBLIC int write_section_line(char *pattern,char *fmt,...);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\UNDEL.C */
+/* Prototypes for functions defined in undel.c */
 PUBLIC void blit(GRECT *src,GRECT *dst);
 PUBLIC void cleanup_undelete(void);
 PUBLIC void init_ud_form(void);
@@ -198,10 +195,10 @@ PUBLIC void udo_up_page(void);
 PUBLIC void udo_up1(void);
 PUBLIC void undelete_files(void);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\VALID.C */
+/* Prototypes for functions defined in valid.c */
 PUBLIC unsigned short addchk(unsigned short chksum,unsigned short *p,long count);
 PUBLIC unsigned short addcrc(unsigned short crc,unsigned char *p,long count);
 PUBLIC void do_valid(short type,short val);
 
-/* Prototypes for functions defined in E:\SOURCE\EDGE204\COMPILE.RFB\VIEWFILE.C */
+/* Prototypes for functions defined in viewfile.c */
 PUBLIC void view_file(char *namein,short draw);

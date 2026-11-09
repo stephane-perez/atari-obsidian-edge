@@ -20,10 +20,7 @@ and nothing has been tried on a real machine.
 
 How to install
 --------------
-1. Double-click on INSTALL.PRG.
-2. Enter your name, select the drive to install on, and choose whether
-   to install Diamond Mirror in the AUTO folder of your boot drive.
-   You do not need a serial number or a registration code.
-3. Click on 'Install'.  The program is installed in X:\EDGE.
+1. Copy or move DMIRROR.PRG to C:\AUTO.
+3. Double click on EDGE.PRG to run Obsidian Edge
 
 License: GNU General Public License, version 2 (see LICENSE.TXT).

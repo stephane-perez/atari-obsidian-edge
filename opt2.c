@@ -188,9 +188,7 @@ PRIVATE void wrap_obar(void);
 PUBLIC short do_opt_compress(short display)
 {
 int maxdirclus;
-#ifndef DEMO
 int rc;
-#endif
 
 	if ((maxdirclus=do_tdisk(1)) < 0) {			//MAGNUM
 		force_update(-1);
@@ -198,11 +196,6 @@ int rc;
 		return -1;
 	}
 
-#ifdef DEMO
-	form_alert(1,DEMO_UNAVAIL);
-	force_update(-1);
-	return -1;
-#else
 	toggle_bottom(BDOOPT);
 	doing_opt = 1;					/* flag for bpb with DATAlite */
 
@@ -258,7 +251,6 @@ int rc;
 		force_update(-1);
 
 	return rc;
-#endif
 }
 
 /*
@@ -976,9 +968,7 @@ short nextc;
 PUBLIC short do_opt(void)
 {
 int maxdirclus;
-#ifndef DEMO
 int i, rc;
-#endif
 
 	if ((maxdirclus=do_tdisk(1)) < 0) {		//MAGNUM
 		force_update(-1);
@@ -986,11 +976,6 @@ int i, rc;
 		return -1;
 	}
 
-#ifdef DEMO
-	form_alert(1,DEMO_UNAVAIL);
-	force_update(-1);
-	return -1;
-#else
 	if (opt.visual) {
 		if (do_diskmap() < 0)
 			return -1;
@@ -1052,7 +1037,6 @@ int i, rc;
 	doing_opt = 0;				/* flag for bpb with DATAlite */
 
 	return rc;
-#endif
 }
 
 PRIVATE int opt_full(int maxdirclus)

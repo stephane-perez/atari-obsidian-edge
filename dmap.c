@@ -819,13 +819,6 @@ PUBLIC void do_zero()
 {
 char path[MAX_PATHNAME];
 
-#ifdef DEMO
-	if (dev > FIRST_HD_DEVICE) {
-		form_alert(1,DEMO_DRIVEC);
-		return;
-	}
-#endif
-
 	/*
 	 *	make sure we don't save the Unzero info on the drive
 	 *	that we're about to Zero ...
@@ -871,13 +864,6 @@ PUBLIC void do_wipe()
 {
 int rc;
 char temp[MAX_DISPLAYSIZE];
-
-#ifdef DEMO
-	if (dev > FIRST_HD_DEVICE) {
-		form_alert(1,DEMO_DRIVEC);
-		return;
-	}
-#endif
 
 	if (get_mybpb(&dpb,dev) < 0)
 		xform_alert(1,GEN_BPB_ALERT);

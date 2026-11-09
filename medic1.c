@@ -475,13 +475,9 @@ static char title[MAX_DISPLAYSIZE];
 	}
 	if (*problems && !fix) {
 		if (obj == FIXNOW) {
-#ifdef DEMO
-			form_alert(1,DEMO_UNAVAIL);
-#else
 			fix = 1;
 			free_pointers();
 			return 0;			/* try again ... */
-#endif
 		}
 		return -1;
 	}
@@ -1450,7 +1446,7 @@ static char title[MAX_DISPLAYSIZE];
 	strcpy(blocks->te_ptext,"0.0");
 	strcpy(medic[NPASS].ob_spec," 1");
 	sprintf(medic[TOTPASS].ob_spec,"%2d",mapbad.passes);
-	strcpy(medic[MBAD].ob_spec,"ù");
+	strcpy(medic[MBAD].ob_spec,"ï¿½");
 	redraw_object(medic,0);
 
 	if (fix) {
@@ -1710,12 +1706,8 @@ BAD *b1;
 
 	if (firstbad && !firstfatbad && !fix) {
 		if (obj == BADFIXN) {
-#ifdef DEMO
-			form_alert(1,DEMO_UNAVAIL);
-#else
 			fix = 1;
 			return 1;
-#endif
 		}
 	}
 

@@ -4,7 +4,7 @@
 # MiNTLib, GEMlib): see README.md and scripts/get-cross-mint.sh, and
 # libcmini: scripts/get-libcmini.sh.
 #
-#   make              build build/EDGE.PRG, build/DMIRROR.PRG, build/INSTALL.PRG
+#   make              build build/EDGE.PRG, build/DMIRROR.PRG
 #   make LIBC=mintlib the same, with MiNTLib instead of libcmini (bigger)
 #   make dist         folder ready to copy to the Atari: build/dist/OBSIDIAN/
 #   make zip          the same, as build/obsidian-edge-<version>.zip
@@ -67,17 +67,15 @@ PRGFLAGS := --mfastload --mfastram --mfastalloc
 PORT_OBJS := port/lattice.o port/mediach.o $(LIBC_OBJS)
 
 EDGE_SRCS := main.c copyd.c disk.c dmap.c fileio.c info.c medic1.c mirror.c \
-             misc.c opt2.c part1.c protect.c rsc.c section.c undel.c valid.c \
-             viewfile.c xrsrc.c lib/driver.c lib/encrypt.c
+             misc.c opt2.c part1.c rsc.c section.c undel.c valid.c \
+             viewfile.c xrsrc.c lib/driver.c
 EDGE_OBJS := $(EDGE_SRCS:.c=.o) lib/scsidrv.o port/edgeasm.o port/compmem.o port/callstack.o \
              $(PORT_OBJS)
 
 DMIRROR_OBJS := dmirror/dmirror.o dmirror/section.o dmirror/xmode.o \
                 port/compmem.o $(PORT_OBJS)
 
-INSTALL_OBJS := install/install.o lib/encrypt.o $(PORT_OBJS)
-
-PROGRAMS := $(BUILD)/EDGE.PRG $(BUILD)/DMIRROR.PRG $(BUILD)/INSTALL.PRG
+PROGRAMS := $(BUILD)/EDGE.PRG $(BUILD)/DMIRROR.PRG
 
 # version of the fork (the programs themselves still say 2.57)
 VERSION := $(shell cat VERSION)
@@ -148,21 +146,18 @@ $(BUILD)/EDGE.PRG: $(call obj,$(EDGE_OBJS)) $(LIBC_STAMP)
 $(BUILD)/DMIRROR.PRG: $(call obj,$(DMIRROR_OBJS)) $(LIBC_STAMP)
 	$(call link,DMIRROR,16k)
 
-$(BUILD)/INSTALL.PRG: $(call obj,$(INSTALL_OBJS)) $(LIBC_STAMP)
-	$(call link,INSTALL,16k)
-
 -include $(shell find $(OBJDIR) -name '*.d' 2>/dev/null)
 
 # --- distribution --------------------------------------------------------
-# same layout as the original v2.57 release: everything in one folder,
-# INSTALL.PRG copies the files where they belong
+# same layout as the original v2.57 release: everything in one folder
 DIST := $(BUILD)/dist/OBSIDIAN
 HELP_FILES := $(wildcard HELP/*.HLP)
 
 dist: $(PROGRAMS)
 	rm -rf $(BUILD)/dist
-	mkdir -p $(DIST)
-	cp $(PROGRAMS) EDGE.RSC install/INSTALL.RSC $(HELP_FILES) $(DIST)/
+	mkdir -p $(DIST)/HELP
+	cp $(PROGRAMS) EDGE.RSC $(DIST)/
+	cp $(HELP_FILES) $(DIST)/HELP
 	cp DOC/LICENSE.TXT $(DIST)/LICENSE.TXT
 	sed -e 's/@VERSION@/$(VERSION)/' -e 's/$$/\r/' port/README.TXT > $(DIST)/README.TXT
 

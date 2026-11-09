@@ -34,12 +34,7 @@
 /*
  *	stuff (currently) exclusive to dmirror
  */
-#ifdef BETA
-#define PROGRAM_VERSION	"2.57á1"
-#define EXPIRY_DATE		( ((2017-1980)<<9)+(6<<5)+30 )		/* 30 June 2017 */
-#else
 #define PROGRAM_VERSION	"2.57"
-#endif
 
 #define ABORT_KEY		0x03				/* control-C */
 
@@ -120,7 +115,7 @@ int test_rotate = FALSE;		/* TRUE => rotate tests */
 struct control mirror;
 char mirror_path[MAX_EDGEPATH] = "";	/* path for mirror files */
 
-char *copyright = "Diamond Mirror: Copyright ½ 2002-2017 Roger Burrows.  All Rights Reserved";
+char *copyright = "Diamond Mirror: Copyright ï¿½ 2002-2017 Roger Burrows.  All Rights Reserved";
 
 
 /*
@@ -199,7 +194,7 @@ char *p, temp[200];
 
 	printf("\r\x1bp                                    \n");	/* inverse video */
 	printf("        Diamond Mirror v%-6.6s      \n",PROGRAM_VERSION);
-	printf("    ½ 1992-2003 by Roger Burrows    \n");
+	printf("    ï¿½ 1992-2003 by Roger Burrows    \n");
 	printf(" based on code by Robert D. Luneski \n");
 	printf("                                    \x1bq\n");		/* normal video */
 	printf("\n");
@@ -209,7 +204,7 @@ char *p, temp[200];
 	 */
 	if (open_section(DM_PREFS_FILE,"ra",TEST_SECTION) == 0) {
 		temp[0] = '\0';
-		read_section_line(INF_PARTITIONS," %[ -ÿ]",temp);
+		read_section_line(INF_PARTITIONS," %[ -ï¿½]",temp);
 		for (p = temp; *p; p++) {
 			n = *p - 'A';
 			if ((n >= FIRST_HD_DEVICE) && (n < NUM_DEVICES))
@@ -222,14 +217,14 @@ char *p, temp[200];
 	}
 	if (open_section(DM_PREFS_FILE,"ra",MIRROR_SECTION) == 0) {
 		temp[0] = '\0';
-		read_section_line(INF_PARTITIONS," %[ -ÿ]",temp);
+		read_section_line(INF_PARTITIONS," %[ -ï¿½]",temp);
 		for (p = temp; *p; p++) {
 			n = *p - 'A';
 			if ((n >= FIRST_HD_DEVICE) && (n < NUM_DEVICES))
 				mirror.partitions |= (1L << n);
 		}
 		read_section_line(INF_FREQUENCY," %d",&mirror.frequency);
-		read_section_line(INF_PATH," %[ -ÿ]",mirror_path);
+		read_section_line(INF_PATH," %[ -ï¿½]",mirror_path);
 		close_section();
 	}
 	if (open_section(DM_PREFS_FILE,"ra",LASTRUN_SECTION) == 0) {
@@ -1345,11 +1340,6 @@ int i;
 					bitmap |= bit;
 		}
 	}
-
-#ifdef BETA
-	if (today > calcdays(EXPIRY_DATE))		/* obscure place to check */
-		bitmap = 0xffffffffL;
-#endif
 
 	return bitmap;
 }

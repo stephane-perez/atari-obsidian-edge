@@ -1,5 +1,0 @@
-DRIVER.LIB
-.C	[-b4 -r6 -cf -cu -d0 -m0 -rs -fm]
-.S	[-m0]
-=
-DRIVER.C	(SCSIDRV.H)

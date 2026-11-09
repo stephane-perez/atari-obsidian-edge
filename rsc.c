@@ -266,9 +266,6 @@ GRECT desk;
 
 	dmap = (rez==1)?mdmap:hdmap;		/* use map appropriate to character height ... */
 
-	if (strcmp(about[ABVERSION].ob_spec,RSC_VERSION) != 0)
-		return -1;
-
 	return 0;
 }
 
@@ -337,7 +334,7 @@ OBBLK *temp;
 			switch (type) {
 			case G_ICON:
 				ib = (ICONBLK *) ob->ob_spec;
-				/* ob->ob_height = ib->ib_ytext + ib->ib_htext;  Objekth”he = Iconh”he */
+				/* ob->ob_height = ib->ib_ytext + ib->ib_htext;  Objekthï¿½he = Iconhï¿½he */
 				ob->ob_height = ib->ib_hicon;
 				trans_gimage(ib,type);			/* adapt icon to screen */
 				break;
@@ -346,7 +343,7 @@ OBBLK *temp;
 //rfb: the following does not make sense: why are we comparing a pointer to 0x600 ????
 				if (((long) ob->ob_spec > 0x600) && (temp->old_type == G_CICON)) {
 					ib = (ICONBLK *) ((OBBLK *) ob->ob_spec)->ublk.ub_parm;
-					/* ob->ob_height = ib->ib_ytext + ib->ib_htext;  Objekth”he = Iconh”he */
+					/* ob->ob_height = ib->ib_ytext + ib->ib_htext;  Objekthï¿½he = Iconhï¿½he */
 					/* ob->ob_height = ib->ib_hicon; org */
 					if (rez == 2)
 						ob->ob_height = ib->ib_hicon;

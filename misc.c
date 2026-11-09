@@ -612,12 +612,7 @@ int i, obj, src, dest;
 		if (xform_alert(2,CP_WARN_ALERT,dest+'A',src+'A',dest+'A') == 2)
 			return -1;
 
-#ifdef DEMO
-	form_alert(1,DEMO_UNAVAIL);
-	return -1;
-#else
 	return (src<<8) + dest;
-#endif
 }
 
 /*

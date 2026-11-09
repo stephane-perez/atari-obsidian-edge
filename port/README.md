@@ -40,10 +40,6 @@ header where `OBJECT.ob_spec` is a `void *` (as in Lattice C) instead of the
   (MiNTLib) the high 32 bits. `lib/encrypt.c` (registration) depends on the
   Lattice behaviour: the fixed serial number / registration code of the free
   version (`E-0000-25` / `DSFMDSCN`) only match with it.
-- **The protection structure** in `protect.c` is never written by EDGE.PRG
-  itself, only patched into the file by INSTALL.PRG: GCC removed it and used
-  its initial values, so it is declared `volatile`. GCC (a.out) only aligns
-  it on 2 bytes, so INSTALL.PRG now searches for it in steps of 2 bytes.
 - **Code called by the AES** (USERDEF objects: `xdraw_cicon()`, which draws
   the colour icons under TOS versions whose AES cannot) runs on the AES's
   own small supervisor stack. GEMlib's VDI bindings put their parameter

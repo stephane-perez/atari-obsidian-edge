@@ -185,7 +185,7 @@ char temp[MAX_PATHNAME];
 		read_section_line(INF_WARN," %d",&opt->warn);
 		read_section_line(INF_MULTI," %08lx",&opt->multi);
 		temp[0] = '\0';
-		read_section_line(INF_FILEPATH," %[ -ÿ]",temp);
+		read_section_line(INF_FILEPATH," %[ -ï¿½]",temp);
 		copy_to_edgepath(opt->filepath,temp);
 		close_section();
 	}
@@ -549,9 +549,6 @@ PUBLIC void save_prefs(OPT *opt)
 {
 	set_prefs(opt);
 
-#ifdef DEMO
-	form_alert(1,DEMO_UNAVAIL);
-#else
 	open_section(PREFS_FILE,"wa",GENERAL_SECTION);
 	write_section_line(INF_NOVICE,"%d",opt->novice);
 	write_section_line(INF_WARN,"%d",opt->warn);
@@ -584,7 +581,6 @@ PUBLIC void save_prefs(OPT *opt)
 	if (opt->keeplabel)
 		write_section_line(INF_UTILKEEP,"%d",opt->keeplabel);
 	close_section();
-#endif
 }
 
 /*

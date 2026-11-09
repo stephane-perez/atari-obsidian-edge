@@ -131,13 +131,6 @@ char fpath[MAX_PATHNAME];
 static char title[MAX_DISPLAYSIZE];
 FILE *fto;
 
-#ifdef DEMO
-	if (dev > FIRST_HD_DEVICE) {
-		form_alert(1,DEMO_DRIVEC);
-		return;
-	}
-#endif
-
 	vsf_style(myhandle,8);
 	vsf_color(myhandle,GREEN);
 

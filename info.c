@@ -152,17 +152,6 @@ OBJECT *obj;
 			break;
 		case SAVEDI:
 			done = TRUE;
-#ifdef DEMO
-			for (j = 0, obj = &saveinfo[SIA]; j < NUM_DEVICES; j++, obj++) {
-				if (obj->ob_state & SELECTED) {
-					if (j > FIRST_HD_DEVICE) {
-						form_alert(1,DEMO_DRIVEC);
-						done = FALSE;
-						break;
-					}
-				}
-			}
-#endif
 			break;
 		}
 	} while(!done);
@@ -214,12 +203,6 @@ int rc;
 		}
 		if (restdev < 0)
 			xform_alert(1,GEN_PART_ALERT);
-#ifdef DEMO
-		else if (restdev > FIRST_HD_DEVICE) {
-			form_alert(1,DEMO_DRIVEC);
-			restdev = -1;
-		}
-#endif
 	} while(restdev < 0);
 
 	if (get_existing_fname(fname,opt.filepath,MIRROR_MASK,text[DINFO_FSEL_REST].ob_spec) == 0)

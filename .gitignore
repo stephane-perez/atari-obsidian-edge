@@ -1,0 +1,6 @@
+build/
+.tools/
+*.img
+*.rom
+tos/
+__pycache__/

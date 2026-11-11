@@ -65,7 +65,7 @@ Then:
 
 ```sh
 sh scripts/get-libcmini.sh
-make            # build/EDGE.PRG, build/DMIRROR.PRG, build/INSTALL.PRG
+make            # build/EDGE.PRG, build/DMIRROR.PRG
 make zip        # build/obsidian-edge-<version>.zip, ready to copy to the Atari
 make LIBC=mintlib BUILD=build/mintlib   # the same with MiNTLib, for comparison
 ```
@@ -73,12 +73,12 @@ make LIBC=mintlib BUILD=build/mintlib   # the same with MiNTLib, for comparison
 ### Testing in Hatari
 
 `make smoke-test EMUTOS=/path/to/etos512uk.img` runs `tools/smoke_test.py`:
-in Hatari (ST, 4 MB, monochrome), it runs `INSTALL.PRG`, fills in and
-validates its dialog, checks the installed files, then starts the installed
-`EDGE.PRG` and checks that it gets past the registration check. Then, on an
-STE in medium resolution (colour icons), it drops down a menu and checks
-that the menu appears and that nothing crashed: this catches stack overflows
-in the code the AES calls (see `port/callstack.S`). With a TOS 1.62 image,
+in Hatari (ST, 4 MB, monochrome), it starts `EDGE.PRG` and checks that it
+loads its resource file and gets through its start-up. Then, on an STE in
+medium resolution (colour icons), it drops down a menu and checks that the
+menu appears and that nothing crashed (this catches stack overflows in the
+code the AES calls, see `port/callstack.S`), and opens a help file from the
+Help menu (layout of the distribution). With a TOS 1.62 image,
 add `SMOKE_MACHINE=ste`. Screenshots
 and logs are kept in `build/smoke/`. It needs `hatari`, `xvfb` and
 `xdotool`, and an EmuTOS image (free, from <https://emutos.sourceforge.io/>)
@@ -91,7 +91,9 @@ been tested on real hardware.**
 ### Continuous integration
 
 `.github/workflows/build.yml` builds the programs on every push and pull
-request (with libcmini, and with MiNTLib for comparison), writes a table of
+request (with libcmini, and with MiNTLib for comparison), checks that no
+source file was converted to UTF-8 by an editor (see `.editorconfig`: the
+inherited sources are 8-bit, CR LF), writes a table of
 the program sizes compared with Diamond Edge 2.57 in the run summary, runs
 the smoke test with EmuTOS on the libcmini build, and keeps the Atari files
 and the screenshots as workflow artifacts.

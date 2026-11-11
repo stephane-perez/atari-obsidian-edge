@@ -13,7 +13,7 @@ a GEMDOS drive:
     and the GEMDOS drive as D: (so that EDGE works on drive A: and shows its
     main screen and colour icons).  The mouse is moved over the "Undelete"
     menu title, then the first item of the Help menu is chosen.  Checks: the
-    menu drops down, the help file HELP\FILE.HLP is opened (layout of the
+    menu drops down, the help file HELP\\FILE.HLP is opened (layout of the
     distribution), no CPU exception (bombs), and EDGE is still running.  This catches stack overflows in code that the
     AES calls (USERDEF objects such as the colour icons): with TOS 1.62 one
     crashed the AES as soon as a menu was dropped down; with EmuTOS the

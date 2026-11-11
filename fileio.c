@@ -185,7 +185,7 @@ char temp[MAX_PATHNAME];
 		read_section_line(INF_WARN," %d",&opt->warn);
 		read_section_line(INF_MULTI," %08lx",&opt->multi);
 		temp[0] = '\0';
-		read_section_line(INF_FILEPATH," %[ -ï¿½]",temp);
+		read_section_line(INF_FILEPATH," %[ -ÿ]",temp);
 		copy_to_edgepath(opt->filepath,temp);
 		close_section();
 	}

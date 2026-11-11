@@ -18,6 +18,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check the encoding of the sources
+        run: |
+          # the inherited sources are 8-bit (Atari character set): an editor
+          # converting them to UTF-8 replaces those bytes with U+FFFD
+          if grep -rlI --exclude-dir=.git --exclude-dir=build --exclude-dir=.tools $'\xef\xbf\xbd' . ; then
+            echo "::error::U+FFFD (replacement character) found: a file was converted to UTF-8"
+            exit 1
+          fi
+
       - name: Install the m68k-atari-mint cross toolchain
         run: |
           sudo add-apt-repository -y ppa:vriviere/ppa

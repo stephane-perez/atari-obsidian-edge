@@ -1446,7 +1446,7 @@ static char title[MAX_DISPLAYSIZE];
 	strcpy(blocks->te_ptext,"0.0");
 	strcpy(medic[NPASS].ob_spec," 1");
 	sprintf(medic[TOTPASS].ob_spec,"%2d",mapbad.passes);
-	strcpy(medic[MBAD].ob_spec,"ï¿½");
+	strcpy(medic[MBAD].ob_spec,"ù");
 	redraw_object(medic,0);
 
 	if (fix) {

@@ -8,6 +8,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: no casts as lvalues
+ *
+ *	Modified for Obsidian Edge (November 2026): demo version removed
  */
 
 /*

@@ -1,0 +1,20 @@
+# EditorConfig (https://editorconfig.org): settings for editors and IDEs.
+root = true
+
+# The sources inherited from Diamond Edge are in the Atari character set
+# (8-bit, read here as Latin-1; e.g. the byte $FF ends the scanf() ranges
+# "%[ -\xFF]", $BD is the copyright sign), with CR LF line ends and tabs
+# every 4 columns.  An editor that converts them to UTF-8 destroys those
+# bytes (they become U+FFFD): the CI rejects that.
+[*.{c,h,s,HLP,TXT,PRJ}]
+charset = latin1
+end_of_line = crlf
+indent_style = tab
+tab_width = 4
+insert_final_newline = false
+trim_trailing_whitespace = false
+
+# Files written for Obsidian Edge: UTF-8 (in practice ASCII), LF
+[{port/**,tools/**,scripts/**,Makefile,Dockerfile,*.md,*.yml}]
+charset = utf-8
+end_of_line = lf

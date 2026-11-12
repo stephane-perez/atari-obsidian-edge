@@ -10,6 +10,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: no cast as lvalue
+ *
+ *	Modified for Obsidian Edge (November 2026): demo version removed
  */
 
 /*
@@ -1446,7 +1448,7 @@ static char title[MAX_DISPLAYSIZE];
 	strcpy(blocks->te_ptext,"0.0");
 	strcpy(medic[NPASS].ob_spec," 1");
 	sprintf(medic[TOTPASS].ob_spec,"%2d",mapbad.passes);
-	strcpy(medic[MBAD].ob_spec,"ï¿½");
+	strcpy(medic[MBAD].ob_spec,"ù");
 	redraw_object(medic,0);
 
 	if (fix) {

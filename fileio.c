@@ -11,6 +11,8 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): demo version removed
  */
 
 /*
@@ -185,7 +187,7 @@ char temp[MAX_PATHNAME];
 		read_section_line(INF_WARN," %d",&opt->warn);
 		read_section_line(INF_MULTI," %08lx",&opt->multi);
 		temp[0] = '\0';
-		read_section_line(INF_FILEPATH," %[ -ï¿½]",temp);
+		read_section_line(INF_FILEPATH," %[ -ÿ]",temp);
 		copy_to_edgepath(opt->filepath,temp);
 		close_section();
 	}

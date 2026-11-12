@@ -5,6 +5,8 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): BETA version and expiry date removed
  */
 
 /*
@@ -115,7 +117,7 @@ int test_rotate = FALSE;		/* TRUE => rotate tests */
 struct control mirror;
 char mirror_path[MAX_EDGEPATH] = "";	/* path for mirror files */
 
-char *copyright = "Diamond Mirror: Copyright ï¿½ 2002-2017 Roger Burrows.  All Rights Reserved";
+char *copyright = "Diamond Mirror: Copyright ½ 2002-2017 Roger Burrows.  All Rights Reserved";
 
 
 /*
@@ -194,7 +196,7 @@ char *p, temp[200];
 
 	printf("\r\x1bp                                    \n");	/* inverse video */
 	printf("        Diamond Mirror v%-6.6s      \n",PROGRAM_VERSION);
-	printf("    ï¿½ 1992-2003 by Roger Burrows    \n");
+	printf("    ½ 1992-2003 by Roger Burrows    \n");
 	printf(" based on code by Robert D. Luneski \n");
 	printf("                                    \x1bq\n");		/* normal video */
 	printf("\n");
@@ -204,7 +206,7 @@ char *p, temp[200];
 	 */
 	if (open_section(DM_PREFS_FILE,"ra",TEST_SECTION) == 0) {
 		temp[0] = '\0';
-		read_section_line(INF_PARTITIONS," %[ -ï¿½]",temp);
+		read_section_line(INF_PARTITIONS," %[ -ÿ]",temp);
 		for (p = temp; *p; p++) {
 			n = *p - 'A';
 			if ((n >= FIRST_HD_DEVICE) && (n < NUM_DEVICES))
@@ -217,14 +219,14 @@ char *p, temp[200];
 	}
 	if (open_section(DM_PREFS_FILE,"ra",MIRROR_SECTION) == 0) {
 		temp[0] = '\0';
-		read_section_line(INF_PARTITIONS," %[ -ï¿½]",temp);
+		read_section_line(INF_PARTITIONS," %[ -ÿ]",temp);
 		for (p = temp; *p; p++) {
 			n = *p - 'A';
 			if ((n >= FIRST_HD_DEVICE) && (n < NUM_DEVICES))
 				mirror.partitions |= (1L << n);
 		}
 		read_section_line(INF_FREQUENCY," %d",&mirror.frequency);
-		read_section_line(INF_PATH," %[ -ï¿½]",mirror_path);
+		read_section_line(INF_PATH," %[ -ÿ]",mirror_path);
 		close_section();
 	}
 	if (open_section(DM_PREFS_FILE,"ra",LASTRUN_SECTION) == 0) {

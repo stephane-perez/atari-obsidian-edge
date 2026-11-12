@@ -17,7 +17,7 @@
 #error "lattice.h is only for the GCC build"
 #endif
 
-#define _GNU_SOURCE				/* MiNTLib: mrand48(), srand48() ... */
+#define _GNU_SOURCE				/* MiNTLib: GNU and BSD extensions */
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -50,19 +50,6 @@ long chgdsk(int drive);
 
 /* <io.h>: length of an open file */
 long filelength(int fd);
-
-/*
- *	<stdlib.h>: the Lattice C rand48 generator.  It is the POSIX linear
- *	congruential generator (same multiplier, increment and srand48()
- *	seeding), but Lattice's mrand48() returns the LOW 32 bits of the 48-bit
- *	state instead of the high ones.  lib/encrypt.c depends on it: with the
- *	POSIX version, INSTALL.PRG rejects the fixed serial number/registration
- *	code pair (E-0000-25 / DSFMDSCN) of the free version.
- */
-#define srand48	oe_srand48
-#define mrand48	oe_mrand48
-void oe_srand48(long seed);
-long oe_mrand48(void);
 
 /* force GEMDOS to see a media change on 'drive' (0 = A:) */
 int _mediach(int drive);

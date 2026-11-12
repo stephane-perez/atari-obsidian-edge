@@ -6,6 +6,8 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): removed the check of the resource version (RSC_VERSION)
  */
 
 /*
@@ -334,7 +336,7 @@ OBBLK *temp;
 			switch (type) {
 			case G_ICON:
 				ib = (ICONBLK *) ob->ob_spec;
-				/* ob->ob_height = ib->ib_ytext + ib->ib_htext;  Objekthï¿½he = Iconhï¿½he */
+				/* ob->ob_height = ib->ib_ytext + ib->ib_htext;  Objekth”he = Iconh”he */
 				ob->ob_height = ib->ib_hicon;
 				trans_gimage(ib,type);			/* adapt icon to screen */
 				break;
@@ -343,7 +345,7 @@ OBBLK *temp;
 //rfb: the following does not make sense: why are we comparing a pointer to 0x600 ????
 				if (((long) ob->ob_spec > 0x600) && (temp->old_type == G_CICON)) {
 					ib = (ICONBLK *) ((OBBLK *) ob->ob_spec)->ublk.ub_parm;
-					/* ob->ob_height = ib->ib_ytext + ib->ib_htext;  Objekthï¿½he = Iconhï¿½he */
+					/* ob->ob_height = ib->ib_ytext + ib->ib_htext;  Objekth”he = Iconh”he */
 					/* ob->ob_height = ib->ib_hicon; org */
 					if (rez == 2)
 						ob->ob_height = ib->ib_hicon;

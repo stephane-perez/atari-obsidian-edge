@@ -77,7 +77,7 @@ DMIRROR_OBJS := dmirror/dmirror.o dmirror/section.o dmirror/xmode.o \
 
 PROGRAMS := $(BUILD)/EDGE.PRG $(BUILD)/DMIRROR.PRG
 
-# version of the fork (the programs themselves still say 2.57)
+# version of the fork (shown by EDGE.PRG: version.h)
 VERSION := $(shell cat VERSION)
 
 .PHONY: all dist zip smoke-test clean

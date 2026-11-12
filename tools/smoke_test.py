@@ -3,27 +3,23 @@
 
   tools/smoke_test.py --dist build/dist/OBSIDIAN --tos etos512uk.img --out build/smoke
 
-Three runs of Hatari (4 MB, EmuTOS), with a copy of the distribution folder as
+Two runs of Hatari (4 MB, EmuTOS), with a copy of the distribution folder as
 a GEMDOS drive:
 
- 1. INSTALL.PRG is started; the test types a name, selects "Install Diamond
-    Mirror: No" and clicks "Install".  Checks: C:\\EDGE\\ holds EDGE.PRG,
-    EDGE.RSC and the help files, and the installed EDGE.PRG differs from the
-    distributed one (INSTALL.PRG writes the registration data into it).
- 2. The installed EDGE.PRG is started.  Checks: it opens EDGE.RSC, then gets
-    past the registration check (it looks for its preferences file EDGE.INF,
-    which an unregistered copy never does), and it is still running.
- 3. Colour: an STE in medium resolution, with an empty FAT12 floppy in A:
+ 1. EDGE.PRG is started (ST, monochrome monitor, GEMDOS drive C:).  Checks:
+    it opens EDGE.RSC, gets through its start-up (it looks for its
+    preferences file EDGE.INF), and it is still running.
+ 2. Colour: an STE in medium resolution, with an empty FAT12 floppy in A:
     and the GEMDOS drive as D: (so that EDGE works on drive A: and shows its
     main screen and colour icons).  The mouse is moved over the "Undelete"
-    menu title.  Checks: the menu drops down, no CPU exception (bombs), and
-    EDGE is still running.  This catches stack overflows in code that the
+    menu title, then the first item of the Help menu is chosen.  Checks: the
+    menu drops down, the help file HELP\\FILE.HLP is opened (layout of the
+    distribution), no CPU exception (bombs), and EDGE is still running.  This catches stack overflows in code that the
     AES calls (USERDEF objects such as the colour icons): with TOS 1.62 one
     crashed the AES as soon as a menu was dropped down; with EmuTOS the
     menu no longer dropped down.
 
-Steps 1 and 2 use a monochrome monitor and an ST (--machine to change it:
-Hatari refuses TOS 1.62 on an ST).
+Step 1 uses an ST (--machine to change it: Hatari refuses TOS 1.62 on an ST).
 
 Screenshots and Hatari logs (with the GEMDOS trace) are kept in --out.
 This only proves that the programs start and that their GEM user interface
@@ -43,15 +39,12 @@ import time
 
 SCREEN_W, SCREEN_H = 640, 400          # ST high resolution (monochrome monitor)
 
-# positions on the INSTALL.PRG dialog (ST high resolution, EmuTOS)
-INSTALL_NAME_FIELD = (240, 249)
-INSTALL_MIRROR_NO = (498, 345)
-INSTALL_BUTTON = (316, 360)
-
 # EDGE main screen, ST medium resolution (shown 640x400 by Hatari)
 UNDELETE_MENU_TITLE = (350, 5)
 UNDELETE_MENU_AREA = (312, 20, 540, 215)      # x0, y0, x1, y1 of the drop-down menu
 AWAY_FROM_MENUS = (300, 250)
+HELP_MENU_TITLE = (488, 5)
+HELP_MENU_FIRST_ITEM = (520, 28)          # opens HELP\FILE.HLP in the file viewer
 
 # CPU exceptions that mean a crash (bus error, address error, illegal instruction)
 CRASH_SIGNS = ("Bus Error", "Address Error", "Illegal instruction")
@@ -196,7 +189,7 @@ def main():
     ap.add_argument("--tos", default=os.environ.get("EMUTOS"), help="EmuTOS image (or $EMUTOS)")
     ap.add_argument("--out", required=True, help="folder for screenshots and logs")
     ap.add_argument("--machine", default="st", choices=["st", "ste", "megaste", "tt", "falcon"],
-                    help="machine for steps 1 and 2 (TOS 1.62 needs ste); step 3 always uses ste")
+                    help="machine for step 1 (TOS 1.62 needs ste); step 2 always uses ste")
     ap.add_argument("--display", default=":98")
     a = ap.parse_args()
 
@@ -214,76 +207,54 @@ def main():
     tos = os.path.abspath(a.tos)
     failures = []
 
-    # 1. INSTALL.PRG
-    h = Hatari(tos, hd, "C:\\INSTALL.PRG", out, "1-install", a.display, machine=a.machine)
+    # 1. EDGE.PRG, monochrome
+    h = Hatari(tos, hd, "C:\\EDGE.PRG", out, "1-edge", a.display, machine=a.machine)
     try:
-        h.wait_until(12)
+        h.wait_until(20)
         h.screenshot()
-        h.click(*INSTALL_NAME_FIELD)
-        h.type("TEST")
-        h.click(*INSTALL_MIRROR_NO)
-        h.screenshot()
-        h.click(*INSTALL_BUTTON)
-        time.sleep(8)
-        h.screenshot()
-        time.sleep(20)
-        h.screenshot()
+        alive = h.running()
     finally:
         h.stop()
+    log = h.trace()
+    check('EDGE.RSC' in log and 'Fopen' in log, "EDGE.PRG opened EDGE.RSC", failures)
+    check('EDGE.INF' in log, "EDGE.PRG got through its start-up (looked for EDGE.INF)", failures)
+    check(alive, "Hatari was still running EDGE.PRG after 20 s", failures)
 
-    edge_dir = os.path.join(hd, "EDGE")
-    installed = os.path.join(edge_dir, "EDGE.PRG")
-    check(os.path.isdir(edge_dir), "INSTALL.PRG created C:\\EDGE", failures)
-    for name in ("EDGE.PRG", "EDGE.RSC"):
-        check(os.path.isfile(os.path.join(edge_dir, name)), "C:\\EDGE\\%s installed" % name, failures)
-    if os.path.isfile(installed):
-        with open(installed, "rb") as f1, open(os.path.join(a.dist, "EDGE.PRG"), "rb") as f2:
-            check(f1.read() != f2.read(), "installed EDGE.PRG carries the registration data", failures)
-
-    # 2. the installed EDGE.PRG
-    if os.path.isfile(installed):
-        h = Hatari(tos, hd, "C:\\EDGE\\EDGE.PRG", out, "2-edge", a.display, machine=a.machine)
-        try:
-            h.wait_until(20)
-            h.screenshot()
-            alive = h.running()
-        finally:
-            h.stop()
-        log = h.trace()
-        check('EDGE.RSC' in log and 'Fopen' in log, "EDGE.PRG opened EDGE.RSC", failures)
-        check('EDGE.INF' in log, "EDGE.PRG got past the registration check (looked for EDGE.INF)", failures)
-        check(alive, "Hatari was still running EDGE.PRG after 20 s", failures)
-
-    # 3. colour, STE medium resolution: drop down a menu
-    if os.path.isfile(installed):
-        floppy = os.path.join(out, "blank.st")
-        blank_floppy(floppy)
-        h = Hatari(tos, hd, "D:\\EDGE\\EDGE.PRG", out, "3-colour", a.display,
-                   machine="ste", monitor="rgb",
-                   extra=("--tos-res", "med", "--gemdos-drive", "D", "--disk-a", floppy))
-        try:
-            h.wait_until(22)
-            h.move(*AWAY_FROM_MENUS)
-            time.sleep(2)
-            before = h.screenshot()
-            h.move(*UNDELETE_MENU_TITLE)
-            time.sleep(3)
-            after = h.screenshot()
-            h.move(*AWAY_FROM_MENUS)
-            time.sleep(3)
-            h.screenshot()
-            alive = h.running()
-        finally:
-            h.stop()
-        log = h.trace()
-        n = changed_pixels(before, after, UNDELETE_MENU_AREA) if before and after else 0
-        check(n > 2000, "colour: the Undelete menu dropped down (%d pixels changed)" % n, failures)
-        start = log.find('Pexec(0, "D:\\EDGE\\EDGE.PRG"')
-        after_start = log[start:] if start >= 0 else ""   # EmuTOS probes the hardware at boot
-        check(start >= 0, "colour: EDGE.PRG was started", failures)
-        crash = [c for c in CRASH_SIGNS if c in after_start]
-        check(not crash, "colour: no CPU exception%s" % (" (%s)" % ", ".join(crash) if crash else ""), failures)
-        check(alive, "colour: Hatari was still running EDGE.PRG", failures)
+    # 2. colour, STE medium resolution: drop down a menu
+    floppy = os.path.join(out, "blank.st")
+    blank_floppy(floppy)
+    h = Hatari(tos, hd, "D:\\EDGE.PRG", out, "2-colour", a.display,
+               machine="ste", monitor="rgb",
+               extra=("--tos-res", "med", "--gemdos-drive", "D", "--disk-a", floppy))
+    try:
+        h.wait_until(22)
+        h.move(*AWAY_FROM_MENUS)
+        time.sleep(2)
+        before = h.screenshot()
+        h.move(*UNDELETE_MENU_TITLE)
+        time.sleep(3)
+        after = h.screenshot()
+        h.move(*AWAY_FROM_MENUS)
+        time.sleep(3)
+        h.screenshot()
+        h.move(*HELP_MENU_TITLE)
+        time.sleep(2)
+        h.click(*HELP_MENU_FIRST_ITEM)
+        time.sleep(4)
+        h.screenshot()
+        alive = h.running()
+    finally:
+        h.stop()
+    log = h.trace()
+    n = changed_pixels(before, after, UNDELETE_MENU_AREA) if before and after else 0
+    check(n > 2000, "colour: the Undelete menu dropped down (%d pixels changed)" % n, failures)
+    start = log.find('Pexec(0, "D:\\EDGE.PRG"')
+    after_start = log[start:] if start >= 0 else ""   # EmuTOS probes the hardware at boot
+    check(start >= 0, "colour: EDGE.PRG was started", failures)
+    crash = [c for c in CRASH_SIGNS if c in after_start]
+    check(not crash, "colour: no CPU exception%s" % (" (%s)" % ", ".join(crash) if crash else ""), failures)
+    check('Fopen("D:\\HELP\\FILE.HLP"' in after_start, "colour: the Help menu opened HELP\\FILE.HLP", failures)
+    check(alive, "colour: Hatari was still running EDGE.PRG", failures)
 
     print("screenshots and logs in", out)
     if failures:

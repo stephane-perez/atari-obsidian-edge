@@ -89,22 +89,6 @@ long fputl(long l,FILE *fp)
 }
 
 /*
- *	Lattice C srand48()/mrand48(): see lattice.h
- */
-static unsigned long long rand48_state;
-
-void oe_srand48(long seed)
-{
-	rand48_state = ((unsigned long long)(unsigned long)seed << 16) | 0x330eULL;
-}
-
-long oe_mrand48(void)
-{
-	rand48_state = (rand48_state * 0x5deece66dULL + 0xbULL) & 0xffffffffffffULL;
-	return (long)(unsigned long)rand48_state;
-}
-
-/*
  *	swab(), safe when from == to
  */
 void oe_swab(const void *from,void *to,ssize_t n)

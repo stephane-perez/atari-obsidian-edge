@@ -8,6 +8,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: prototypes match the function definitions
+ *
+ *	Modified for Obsidian Edge (November 2026): demo version removed
  */
 
 /*

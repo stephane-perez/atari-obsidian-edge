@@ -8,6 +8,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: prototypes match the function definitions (char vs unsigned char)
+ *
+ *	Modified for Obsidian Edge (November 2026): removed the prototype of protect(), file names in comments
  */
 
 /* Prototypes for functions defined in copyd.c */

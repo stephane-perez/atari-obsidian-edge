@@ -6,6 +6,9 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): removed the definitions left
+ *	over from the copy protection (INSTALL.PRG, "Unregistered")
  */
 
 /*
@@ -36,7 +39,6 @@
 #define PROGRAM_FILE	"EDGE.PRG"
 #define RSC_FILE		"EDGE.RSC"
 #define PREFS_FILE		"EDGE.INF"			/* stores preferences for Edge */
-#define IN_PROGRAM_FILE	"INSTALL.PRG"
 #define DM_PROGRAM_FILE	"DMIRROR.PRG"
 #define DM_PREFS_FILE	"DMIRROR.INF"		/* stores preferences for Diamond Mirror */
 #define DM_PATH			"%c:\\AUTO\\"		/* where to find Diamond Mirror program/prefs */
@@ -179,8 +181,6 @@
 
 #define MAPBADLIST_ROWS		8				/* for bad cluster/sector report */
 #define MAPBADLIST_COLS		5
-
-#define UNREGISTERED		"Unregistered"	/* must match string in "About" */
 
 /*
  *	EDGE preferences file

@@ -1,3 +1,32 @@
+Obsidian Edge change summary
+============================
+
+Obsidian Edge is a fork of Diamond Edge v2.57.  This is a summary of
+the changes compared to Diamond Edge v2.57; for details, see the git
+history: https://github.com/stephane-perez/atari-obsidian-edge
+
+v0.0.1 (November 2026)
+----------------------
+  . first release of the fork, renamed Obsidian Edge.  The About box
+    shows the fork's version; the windows and dialogs still say
+    "Diamond Edge", and Diamond Mirror still shows v2.57
+
+  . the copy protection, the registration and the demo version are
+    removed: there is no INSTALL.PRG any more.  EDGE.PRG runs from
+    its folder, with its help files in the HELP folder next to it.
+    To use Diamond Mirror, copy DMIRROR.PRG to the AUTO folder of
+    the boot drive and configure it from Edge, as before
+
+  . rebuilt with GCC and libcmini instead of Lattice C
+
+  . help: new topic "About Obsidian Edge" (credits, license, source
+    code) in the File help; the Technical Support topic of the
+    Utility help no longer refers to Anodyne Software's support and
+    to the registration code
+
+  . the disk functions are unchanged, and not tested yet
+
+
 Diamond Edge change summary
 ===========================
 

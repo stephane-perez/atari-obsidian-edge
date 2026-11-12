@@ -205,22 +205,17 @@
  
  ù  Technical Support
  
-    Diamond Edge is backed by Anodyne Software's experienced technical
- support. If you require assistance beyond that which the manual, help
- features, and READ.ME files can provide, then we are available to help
- you.
+    Obsidian Edge is free software, maintained by volunteers, without
+ commercial support (Anodyne Software no longer supports Diamond
+ Edge).  To report a problem, open an issue at:
+    https://github.com/stephane-perez/atari-obsidian-edge/issues
  
-    Before calling technical support, please attempt to recreate the
- problem so that you can provide us with an exact sequence of events.
- If the problem reoccurs, then contact us with the following
- information:
+    Please first attempt to recreate the problem so that you can give
+ an exact sequence of events, and include the following information:
  
     ù  Product Information:  The name, version number, and file
        date/time of the application program.  The version number
        appears in the About box.
- 
-    ù  Your user registration code:  This appears on the distribution
-       disk label.
  
     ù  System Information: The model of TOS-compatible system that you
        use, including memory configuration, operating system version

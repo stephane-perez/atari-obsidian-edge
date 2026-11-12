@@ -11,8 +11,9 @@ Like its ancestor, it aims to provide:
 - file undeletion.
 
 > **Status: version 0.0.1 (work in progress).** This is the first release of the
-> fork. It is based on Diamond Edge 2.57 and does not yet contain functional
-> changes. Always back up your data before running any disk optimiser.
+> fork. It is based on Diamond Edge 2.57, rebuilt with GCC, without the copy
+> protection and the demo version; the disk functions are unchanged and not
+> tested yet. Always back up your data before running any disk optimiser.
 
 ## Origin and credits
 
@@ -30,7 +31,16 @@ name of the original product; this fork uses a different name to avoid any
 confusion with it.
 
 The full git history of the upstream repository is preserved in this repository.
-See [`NOTICE`](NOTICE) for copyright and modification details.
+The changes made to Diamond Edge are summarised in
+[`DOC/CHANGES.TXT`](DOC/CHANGES.TXT).
+
+```
+Copyright (C) Robert D. Luneski / Oregon Research Associates
+Copyright (C) 2002-2017 Roger Burrows / Anodyne Software
+Copyright (C) 2026 Stephane Perez (Obsidian Edge)
+```
+
+The original copyright notices are kept unchanged in every source file.
 
 ## Compatibility
 
@@ -107,14 +117,28 @@ numbering (upstream's last version is 2.57).
 
 Obsidian Edge is free software, released under the
 **GNU General Public License, version 2** (June 1991), like the upstream
-source release. See [`COPYING`](COPYING) for the full license text
-(copied unchanged from the upstream repository).
+source release. See [`DOC/LICENSE.TXT`](DOC/LICENSE.TXT) for the full license
+text (unchanged from the upstream repository; it is also in the distribution as
+`LICENSE.TXT`).
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.
 
+The complete corresponding source code is in this repository. Any binary
+distribution (for example a `.PRG` file attached to a release) must be
+accompanied by, or give a link to, the matching source code.
+
 ## Contributing
 
 Issues and pull requests are welcome. By contributing, you agree that your
 contribution is licensed under the same GPL v2 terms.
+
+As required by section 2(a) of the GPL v2, a source file modified in this fork
+carries a notice saying that it was changed, and when, below its original
+copyright notice (for example `Modified for Obsidian Edge (November 2026): ...`).
+User-visible changes are also listed in [`DOC/CHANGES.TXT`](DOC/CHANGES.TXT).
+
+The sources inherited from Diamond Edge use the Atari 8-bit character set,
+CR LF line ends and tabs of 4: see `.editorconfig`. Do not let an editor
+convert them to UTF-8 (the CI rejects it).

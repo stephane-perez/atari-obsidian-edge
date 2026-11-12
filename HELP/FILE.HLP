@@ -11,15 +11,16 @@
     ù  The Disk Fragmentation Map Display
     ù  The All Partitions Information Display
     ù  The Print Function
+    ù  About Obsidian Edge
  
  
  ù  Preferences
  
     User selectable preferences are available through the Preferences
- option under the File menu.  These preferences are automatically set
- during the installation process and you may modify them at any time.
- The selectable options include the default path where you want both
- Diamond Edge Information and Validation files to be saved.
+ option under the File menu.  Until you save them, default preferences
+ are used, and you may modify them at any time.  The selectable options
+ include the default path where you want both Diamond Edge Information
+ and Validation files to be saved (initially, the folder of EDGE.PRG).
  
     ù  Note that ALL of the currently selected menu options and
        switches are saved in the configuration file. This includes
@@ -164,5 +165,30 @@
  above by selecting Print (Alt-P) from the main window icons.  It is
  a good idea to have a printout of all your critical disk information
  for emergency recovery purposes.
+
+
+ ù  About Obsidian Edge
+ 
+    Obsidian Edge is a free fork of Diamond Edge 2.57.  Diamond Edge
+ was created by Robert D. Luneski at Oregon Research Associates, then
+ maintained by Roger Burrows (Anodyne Software), who released its
+ source code under the GNU General Public License in January 2017.
+ Obsidian Edge is an independent project, not affiliated with or
+ endorsed by Oregon Research Associates, Anodyne Software or the
+ authors of Diamond Edge.
+ 
+    Copyright (C) Robert D. Luneski / Oregon Research Associates
+    Copyright (C) 2002-2017 Roger Burrows / Anodyne Software
+    Copyright (C) 2026 Stephane Perez (Obsidian Edge)
+ 
+    This program is free software: you can redistribute it and/or
+ modify it under the terms of the GNU General Public License,
+ version 2 (see LICENSE.TXT).  It is distributed in the hope that it
+ will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ 
+    The source code, and the list of the changes made to Diamond
+ Edge, are available at:
+    https://github.com/stephane-perez/atari-obsidian-edge
 
 

@@ -12,6 +12,8 @@
  *	Modified for Obsidian Edge (November 2026): demo version removed
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *
+ *	Modified for Obsidian Edge (November 2026): error code initialised when the mirror file cannot be read
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -1207,7 +1209,7 @@ char *mfat12;
 				Fclose(from);
 				return mfat16;
 			}
-		}
+		} else count = -1;
 	} else {								/* fat12 */
 		if ((mfat16=calloc(3,dpb.bpf)) == NULL) {
 			error(3*dpb.bpf,MEMALLOC,"");

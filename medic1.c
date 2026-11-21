@@ -12,6 +12,9 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: no cast as lvalue
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
 /*
@@ -745,7 +748,7 @@ char pathout[MAX_ERRFILEMSGSIZE];
 				must_write(dev,dpb.spc,logsector(st),dirlist[dirlevel].dirbuf+offset,DIR);
 				st = fat16[st];
 				offset += (long) dpb.bpc;
-			} while (st != dpb.bitmask);
+			} while (st != (short)dpb.bitmask);
 		} else {
 			must_write(dev,dpb.rds,1+2*dpb.spf,dirlist[0].dirbuf,DIR);
 		}
@@ -823,7 +826,7 @@ long offset;
 		prev = st;
 		st = fat16[st];
 		offset += dpb.bpc;
-	} while (st != dpb.bitmask);
+	} while (st != (short)dpb.bitmask);
 
 	return 0;
 }
@@ -885,7 +888,7 @@ short st;
 		draw_block(st,flag);
 		tfat[st] = 1;
 		st = fat16[st];
-	} while (st != dpb.bitmask);
+	} while (st != (short)dpb.bitmask);
 }
 
 /**********************************************************************/
@@ -897,7 +900,7 @@ short st;
 	do {
 		tfat[st] = 1;
 		st = fat16[st];
-	} while (st != dpb.bitmask);
+	} while (st != (short)dpb.bitmask);
 }
 
 /*
@@ -1098,7 +1101,7 @@ char dname[MAX_FILENAME];
 		st = fat16[st];
 		i++;
 
-		if (st == dpb.bitmask)
+		if (st == (short)dpb.bitmask)
 			break;
 
 		if (!valid_cluster(st)) {
@@ -1282,7 +1285,7 @@ DIRENTRY *d;
 
 	for (i = 2; i < dpb.maxc; i++) {
 		if ((tfat[i] != 0) && (tfat[i] != 1)) {
-			if (tfat[i] != dpb.badmask) {
+			if (tfat[i] != (short)dpb.badmask) {
 				/* diskerr(14); */
 				errcnt[LOSTCLUSTER]++;
 			} else nbadclus++;
@@ -1294,7 +1297,7 @@ DIRENTRY *d;
 	write_errfile("%s  %d %s\n",pathin,errcnt[LOSTCLUSTER],text[MEDLOG_LOSTCLUS].ob_spec);
 	for (i = 2, num = 0; i < dpb.maxc; i++) {
 		if ((tfat[i] != 0) && (tfat[i] != 1)) {
-			if (tfat[i] != dpb.badmask) {
+			if (tfat[i] != (short)dpb.badmask) {
 				write_errfile(" %5d%c",i,(++num%10)?' ':'\n');
 				if (opt.visual)
 					draw_block(i,CLUSTER_ERR);
@@ -1325,13 +1328,13 @@ DIRENTRY *d;
 
 	for (total = 0; endpoint < end; endpoint += sizeof(DIRENTRY), total += num) {
 		for (i = 2, num = 0; i < dpb.maxc; i++) {
-			if ((tfat[i] != 0) && (tfat[i] != 1) && (tfat[i] != dpb.badmask)) {
+			if ((tfat[i] != 0) && (tfat[i] != 1) && (tfat[i] != (short)dpb.badmask)) {
 				num = 1;
 				tfat[i] = 1;
 				start = curc = i;
 				st = fat16[curc];
-				while(st != dpb.bitmask) {
-					if (!valid_cluster(st) || (tfat[st] == 1) || (tfat[st] == dpb.badmask)) {
+				while(st != (short)dpb.bitmask) {
+					if (!valid_cluster(st) || (tfat[st] == 1) || (tfat[st] == (short)dpb.badmask)) {
 						fat16[curc] = dpb.bitmask;
 						break;
 					}
@@ -1917,7 +1920,7 @@ char *temp;
 				must_write(dev,dpb.spc,logsector(st),dirlist[dirlevel].dirbuf+offset,DIR);
 				st = fat16[st];
 				offset += dpb.bpc;
-			} while (st != dpb.bitmask);
+			} while (st != (short)dpb.bitmask);
 		} else {
 			must_write(dev,dpb.rds,1+2*dpb.spf,dirlist[0].dirbuf,DIR);
 		}
@@ -1988,7 +1991,7 @@ long offset;
 			}
 		}
 		offset += (long) dpb.bpc;
-	} while (st != dpb.bitmask);
+	} while (st != (short)dpb.bitmask);
 
 	return 0;
 }
@@ -2520,7 +2523,7 @@ int needtowrite = 0;
 			needtowrite = 1;
 		} else clusters++;					/* good cluster: count it */
 
-		if (st == dpb.bitmask)				/* end of chain */
+		if (st == (short)dpb.bitmask)				/* end of chain */
 			break;
 
 		if (!valid_cluster(st)) {			/* invalid cluster: */

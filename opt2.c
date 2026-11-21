@@ -10,6 +10,9 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: no casts as lvalues
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
 /*
@@ -814,7 +817,7 @@ DIRENTRY *dirend;
 			}
 			st = fat16[st];
 			offset += (long) dpb.bpc;
-		} while (st != dpb.bitmask);
+		} while (st != (short)dpb.bitmask);
 
 		if (curfile->name[0] == DELETION_MARK)
 			continue;
@@ -867,7 +870,7 @@ DIRENTRY *dirend;
 			must_write(dev,dpb.spc,logsector(st),dirlist[dirlevel].dirbuf+offset,DIR);
 			st = fat16[st];
 			offset += dpb.bpc;
-		} while (st != dpb.bitmask);
+		} while (st != (short)dpb.bitmask);
 		up_dirlist();
 	}
 
@@ -1497,7 +1500,7 @@ char *dirend;
 			}
 			st = fat16[st];
 			offset += (long) dpb.bpc;
-		} while (st != dpb.bitmask);
+		} while (st != (short)dpb.bitmask);
 
 		if (curfile->name[0] == DELETION_MARK)
 			continue;
@@ -1535,7 +1538,7 @@ char *dirend;
 			must_write(dev,dpb.spc,logsector(st),dirlist[dirlevel].dirbuf+offset,DIR);
 			st = fat16[st];
 			offset += dpb.bpc;
-		} while (st != dpb.bitmask);
+		} while (st != (short)dpb.bitmask);
 		up_dirlist();
 	}
 
@@ -1566,7 +1569,7 @@ short nc = nextcluster;
 		nc++;
 		start = fat16[start];
 		cnt++;
-	} while(start != dpb.bitmask);
+	} while(start != (short)dpb.bitmask);
 
 	return cnt;
 }
@@ -1606,7 +1609,7 @@ short nc = nextcluster;
 			;
 		start = fat16[start];
 		cnt++;
-	} while(start != dpb.bitmask);
+	} while(start != (short)dpb.bitmask);
 
 	return cnt;
 }

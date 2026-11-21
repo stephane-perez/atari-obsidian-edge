@@ -10,6 +10,9 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: prototypes match the function definitions
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
 /*
@@ -274,7 +277,7 @@ unsigned short *f;
 					notused++;
 				st = mirrorfat[st];
 				j++;
-			} while (st != dpb.bitmask);
+			} while (st != (short)dpb.bitmask);
 			if (j == nclus)
 				break;
 		}
@@ -562,7 +565,7 @@ long offset;
 			}
 			st = fat16[st];
 			offset += dpb.bpc;
-		} while(st!=dpb.bitmask);
+		} while(st!=(short)dpb.bitmask);
 		startpoint = curdirbuf + 2*sizeof(DIRENTRY);
 		endpoint = sort_dir(curdirbuf,ncl,0);		/* don't remove deletions! */
 	}
@@ -843,7 +846,7 @@ short ret = -1;
 			}
 			st = fat16[st];
 			offset += (long) dpb.bpc;
-		} while (st != dpb.bitmask);
+		} while (st != (short)dpb.bitmask);
 
 		endp = sort_dir(dirlist[fdirlevel].dirbuf,ncl,0);	/* don't remove deletions! */
 	}
@@ -1049,7 +1052,7 @@ short lastc, num2, unumclus, ucclus, unextc, unum, dotype;
 		} else {
 			while(fat16[ucclus]) {			/* look for first free cluster in current FAT */
 				ucclus = mirrorfat[ucclus];	/* while following chain in mirror */
-				if (ucclus == dpb.bitmask) {/* end of chain: start of deleted file has been reused ... */
+				if (ucclus == (short)dpb.bitmask) {/* end of chain: start of deleted file has been reused ... */
 					dotype = SIM;
 					break;
 				}
@@ -1060,7 +1063,7 @@ short lastc, num2, unumclus, ucclus, unextc, unum, dotype;
 	unum = 0;						/* count clusters written */
 	if (dotype == MIR) {
 		putword(&entry->start,ucclus);
-		for (unextc = mirrorfat[ucclus]; unextc != dpb.bitmask; unextc = mirrorfat[unextc]) {
+		for (unextc = mirrorfat[ucclus]; unextc != (short)dpb.bitmask; unextc = mirrorfat[unextc]) {
 			if (fat16[unextc] == 0) {
 				fat16[ucclus] = unextc;
 				ucclus = unextc;

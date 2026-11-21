@@ -7,6 +7,9 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): BETA version and expiry date removed
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
 /*
@@ -925,7 +928,7 @@ long size;
 		st = fat16[st];
 		i++;
 
-		if (st == dpb.bitmask)
+		if (st == (short)dpb.bitmask)
 			break;
 
 		if (!valid_cluster(st)) {
@@ -971,7 +974,7 @@ int i, rc = 0;
 
 	for (i = 2; i < dpb.maxc; i++) {
 		if ((tfat[i] != 0) && (tfat[i] != 1)) {
-			if (tfat[i] != dpb.badmask) {
+			if (tfat[i] != (short)dpb.badmask) {
 				errcnt[LOSTCLUSTER]++;
 				rc = -1;					/* found a lost cluster ... */
 			}
@@ -994,7 +997,7 @@ short st;
 	do {
 		tfat[st] = 1;
 		st = fat16[st];
-	} while (st != dpb.bitmask);
+	} while (st != (short)dpb.bitmask);
 }
 
 /*
@@ -1035,7 +1038,7 @@ char dname[MAX_FILENAME];
 		dirlevel++;
 		st = dirstart = get_word((char *)&curfile->start);
 		ncl = 1;
-		while (fat16[st] != dpb.bitmask) {
+		while (fat16[st] != (short)dpb.bitmask) {
 			sc = st;
 			st = fat16[st];
 			if (!valid_cluster(st)) {
@@ -1165,7 +1168,7 @@ long offset, rc;
 		prev = st;
 		st = fat16[st];
 		offset += dpb.bpc;
-	} while (st != dpb.bitmask);
+	} while (st != (short)dpb.bitmask);
 
 	return 0;
 }

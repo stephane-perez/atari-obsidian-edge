@@ -13,6 +13,9 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
 /*
@@ -507,7 +510,7 @@ unsigned short ls;
 				return -1;
 
 			st = f16[st];
-			if (st == dpb.bitmask)
+			if (st == (short)dpb.bitmask)
 				break;
 
 			if (!valid_cluster(st))
@@ -613,7 +616,7 @@ short prev, st, numfrags, sz, fill;
 			}
 			prev = st;
 			st = f16[prev];
-			if (st == dpb.bitmask)					/* end of chain */
+			if (st == (short)dpb.bitmask)					/* end of chain */
 				break;
 			if (st != prev+1)						/* fragmented ? */
 				if (f16[prev+1] != dpb.badmask)		/* only counts if NOT due to bad sector */

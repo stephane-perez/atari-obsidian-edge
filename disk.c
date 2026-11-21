@@ -12,6 +12,8 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): partitions with more than 32765 data clusters refused
  */
 
 /*
@@ -195,7 +197,7 @@ long rc;
 PUBLIC int load_mybpb(char *buf,MYBPB *mybpb,BPB *tbpb)
 {
 int n;
-long maxclus;
+long maxclus, ncdata;
 
 	if (tbpb)
 		mybpb->isfat16 = tbpb->bflags & 0x01;
@@ -240,7 +242,12 @@ long maxclus;
 		if (tbpb)
 			mybpb->cdata = tbpb->numcl;		/* test for DL2 */
 	} else {
-		mybpb->cdata = (short) ((mybpb->tsec-mybpb->firstd) / mybpb->spc);
+		if (mybpb->spc <= 0)
+			return -1;
+		ncdata = (mybpb->tsec-mybpb->firstd) / mybpb->spc;
+		if ((ncdata < 0) || (ncdata > MAX_DATA_CLUSTERS))
+			return -1;						/* cluster numbers are shorts */
+		mybpb->cdata = (short)ncdata;
 		if (mybpb->datalite)
 			mybpb->tsec = *(unsigned short *)(buf+DATALITE_SEC_OFFSET);
 	}
@@ -285,7 +292,7 @@ long maxclus;
 	if (mybpb->nfat != 2)
 		return -1;
 
-	if ((mybpb->cdata < 0) || (mybpb->cdata > 32767))		//MAGNUM
+	if ((mybpb->cdata < 0) || (mybpb->cdata > MAX_DATA_CLUSTERS))
 		return -1;
 
 	return 0;

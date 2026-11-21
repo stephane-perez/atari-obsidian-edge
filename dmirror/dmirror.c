@@ -9,6 +9,8 @@
  *	Modified for Obsidian Edge (November 2026): BETA version and expiry date removed
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *
+ *	Modified for Obsidian Edge (November 2026): partitions with more than 32765 data clusters refused
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -670,7 +672,7 @@ char *bbuf;
 int load_mybpb(char *buff,MYBPB *mybpb,BPB *tbpb)
 {
 int n;
-long maxclus;
+long maxclus, ncdata;
 
 	if (tbpb)
 		mybpb->isfat16 = tbpb->bflags & 0x01;
@@ -706,7 +708,12 @@ long maxclus;
 	mybpb->nres = get_word(buff + 14);		/* number reserved */
 	mybpb->firstd = (mybpb->nfat*mybpb->spf) + mybpb->rds + mybpb->nres;
 
-	mybpb->cdata = (short) ((mybpb->tsec-mybpb->firstd) / mybpb->spc);
+	if (mybpb->spc <= 0)
+		return -1;
+	ncdata = (mybpb->tsec-mybpb->firstd) / mybpb->spc;
+	if ((ncdata < 0) || (ncdata > MAX_DATA_CLUSTERS))
+		return -1;							/* cluster numbers are shorts */
+	mybpb->cdata = (short)ncdata;
 
 	mybpb->bpf = (long)mybpb->spf * mybpb->bps;
 	mybpb->rdb = (long)mybpb->rds * mybpb->bps;	/* root dir bytes */
@@ -748,7 +755,7 @@ long maxclus;
 	if (mybpb->nfat != 2)
 		return 0;
 
-	if ((mybpb->cdata < 0) || (mybpb->cdata > 32767))		//MAGNUM
+	if ((mybpb->cdata < 0) || (mybpb->cdata > MAX_DATA_CLUSTERS))
 		return 0;
 
 	return 1;

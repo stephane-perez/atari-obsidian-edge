@@ -8,6 +8,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): removed the definitions left
+ *
+ *	Modified for Obsidian Edge (November 2026): MAX_DATA_CLUSTERS
  *	over from the copy protection (INSTALL.PRG, "Unregistered")
  */
 
@@ -157,6 +159,8 @@
 #define fattr(a)			(*(a+11))
 #define form_feed()			(Cprnout(0x0c))
 #define ring_bell()			(Cconout(0x07))
+/* cluster numbers are shorts: maxc (cdata+2) must stay below 32768 */
+#define MAX_DATA_CLUSTERS	32765
 #define valid_cluster(clus)	(((clus)>=2)&&((clus)<dpb.maxc))
 #define IS_COLOUR_AES		(_AESglobal[0] >= 0x330)
 #define MAGX_COOKIE			0x4d616758L		/* MagX */

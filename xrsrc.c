@@ -8,6 +8,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: xdraw_cicon() runs
+ *
+ *	Modified for Obsidian Edge (November 2026): R_IMAGEDATA returns the image pointer
  *	on a private stack (the AES calls it on its own, small, stack)
  */
 
@@ -493,7 +495,7 @@ union {
 
 	case R_IMAGEDATA:
 		the_addr = get_sub(index,hdr_buf->rsh_imdata,sizeof(BYTE *));
-		the_addr = (VOID *) *(BYTE *)the_addr;
+		the_addr = (VOID *) *(BYTE **)the_addr;
 		break;
 
 	case R_FRIMG:

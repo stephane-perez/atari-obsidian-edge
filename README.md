@@ -137,7 +137,8 @@ contribution is licensed under the same GPL v2 terms.
 As required by section 2(a) of the GPL v2, a source file modified in this fork
 carries a notice saying that it was changed, and when, below its original
 copyright notice (for example `Modified for Obsidian Edge (November 2026): ...`).
-User-visible changes are also listed in [`DOC/CHANGES.TXT`](DOC/CHANGES.TXT).
+Every change, fix and improvement is recorded in [`CHANGELOG.md`](CHANGELOG.md);
+user-visible changes are also listed in [`DOC/CHANGES.TXT`](DOC/CHANGES.TXT).
 
 The sources inherited from Diamond Edge use the Atari 8-bit character set,
 CR LF line ends and tabs of 4: see `.editorconfig`. Do not let an editor

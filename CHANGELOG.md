@@ -22,6 +22,25 @@ User-visible changes are also summarised, in plain ASCII for the Atari, in
   Tested in Hatari (EmuTOS, ACSI disk, FAT16): Optimize and Medic (with
   6 injected defects) now give disk images identical to Diamond Edge 2.57.
   See issue #2.
+- Medic, unreadable directory cluster (fix mode): the cluster count was
+  not decremented (`*ncl--` decremented the pointer), and the cluster
+  dropped from the chain was the wrong one: the next, readable, cluster was
+  marked bad and its link lost, so the scan then ran through cluster
+  `$FFF7`. Both copies (`load_directory()`, `load_directory_bad()`).
+- Medic: `*problems++` (pointer) instead of `(*problems)++` when the two
+  FATs differ.
+- Disk functions and Diamond Mirror: a partition with more than 32765 data
+  clusters overflowed the cluster counts (`short`) and the old check could
+  never fail; such partitions are now refused. A boot sector with 0
+  sectors per cluster no longer divides by zero.
+- Undelete: the error message after a failed seek in the FAT16 mirror file
+  showed an uninitialised value.
+- SCSIDRV `phys_read()`/`phys_write()`: uninitialised return value for 0
+  sectors.
+- File viewer: only the first line offset of a new text block was
+  initialised (missing `lptr++`).
+- Resource loader: `R_IMAGEDATA` read a byte instead of a pointer (not
+  used by the program).
 
 ## [0.0.1] - 2026-11
 

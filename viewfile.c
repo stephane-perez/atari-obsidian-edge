@@ -8,6 +8,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: prototype matches the function definition
+ *
+ *	Modified for Obsidian Edge (November 2026): all the line offsets of a text block initialised
  */
 
 /*
@@ -364,7 +366,7 @@ TEXTBLOCK *current, *prev;
 		current->tb_prev = prev;
 		current->tb_next = NULL;
 		for (n = 0, lptr = current->tb_offset; n < LINES_PER_BLOCK; n++)
-			*lptr = -1L;
+			*lptr++ = -1L;
 	}
 
 	current->tb_offset[blockpos] = offset;

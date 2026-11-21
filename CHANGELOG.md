@@ -26,7 +26,12 @@ User-visible changes are also summarised, in plain ASCII for the Atari, in
   not decremented (`*ncl--` decremented the pointer), and the cluster
   dropped from the chain was the wrong one: the next, readable, cluster was
   marked bad and its link lost, so the scan then ran through cluster
-  `$FFF7`. Both copies (`load_directory()`, `load_directory_bad()`).
+  `$FFF7`; when the bad cluster was the last one, `fat16[-1]` was
+  overwritten. Both copies (`load_directory()`, `load_directory_bad()`).
+  Tested in Hatari with an unreadable first, middle and last folder
+  cluster: the folder chain is repaired, the cluster is marked bad and the
+  disk is clean for `fsck.fat`; Diamond Edge 2.57 hangs on the middle case
+  and leaves the last one unmarked.
 - Medic: `*problems++` (pointer) instead of `(*problems)++` when the two
   FATs differ.
 - Disk functions and Diamond Mirror: a partition with more than 32765 data

@@ -14,6 +14,8 @@
  *	Modified for Obsidian Edge (November 2026): demo version removed
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *
+ *	Modified for Obsidian Edge (November 2026): unreadable directory clusters dropped correctly, counters fixed
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -441,7 +443,7 @@ static char title[MAX_DISPLAYSIZE];
 	sprintf(medic[BADCLUS].ob_spec,"%5d",nbadclus);
 	if (faterr) {
 		strcpy(medic[FAT12].ob_spec,text[MISC_ERROR].ob_spec);
-		*problems++;
+		(*problems)++;
 	} else sprintf(medic[FAT12].ob_spec,"%5s",text[MISC_OK].ob_spec);
 
 	if (!*problems) {
@@ -798,7 +800,7 @@ long offset;
 					up_dirlist();
 					return -1;
 				} else {
-					*ncl--;
+					(*ncl)--;
 					if (st == *dirstart) {
 						*mustwrite = 1;
 						*dirstart = fat16[st];
@@ -809,9 +811,9 @@ long offset;
 						return 1;
 					} else {
 						tfat[st] = 1;
-						fat16[prev] = fat16[st];
-						st = fat16[st];
+						fat16[prev] = fat16[st];	/* drop the bad cluster from the chain */
 						fat16[st] = dpb.badmask;
+						st = fat16[prev];
 						continue;
 					}
 				}
@@ -1959,7 +1961,7 @@ long offset;
 				up_dirlist();
 				return -1;
 			} else {
-				*ncl--;
+				(*ncl)--;
 				if (st == *dirstart) {
 					*mustwrite = 1;
 					*dirstart = fat16[st];
@@ -1968,9 +1970,9 @@ long offset;
 					assert(offset==0L);		/* temporary paranoia */
 					return 1;
 				} else {
-					fat16[prev] = fat16[st];
-					st = fat16[st];
+					fat16[prev] = fat16[st];		/* drop the bad cluster from the chain */
 					fat16[st] = dpb.badmask;
+					st = fat16[prev];
 					continue;
 				}
 			}
@@ -1978,7 +1980,7 @@ long offset;
 		prev = st;
 		st = fat16[st];
 		if (is_bad_cluster(st)) {
-			*ncl--;
+			(*ncl)--;
 			*mustwrite = 1;
 			if (fat16[st] == dpb.bitmask) {		/* bad last cluster */
 				fat16[st] = dpb.badmask;

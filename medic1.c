@@ -16,6 +16,8 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
  *
  *	Modified for Obsidian Edge (November 2026): unreadable directory clusters dropped correctly, counters fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 alert
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -346,7 +348,7 @@ static char title[MAX_DISPLAYSIZE];
 	if (get_mybpb(&dpb,dev) < 0) {
 		strcpy(medic[VBOOTS].ob_spec,text[MISC_ERROR].ob_spec);
 		redraw_object(medic,VBOOTS);
-		xform_alert(1,MD_BADBOOT_ALERT);
+		bpb_alert(MD_BADBOOT_ALERT);
 		return 1;
 	}
 	strcpy(medic[VBOOTS].ob_spec,text[MISC_OK].ob_spec);
@@ -1475,7 +1477,7 @@ static char title[MAX_DISPLAYSIZE];
 	if (get_mybpb(&dpb,dev) < 0) {
 		strcpy(medic[VBOOTS].ob_spec,text[MISC_ERROR].ob_spec);
 		redraw_object(medic,VBOOTS);
-		xform_alert(1,MD_BADBOOT_ALERT);
+		bpb_alert(MD_BADBOOT_ALERT);
 	} else {
 		wind_update(BEG_UPDATE);
 		mouse_off();

@@ -14,6 +14,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): partitions with more than 32765 data clusters refused
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 partitions recognised and refused
  */
 
 /*
@@ -44,6 +46,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <aes.h>
+#include <cookie.h>
 #include <dos.h>
 #include <limits.h>
 #include <oserr.h>
@@ -54,6 +57,8 @@
 #include "edgedefs.h"
 #include "miscdef.h"
 #include "proto.h"
+
+PRIVATE short fat32_seen;
 
 #define MODULE_NUMBER	2		/* used by error() macro */
 
@@ -146,6 +151,12 @@ long n;
 BPB *tbpb;
 char *bbuf;
 
+	fat32_seen = 0;
+	if (is_fat32_partition(device)) {	/* not supported: no BIOS access, no error */
+		fat32_seen = 1;
+		return E_FAT32;
+	}
+
 	_mediach(device);
 	n = (device>=FIRST_HD_DEVICE) ? MAX_HD_LOGSECSIZE : MAX_FL_LOGSECSIZE;
 	if ((bbuf=malloc(n)) == NULL) {
@@ -158,13 +169,77 @@ char *bbuf;
 		return ret;
 	}
 
-	if ((tbpb=Getbpb(device)) == NULL)
+	if (is_fat32_bootsector(bbuf)) {
+		fat32_seen = 1;
+		ret = E_FAT32;
+	} else if ((tbpb=Getbpb(device)) == NULL)
 		ret = -1;
 	else ret = load_mybpb(bbuf,mybpb,tbpb);
 
 	free(bbuf);
 
 	return ret;
+}
+
+/*
+ *	FAT32 partitions are not supported.  They are recognised from their
+ *	partition type, which the XHDI driver gives (EmuTOS and HDDriver map
+ *	them to drive letters, but the BIOS cannot read them), or else from
+ *	the boot sector (when the BIOS can read it, e.g. under FreeMiNT).
+ */
+
+long oe_xhdi_version(long entry);
+long oe_xhdi_inqdev2(long entry,long dev,unsigned long *start,char *partid);
+
+static long xhdi_entry;
+static short xhdi_dev;
+static char xhdi_partid[4];
+
+static long xhdi_partid_super(void)
+{
+static unsigned long start;
+
+	if (*(long *)(xhdi_entry-4) != 0x27011992L)	/* XHDI magic */
+		return -1L;
+	if ((oe_xhdi_version(xhdi_entry) & 0xffffL) < 0x0110)	/* XHInqDev2() */
+		return -1L;
+	return oe_xhdi_inqdev2(xhdi_entry,xhdi_dev,&start,xhdi_partid);
+}
+
+PUBLIC int is_fat32_partition(short dev)
+{
+	if (dev < FIRST_HD_DEVICE)
+		return 0;
+	if (!getcookie(0x58484449L,&xhdi_entry) || !xhdi_entry)	/* 'XHDI' */
+		return 0;
+	xhdi_dev = dev;
+	memset(xhdi_partid,0,sizeof(xhdi_partid));
+	if (Supexec(xhdi_partid_super) != 0L)
+		return 0;
+	if (memcmp(xhdi_partid,"F32",3) == 0)		/* Atari (AHDI/XGM) partition */
+		return 1;
+	if ((xhdi_partid[0] == 0) && (xhdi_partid[1] == 'D'))	/* DOS (MBR) partition */
+		switch((unsigned char)xhdi_partid[2]) {
+		case 0x0b: case 0x0c: case 0x1b: case 0x1c:
+			return 1;
+		}
+	return 0;
+}
+
+PUBLIC int is_fat32_bootsector(char *buf)
+{
+	/* 16-bit sectors per FAT is 0, and the FAT32 file system type */
+	return (get_word(buf+22) == 0) && (memcmp(buf+82,"FAT32",5) == 0);
+}
+
+/*
+ *	the alert for a get_mybpb() failure: FAT32 partitions get their own
+ */
+PUBLIC void bpb_alert(int index)
+{
+	if (fat32_seen)
+		form_alert(1,FAT32_ALERT);
+	else xform_alert(1,index);
 }
 
 /*
@@ -439,7 +514,7 @@ char temp[MAX_DISPLAYSIZE];
 	wrap_bar();
 	dev = savedev;
 	if (get_mybpb(&dpb,dev) < 0)
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 
 	_mediach(dev2);
 	force_update(dev2);
@@ -460,14 +535,14 @@ char *rootbuf;
 
 	dev = dev1;
 	if (get_mybpb(&dpb,dev) < 0) {
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 		return 0;
 	}
 	cmpbps = dpb.bps;
 	cmpcdata = dpb.cdata;
 	dev = dev2;
 	if (get_mybpb(&dpb,dev) < 0) {
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 		return 0;
 	}
 	if ((cmpbps != dpb.bps) || (cmpcdata != dpb.cdata)) {
@@ -598,7 +673,10 @@ char *f12;
 			if (rc == -EDRVNR) {
 				((TEDINFO *)chart[CBARMAX+i*2].ob_spec)->te_ptext = text[DRIVE_NOT_READY].ob_spec;
 				redraw_object(chart,CBARMAX+i*2);
-			} else xform_alert(1,GEN_BPB_ALERT);
+			} else if (rc == E_FAT32) {
+				((TEDINFO *)chart[CBARMAX+i*2].ob_spec)->te_ptext = FAT32_CHART_TEXT;
+				redraw_object(chart,CBARMAX+i*2);
+			} else bpb_alert(GEN_BPB_ALERT);
 			continue;
 		}
 		if (dpb.isfat16) {							/* fat16 */

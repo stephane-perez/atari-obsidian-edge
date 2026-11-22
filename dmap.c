@@ -15,6 +15,8 @@
  *	Modified for Obsidian Edge (November 2026): demo version removed
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 alert
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -136,7 +138,7 @@ PUBLIC int do_diskinfo()
 
 	if (dev != status.infodev) {		/* need to get new info */
 		if (get_mybpb(&dpb,dev) < 0) {
-			xform_alert(1,GEN_BPB_ALERT);
+			bpb_alert(GEN_BPB_ALERT);
 			return -1;
 		} else if (diskinfo() < 0) {
 			xform_alert(1,GEN_OPFAIL_ALERT);
@@ -249,7 +251,7 @@ int rc;
 	}
 
 	if (get_mybpb(&dpb,dev) < 0) {
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 		return -1;
 	}
 
@@ -844,7 +846,7 @@ char path[MAX_PATHNAME];
 			return;
 
 	if (get_mybpb(&dpb,dev) < 0)
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 	else if (zero_fats_and_root() < 0)
 		xform_alert(1,GEN_OPFAIL_ALERT);
 
@@ -871,7 +873,7 @@ int rc;
 char temp[MAX_DISPLAYSIZE];
 
 	if (get_mybpb(&dpb,dev) < 0)
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 	else if (zero_fats_and_root() < 0)
 		xform_alert(1,GEN_OPFAIL_ALERT);
 	else {

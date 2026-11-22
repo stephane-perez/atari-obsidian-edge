@@ -10,6 +10,8 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: prototypes match the function definitions (char vs unsigned char)
  *
  *	Modified for Obsidian Edge (November 2026): removed the prototype of protect(), file names in comments
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 functions
  */
 
 /* Prototypes for functions defined in copyd.c */
@@ -26,6 +28,9 @@ PUBLIC void fat16_to_fat12(unsigned short *f16,unsigned char *f12);
 PUBLIC long gemdos_read(short fh,long count,void *buf,char *name,int loc);
 PUBLIC long gemdos_write(short fh,long count,void *buf,char *name,int loc);
 PUBLIC int get_mybpb(MYBPB *mybpb,short device);
+PUBLIC int is_fat32_partition(short dev);
+PUBLIC int is_fat32_bootsector(char *buf);
+PUBLIC void bpb_alert(int index);
 PUBLIC int get_name(DIRENTRY *dir,char *fname);
 PUBLIC void loadboot(char *buf,MYBPB *mybpb);
 PUBLIC int load_mybpb(char *buf,MYBPB *mybpb,BPB *tbpb);

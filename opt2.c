@@ -12,6 +12,8 @@
  *	Modified for Obsidian Edge (November 2026): demo version removed
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 alert
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -295,7 +297,7 @@ DIRENTRY *temp;
 	start_bar(msg);
 
 	if (get_mybpb(&dpb,dev) < 0) {
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 		return -1;
 	}
 
@@ -1060,7 +1062,7 @@ static char title[MAX_DISPLAYSIZE];	/* static because it's a window title */
 	start_obar(text[PROG_READFAT].ob_spec);
 
 	if (get_mybpb(&dpb,dev) < 0) {
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 		return -1;
 	}
 

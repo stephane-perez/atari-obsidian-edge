@@ -10,6 +10,8 @@
  *	Modified for Obsidian Edge (November 2026): removed the definitions left
  *
  *	Modified for Obsidian Edge (November 2026): MAX_DATA_CLUSTERS
+ *
+ *	Modified for Obsidian Edge (November 2026): E_FAT32, FAT32 texts
  *	over from the copy protection (INSTALL.PRG, "Unregistered")
  */
 
@@ -161,6 +163,11 @@
 #define ring_bell()			(Cconout(0x07))
 /* cluster numbers are shorts: maxc (cdata+2) must stay below 32768 */
 #define MAX_DATA_CLUSTERS	32765
+
+/* FAT32 partitions are not supported: get_mybpb() returns E_FAT32 */
+#define E_FAT32				(-1000)
+#define FAT32_ALERT			"[1][FAT32 partitions are not|supported by Obsidian Edge.][ OK ]"
+#define FAT32_CHART_TEXT	"FAT32: not supported"
 #define valid_cluster(clus)	(((clus)>=2)&&((clus)<dpb.maxc))
 #define IS_COLOUR_AES		(_AESglobal[0] >= 0x330)
 #define MAGX_COOKIE			0x4d616758L		/* MagX */

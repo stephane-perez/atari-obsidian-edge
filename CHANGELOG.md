@@ -11,6 +11,16 @@ User-visible changes are also summarised, in plain ASCII for the Atari, in
 
 ## [Unreleased]
 
+### Added
+- FAT32 partitions (not supported) are recognised, from their partition
+  type given by the XHDI driver (`F32`, or DOS types `$0B`/`$0C`/`$1B`/`$1C`)
+  or from their boot sector. Choosing one shows "FAT32 partitions are not
+  supported by Obsidian Edge." instead of a boot sector read error, and the
+  active drive does not change; "All Info" shows "FAT32: not supported" for
+  it; the multi-drive functions and "Save info" skip it; drive C: is not
+  the default drive at start-up if it is FAT32. The texts are in the code
+  (`edgedefs.h`), not in `EDGE.RSC` yet.
+
 ### Fixed
 - Disk functions (Medic, Optimize, Undelete, fragmentation map, Diamond
   Mirror): the end of a cluster chain and bad clusters were not recognised

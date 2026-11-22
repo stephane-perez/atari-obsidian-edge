@@ -8,6 +8,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): copy protection, registration check and demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 partitions recognised and refused
  */
 
 /*
@@ -178,7 +180,8 @@ long cookieval;
 	numflops = nflop();
 	drivemap = Drvmap() & ~CDmap();			/* eliminate CD-ROM devices from map    */
 											/* to prevent irritating error messages */
-	if (drivemap & (1L<<FIRST_HD_DEVICE))	/* if drive C exists */
+	if ((drivemap & (1L<<FIRST_HD_DEVICE))	/* if drive C exists */
+	 && !is_fat32_partition(FIRST_HD_DEVICE))	/* and is not FAT32 (unsupported) */
 		dev = FIRST_HD_DEVICE;				/* use it as default */
 	else dev = 0;							/* else use drive A  */
 	lastdev = dev;
@@ -567,6 +570,10 @@ int rc;
 		newdev = get_drive();
 		if (newdev < 0)
 			break;
+		if (is_fat32_partition(newdev)) {
+			form_alert(1,FAT32_ALERT);
+			break;
+		}
 
 		/*
 		 *	here we have a valid drive letter, so we switch drives
@@ -1117,6 +1124,11 @@ int rc;
 			objc_xdsel(bottom,obj);
 			break;
 		}
+		if (is_fat32_partition(exitobj - PCA)) {
+			form_alert(1,FAT32_ALERT);
+			objc_xdsel(bottom,obj);
+			break;
+		}
 		savedev = dev;
 		dev = exitobj - PCA;
 
@@ -1403,6 +1415,10 @@ char *titlep, *buttonp, *alertp;
 	for (j = 0; j < NUM_DEVICES; j++) {
 		if (!(multi[AMULTI+j].ob_state&SELECTED))
 			continue;
+		if (is_fat32_partition(j)) {		/* not supported */
+			form_alert(1,FAT32_ALERT);
+			continue;
+		}
 
 		dev = j;
 		new_icon();
@@ -1438,7 +1454,7 @@ char *titlep, *buttonp, *alertp;
 	new_icon();
 
 	if (get_mybpb(&dpb,dev) < 0)
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 
 	force_update(-1);
 

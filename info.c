@@ -11,6 +11,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 partitions refused
  */
 
 /*
@@ -69,6 +71,11 @@ char fbootf[MAX_PATHNAME];
 int rc = 0;
 MYBPB tpb;
 BPB *tbpb;
+
+	if (is_fat32_partition(savedev)) {
+		form_alert(1,FAT32_ALERT);
+		return -1;
+	}
 
 	n = (savedev >= FIRST_HD_DEVICE) ? MAX_HD_LOGSECSIZE : MAX_FL_LOGSECSIZE;
 	if ((bootbuf=malloc(n)) == NULL) {

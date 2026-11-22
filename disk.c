@@ -238,7 +238,7 @@ PUBLIC int is_fat32_bootsector(char *buf)
 PUBLIC void bpb_alert(int index)
 {
 	if (fat32_seen)
-		form_alert(1,FAT32_ALERT);
+		xform_alert(1,FAT32_ALERT);
 	else xform_alert(1,index);
 }
 
@@ -674,7 +674,7 @@ char *f12;
 				((TEDINFO *)chart[CBARMAX+i*2].ob_spec)->te_ptext = text[DRIVE_NOT_READY].ob_spec;
 				redraw_object(chart,CBARMAX+i*2);
 			} else if (rc == E_FAT32) {
-				((TEDINFO *)chart[CBARMAX+i*2].ob_spec)->te_ptext = FAT32_CHART_TEXT;
+				((TEDINFO *)chart[CBARMAX+i*2].ob_spec)->te_ptext = free_string(FAT32_TEXT);
 				redraw_object(chart,CBARMAX+i*2);
 			} else bpb_alert(GEN_BPB_ALERT);
 			continue;

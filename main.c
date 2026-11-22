@@ -571,7 +571,7 @@ int rc;
 		if (newdev < 0)
 			break;
 		if (is_fat32_partition(newdev)) {
-			form_alert(1,FAT32_ALERT);
+			xform_alert(1,FAT32_ALERT);
 			break;
 		}
 
@@ -1125,7 +1125,7 @@ int rc;
 			break;
 		}
 		if (is_fat32_partition(exitobj - PCA)) {
-			form_alert(1,FAT32_ALERT);
+			xform_alert(1,FAT32_ALERT);
 			objc_xdsel(bottom,obj);
 			break;
 		}
@@ -1416,7 +1416,7 @@ char *titlep, *buttonp, *alertp;
 		if (!(multi[AMULTI+j].ob_state&SELECTED))
 			continue;
 		if (is_fat32_partition(j)) {		/* not supported */
-			form_alert(1,FAT32_ALERT);
+			xform_alert(1,FAT32_ALERT);
 			continue;
 		}
 

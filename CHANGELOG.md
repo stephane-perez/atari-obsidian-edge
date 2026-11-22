@@ -18,8 +18,9 @@ User-visible changes are also summarised, in plain ASCII for the Atari, in
   supported by Obsidian Edge." instead of a boot sector read error, and the
   active drive does not change; "All Info" shows "FAT32: not supported" for
   it; the multi-drive functions and "Save info" skip it; drive C: is not
-  the default drive at start-up if it is FAT32. The texts are in the code
-  (`edgedefs.h`), not in `EDGE.RSC` yet.
+  the default drive at start-up if it is FAT32. The two texts are free
+  strings of `EDGE.RSC` (`FAT32_ALERT`, `FAT32_TEXT`; names in `EDGE.HRD`
+  and `edge.h`).
 
 ### Fixed
 - Disk functions (Medic, Optimize, Undelete, fragmentation map, Diamond

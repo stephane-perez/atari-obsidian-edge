@@ -178,6 +178,7 @@ PUBLIC void set_clip(void);
 PUBLIC void toggle_bottom(short obj);
 PUBLIC void wait_for_redraw(short win);
 PUBLIC int xform_alert(int dft,int index, ...);
+PUBLIC char *free_string(int index);
 
 /* Prototypes for functions defined in section.c */
 PUBLIC void close_section(void);

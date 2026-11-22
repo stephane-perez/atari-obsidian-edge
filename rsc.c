@@ -8,6 +8,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): removed the check of the resource version (RSC_VERSION)
+ *
+ *	Modified for Obsidian Edge (November 2026): free_string()
  */
 
 /*
@@ -282,6 +284,18 @@ PUBLIC void cleanup_rsrc()
 		free(savescreen.fd_addr);
 	if (savemap.fd_addr)
 		free(savemap.fd_addr);
+}
+
+/*
+ *	address of a free string of the resource ("" if not found)
+ */
+PUBLIC char *free_string(int index)
+{
+char **str;
+
+	if (xrsrc_gaddr(R_FRSTR,index,&str,rscglobal) == 0)
+		return "";
+	return *str;
 }
 
 /*

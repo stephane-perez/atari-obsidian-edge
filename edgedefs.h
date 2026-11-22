@@ -164,10 +164,8 @@
 /* cluster numbers are shorts: maxc (cdata+2) must stay below 32768 */
 #define MAX_DATA_CLUSTERS	32765
 
-/* FAT32 partitions are not supported: get_mybpb() returns E_FAT32 */
+/* FAT32 partitions are not supported: get_mybpb() returns E_FAT32 (texts: FAT32_ALERT, FAT32_TEXT) */
 #define E_FAT32				(-1000)
-#define FAT32_ALERT			"[1][FAT32 partitions are not|supported by Obsidian Edge.][ OK ]"
-#define FAT32_CHART_TEXT	"FAT32: not supported"
 #define valid_cluster(clus)	(((clus)>=2)&&((clus)<dpb.maxc))
 #define IS_COLOUR_AES		(_AESglobal[0] >= 0x330)
 #define MAGX_COOKIE			0x4d616758L		/* MagX */

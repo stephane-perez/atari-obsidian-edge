@@ -807,3 +807,7 @@
 #define ZR_WRONG_DRIVE   68  /* Alert-string */
 
 #define ZR_SAVE_FAILED   69  /* Alert-string */
+
+#define FAT32_ALERT      70  /* Alert-string */
+
+#define FAT32_TEXT       71  /* Free string */

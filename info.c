@@ -73,7 +73,7 @@ MYBPB tpb;
 BPB *tbpb;
 
 	if (is_fat32_partition(savedev)) {
-		form_alert(1,FAT32_ALERT);
+		xform_alert(1,FAT32_ALERT);
 		return -1;
 	}
 

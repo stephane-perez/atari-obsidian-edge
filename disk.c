@@ -16,6 +16,8 @@
  *	Modified for Obsidian Edge (November 2026): partitions with more than 32765 data clusters refused
  *
  *	Modified for Obsidian Edge (November 2026): FAT32 partitions recognised and refused
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  */
 
 /*
@@ -82,8 +84,6 @@ MLOCAL struct {			/* remember which drives have been scanned */
 	long free;
 } devstats[NUM_DEVICES] =
 	{ { TRUE, 0L, 0L }, { TRUE, 0L, 0L } };	/* say A & B have been scanned (is this necessary?) */
-
-MLOCAL char alert[MAX_ALERT_SIZE];
 
 /*
  *	function prototypes
@@ -528,7 +528,7 @@ PRIVATE int copy_image(int dev1,int dev2)
 int cmpbps, cmpcdata, nout, ndo;
 int nclus, ls, i;
 long rc;
-short lastused;			/* hwm of used clusters */
+short lastused = 1;		/* hwm of used clusters */
 unsigned short *f16;
 char *readbuf = NULL;
 char *rootbuf;
@@ -732,7 +732,7 @@ char *f12;
 			strcpy(chart[CFREEP+i].ob_spec,"100.");
 		} else {
 			chart[CBAR+i*2].ob_flags &= ~HIDETREE;
-			sprintf(chart[CFREEP+i].ob_spec,"%2d.%1d",thousandths/10,thousandths%10);
+			sprintf(chart[CFREEP+i].ob_spec,"%2ld.%1ld",thousandths/10,thousandths%10);
 			redraw_object(chart,CBAR+i*2);
 		}
 
@@ -763,7 +763,7 @@ char *f12;
 
 	if (thousandths >= 1000)
 		strcpy(chart[TFREEP].ob_spec,"100.");
-	else sprintf(chart[TFREEP].ob_spec,"%2d.%1d",thousandths/10,thousandths%10);
+	else sprintf(chart[TFREEP].ob_spec,"%2ld.%1ld",thousandths/10,thousandths%10);
 
 	redraw_object(chart,TTOT);
 	redraw_object(chart,TUSED);
@@ -943,7 +943,7 @@ PRIVATE int sector_retry(long errnum,int type,int errmsgno,int sector,int pgmloc
 PUBLIC int critical_read(short dev,short numsec,long start,char *buf,int errmsgno,int pgmloc)
 {
 int i, errors, tries;
-long rc;
+long rc = 0L;
 
 	ce_off();
 	for (tries = 0; tries < MAX_TRIES; tries++)
@@ -978,7 +978,7 @@ long rc;
 PUBLIC int critical_write(short dev,short numsec,long start,char *buf,int errmsgno,int pgmloc)
 {
 int i, errors, tries;
-long rc;
+long rc = 0L;
 
 	ce_off();
 	for (tries = 0; tries < MAX_TRIES; tries++)

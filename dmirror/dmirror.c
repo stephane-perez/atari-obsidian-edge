@@ -11,6 +11,8 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
  *
  *	Modified for Obsidian Edge (November 2026): partitions with more than 32765 data clusters refused
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -122,7 +124,7 @@ int test_rotate = FALSE;		/* TRUE => rotate tests */
 struct control mirror;
 char mirror_path[MAX_EDGEPATH] = "";	/* path for mirror files */
 
-char *copyright = "Diamond Mirror: Copyright ½ 2002-2017 Roger Burrows.  All Rights Reserved";
+char *copyright = "Diamond Mirror: Copyright \275 2002-2017 Roger Burrows.  All Rights Reserved";
 
 
 /*
@@ -163,7 +165,7 @@ int val_direntries(DIRENTRY *dirstart,char *end);
 /*
  *	private macros
  */
-#define sup_on()	{ void *savessp = Super(0L);
+#define sup_on()	{ void *savessp = (void *)Super(0L);
 #define sup_off()	Super(savessp); }
 
 
@@ -201,7 +203,7 @@ char *p, temp[200];
 
 	printf("\r\x1bp                                    \n");	/* inverse video */
 	printf("        Diamond Mirror v%-6.6s      \n",PROGRAM_VERSION);
-	printf("    ½ 1992-2003 by Roger Burrows    \n");
+	printf("    \275 1992-2003 by Roger Burrows    \n");
 	printf(" based on code by Robert D. Luneski \n");
 	printf("                                    \x1bq\n");		/* normal video */
 	printf("\n");
@@ -211,7 +213,7 @@ char *p, temp[200];
 	 */
 	if (open_section(DM_PREFS_FILE,"ra",TEST_SECTION) == 0) {
 		temp[0] = '\0';
-		read_section_line(INF_PARTITIONS," %[ -ÿ]",temp);
+		read_section_line(INF_PARTITIONS," %[ -\377]",temp);
 		for (p = temp; *p; p++) {
 			n = *p - 'A';
 			if ((n >= FIRST_HD_DEVICE) && (n < NUM_DEVICES))
@@ -224,14 +226,14 @@ char *p, temp[200];
 	}
 	if (open_section(DM_PREFS_FILE,"ra",MIRROR_SECTION) == 0) {
 		temp[0] = '\0';
-		read_section_line(INF_PARTITIONS," %[ -ÿ]",temp);
+		read_section_line(INF_PARTITIONS," %[ -\377]",temp);
 		for (p = temp; *p; p++) {
 			n = *p - 'A';
 			if ((n >= FIRST_HD_DEVICE) && (n < NUM_DEVICES))
 				mirror.partitions |= (1L << n);
 		}
 		read_section_line(INF_FREQUENCY," %d",&mirror.frequency);
-		read_section_line(INF_PATH," %[ -ÿ]",mirror_path);
+		read_section_line(INF_PATH," %[ -\377]",mirror_path);
 		close_section();
 	}
 	if (open_section(DM_PREFS_FILE,"ra",LASTRUN_SECTION) == 0) {
@@ -259,7 +261,7 @@ char *p, temp[200];
 	if (!testlist)
 		printf("No disk tests scheduled\n");
 	else if (next > today)
-		printf("%d day(s) until next disk test\n",next-today);
+		printf("%ld day(s) until next disk test\n",next-today);
 	else tdo = TRUE;
 
 	next = mirror.lastdate + mirror.frequency;
@@ -267,7 +269,7 @@ char *p, temp[200];
 	if (!mirrorlist)
 		printf("No disk mirrors scheduled\n");
 	else if (next > today)
-		printf("%d day(s) until next disk mirror\n",next-today);
+		printf("%ld day(s) until next disk mirror\n",next-today);
 	else mdo = TRUE;
 
 	/*
@@ -507,7 +509,7 @@ char *fat1, *fat2;
  */
 int compare_fats(char *fat1,char *fat2)
 {
-int i, rc;
+int i, rc = 0;
 
 	for (i = 0; i <= MAX_RETRY; i++)
 		if ((rc=Rwabs(2,fat1,dpb.spf,1,dev)) == 0)
@@ -627,7 +629,7 @@ long fsize;
  */
 int get_mybpb(MYBPB *mybpb,short device)
 {
-int i, rc;
+int i, rc = 0;
 long n;
 BPB *tbpb;
 char *bbuf;
@@ -788,7 +790,7 @@ int j;
  */
 int save_info(short dev,char *path)
 {
-int i, nsec, rc;
+int i, nsec, rc = 0;
 long ntowrite;
 FILE *fp;
 char fbootf[MAX_PATHNAME], bak[MAX_PATHNAME];
@@ -857,7 +859,7 @@ char *rootbuf;
  */
 char *load_root()
 {
-int i, rc;
+int i, rc = 0;
 char *endpoint, *end;
 char *temp;
 

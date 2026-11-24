@@ -10,6 +10,8 @@
  *	Modified for Obsidian Edge (November 2026): removed the check of the resource version (RSC_VERSION)
  *
  *	Modified for Obsidian Edge (November 2026): free_string()
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  */
 
 /*
@@ -64,7 +66,9 @@
 
 #define MODULE_NUMBER	13		/* used by error() macro */
 
+#ifndef NIL
 #define NIL 			-1
+#endif
 
 typedef struct {				// this should perhaps be in xrsrc.h
 	USERBLK ublk;
@@ -1165,9 +1169,11 @@ PRIVATE short myform_keybd(OBJECT *tree,short edit_obj,short next_obj,short kr,s
 			*out_obj = fn_obj;
 			return FALSE;
 		}
+		FALLTHROUGH;
 	case TAB:					/* Falls through to tab if no default	 */
 	case DN_ARROW:
 		fn_dir = 1; 			/* Set fwd direction	*/
+		FALLTHROUGH;
 	case BTAB:
 	case UP_ARROW:
 		*okr = 0;				/* Zap character		*/
@@ -1649,7 +1655,7 @@ short i, len;
 
 		if (which & MU_KEYBD) { /* Control char filter	*/
 			cont = myform_keybd((OBJECT *) tree,edit_obj,next_obj,kr,&next_obj,&kr);
-			if (kr && edit_obj) /* Add others to object */
+			if (kr && edit_obj) { /* Add others to object */
 				if ((kr == DOT1) || (kr == DOT2)) {
 					temp = (TEDINFO *) ((OBJECT *) tree + edit_obj)->ob_spec;
 					len = strlen(temp->te_ptext);
@@ -1659,6 +1665,7 @@ short i, len;
 				} else {
 					objc_edit((OBJECT *) tree,edit_obj,kr,&idx,EDCHAR);
 				}
+			}
 		}
 		/* handle button event	*/
 		if (which & MU_BUTTON) {/* Which object hit?	*/

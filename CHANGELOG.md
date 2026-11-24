@@ -23,6 +23,21 @@ User-visible changes are also summarised, in plain ASCII for the Atari, in
   and `edge.h`).
 
 ### Fixed
+- `EDGE.INF`: the drives selected for the multi-drive functions were read
+  back wrongly when their mask (`%08lx`) had a hexadecimal digit from A to
+  F: the `vsscanf()` of `section.c` (Edge and Diamond Mirror) used the digit
+  string `"01234567890ABCDEF"`, with a second `0`, so `A` was read as 11 and
+  `F` stopped the number (the copy also overflowed its 17-byte buffer by
+  one byte).
+- Optimize: `newfat[nextcluster] = ++nextcluster` (unspecified order of
+  evaluation) written explicitly, as intended.
+- All the clang (`-Wformat`, `-Wconditional-uninitialized`,
+  `-Wimplicit-fallthrough`, `-Wdangling-else`, ...) and GCC warnings: `long`
+  values printed with `%ld`, `ob_spec` passed as `char *` to `%s`, variables
+  initialised, intentional fall-throughs marked with `FALLTHROUGH`
+  (`port/include/lattice.h`), braces for an ambiguous `else`, 8-bit Atari
+  characters in string literals written as octal escapes (same bytes),
+  unused code removed.
 - Disk functions (Medic, Optimize, Undelete, fragmentation map, Diamond
   Mirror): the end of a cluster chain and bad clusters were not recognised
   in the GCC build. Lattice C compared a `short` with an `unsigned short`

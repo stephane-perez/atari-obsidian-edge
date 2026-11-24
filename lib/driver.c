@@ -7,6 +7,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): return value initialised for 0 sectors
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  */
 
 /*
@@ -79,7 +81,7 @@ long rc;
 	/*
 	 *	allocate buffer in ST RAM, in case of virtual memory
 	 */
-	ourbuf = getcookie(_FRB,NULL)?Mxalloc(BUFSIZE,0):Malloc(BUFSIZE);
+	ourbuf = (char *)(getcookie(_FRB,NULL)?Mxalloc(BUFSIZE,0):Malloc(BUFSIZE));
 	if (!ourbuf)
 		return -1;
 

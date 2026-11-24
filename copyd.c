@@ -11,6 +11,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): FAT32 alert
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  */
 
 /*
@@ -167,7 +169,7 @@ short ret;
 int rc;
 long bufsize;
 DTA dta;
-DIRLIST *curdir, *ddir;
+DIRLIST *curdir = NULL, *ddir;
 char *iobuf;
 char pbuff[MAX_PATHNAME], pathsearch[MAX_PATHNAME], fromfile[MAX_PATHNAME];
 

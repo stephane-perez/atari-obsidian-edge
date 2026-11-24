@@ -18,6 +18,8 @@
  *	Modified for Obsidian Edge (November 2026): unreadable directory clusters dropped correctly, counters fixed
  *
  *	Modified for Obsidian Edge (November 2026): FAT32 alert
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -446,7 +448,7 @@ static char title[MAX_DISPLAYSIZE];
 	if (faterr) {
 		strcpy(medic[FAT12].ob_spec,text[MISC_ERROR].ob_spec);
 		(*problems)++;
-	} else sprintf(medic[FAT12].ob_spec,"%5s",text[MISC_OK].ob_spec);
+	} else sprintf(medic[FAT12].ob_spec,"%5s",(char *)text[MISC_OK].ob_spec);
 
 	if (!*problems) {
 		strcpy(medic[REPACT].ob_spec,text[MEDIC_NOPROBLEMS].ob_spec);
@@ -1281,7 +1283,7 @@ char dname[MAX_FILENAME];
 /*********************************************************************/
 PRIVATE void check_garbage(char *pathin)
 {
-short start, curc, st;
+short start = 0, curc, st;
 int i, num, total;
 char *endpoint, *end;
 char tname[MAX_FILENAME];
@@ -1455,7 +1457,7 @@ static char title[MAX_DISPLAYSIZE];
 	strcpy(blocks->te_ptext,"0.0");
 	strcpy(medic[NPASS].ob_spec," 1");
 	sprintf(medic[TOTPASS].ob_spec,"%2d",mapbad.passes);
-	strcpy(medic[MBAD].ob_spec,"ù");
+	strcpy(medic[MBAD].ob_spec,"\371");
 	redraw_object(medic,0);
 
 	if (fix) {

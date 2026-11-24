@@ -17,6 +17,8 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
  *
  *	Modified for Obsidian Edge (November 2026): FAT32 alert
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -341,7 +343,7 @@ char *f12;
 	for (i = 0; i < FRAGBUCKETS; i++) {
 		dmap[BAR1+i].ob_height = 1;
 		dmap[BAR1+i].ob_y = ref_y + ref_h;
-		dmap[BAR1+i].ob_spec = (void *)B0;	/* BOX */
+		dmap[BAR1+i].ob_spec = (void *)(long)B0;	/* BOX */
 	}
 
 	ted = (TEDINFO *) (dmap+S4)->ob_spec;
@@ -420,9 +422,9 @@ char *f12;
 		}
 	}
 
-	sprintf(dmap[FOLDER].ob_spec,"%4d",frag.totfolders);
-	sprintf(dmap[FILES].ob_spec,"%5d",frag.totfiles);
-	sprintf(dmap[FRAG].ob_spec,"%5d",frag.totfragfiles);
+	sprintf(dmap[FOLDER].ob_spec,"%4ld",frag.totfolders);
+	sprintf(dmap[FILES].ob_spec,"%5ld",frag.totfiles);
+	sprintf(dmap[FRAG].ob_spec,"%5ld",frag.totfragfiles);
 
 	if (frag.totfragfiles == 0) {
 		phigh = plow = 0;

@@ -8,6 +8,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  */
 
 //NOTE: at the moment, a Load of SCSI info overwrites the original data in orgbuf,
@@ -183,7 +185,6 @@ PRIVATE int isgarbage(PART *pinfo);
 PRIVATE int isxgm(PART *p);
 PRIVATE int iszero(PART *p);
 PRIVATE int is_valid_ptype(char *type);
-PRIVATE int is_valid_tos_ptype(char *type);
 PRIVATE void load_and_edit_root(short id,short lun);
 PRIVATE void load_and_update(int num);
 PRIVATE void load_newbuf(void);
@@ -1538,19 +1539,6 @@ int i;
 			return FALSE;
 
 	return TRUE;
-}
-
-/*
- *	checks partition type for GEM or BGM
- */
-PRIVATE int is_valid_tos_ptype(char *type)
-{
-	if (strncmp(type,GEM,3) == 0)
-		return TRUE;
-	if (strncmp(type,BGM,3) == 0)
-		return TRUE;
-
-	return FALSE;
 }
 
 PRIVATE void adjust_tos_ptype(PART *part)

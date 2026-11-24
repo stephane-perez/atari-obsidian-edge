@@ -13,6 +13,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  */
 
 /*
@@ -187,7 +189,7 @@ char temp[MAX_PATHNAME];
 		read_section_line(INF_WARN," %d",&opt->warn);
 		read_section_line(INF_MULTI," %08lx",&opt->multi);
 		temp[0] = '\0';
-		read_section_line(INF_FILEPATH," %[ -ÿ]",temp);
+		read_section_line(INF_FILEPATH," %[ -\377]",temp);
 		copy_to_edgepath(opt->filepath,temp);
 		close_section();
 	}
@@ -596,7 +598,7 @@ PRIVATE int check_dirs(char *dirpath)
 {
 enum states { START, DONODE, DOEXT, ENDEXT, ENDDIR, END, DIROK, DIRERROR };
 int state = START;
-int nodecount, extcount;
+int nodecount = 0, extcount = 0;
 
 	while(TRUE) {
 		switch(state) {
@@ -940,16 +942,16 @@ char pstr[MAX_PRINTSIZE];
 			break;
 		for (device = FIRST_HD_DEVICE, i = 0; device < NUM_DEVICES; device++, i++) {
 			sprintf(pstr,"   %c:    %11s      %11s      %11s    %4s",
-					device+'A',chart[CTOT+i].ob_spec,chart[CUSED+i].ob_spec,
-					chart[CFREE+i].ob_spec,chart[CFREEP+i].ob_spec);
+					device+'A',(char *)chart[CTOT+i].ob_spec,(char *)chart[CUSED+i].ob_spec,
+					(char *)chart[CFREE+i].ob_spec,(char *)chart[CFREEP+i].ob_spec);
 			if (!print_string(pstr))
 				break;
 		}
 		if (!print_string(printstr[PRINT_ALLHDR2].ob_spec))
 			break;
 		sprintf(pstr,"%8.8s %11s      %11s      %11s    %4s",
-				printstr[PRINT_ALLTOTAL].ob_spec,chart[TTOT].ob_spec,chart[TUSED].ob_spec,
-				chart[TFREE].ob_spec,chart[TFREEP].ob_spec);
+				(char *)printstr[PRINT_ALLTOTAL].ob_spec,(char *)chart[TTOT].ob_spec,(char *)chart[TUSED].ob_spec,
+				(char *)chart[TFREE].ob_spec,(char *)chart[TFREEP].ob_spec);
 		if (!print_string(pstr))
 			break;
 		form_feed();

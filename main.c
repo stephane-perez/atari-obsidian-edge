@@ -10,6 +10,8 @@
  *	Modified for Obsidian Edge (November 2026): copy protection, registration check and demo version removed
  *
  *	Modified for Obsidian Edge (November 2026): FAT32 partitions recognised and refused
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  */
 
 /*
@@ -561,6 +563,7 @@ int rc;
 			break;
 		}
 		/* drop thru if not UNDELETE, or edit_obj is non-zero */
+		FALLTHROUGH;
 
 	default:
 		if ((status.action == UNDELETE) && edit_obj) {
@@ -1327,8 +1330,8 @@ PRIVATE void set_opt()
 PRIVATE void do_multi(short type)
 {
 short j, k, savedev, lastdev, ret;
-int rc;
-char *titlep, *buttonp, *alertp;
+int rc = 0;
+char *titlep = "", *buttonp = "", *alertp = "";
 
 	savedev = lastdev = dev;
 

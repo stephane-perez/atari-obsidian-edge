@@ -46,6 +46,12 @@ jobs:
       - name: Build (libcmini)
         run: make -j"$(nproc)" all zip
 
+      - name: Static checks with clang (warnings, 16-bit comparisons)
+        run: |
+          sudo apt-get install -y clang
+          clang --version | head -1
+          python3 tools/clang_check.py
+
       - name: Build with MiNTLib, for comparison
         run: make -j"$(nproc)" LIBC=mintlib BUILD=build/mintlib all
 

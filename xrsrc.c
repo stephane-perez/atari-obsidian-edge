@@ -12,6 +12,8 @@
  *	Modified for Obsidian Edge (November 2026): R_IMAGEDATA returns the image pointer
  *
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): explicit int comparisons
  *	on a private stack (the AES calls it on its own, small, stack)
  */
 
@@ -1325,17 +1327,17 @@ MFDB d;
 		}
 		for (x = 0; x < len; x++) {
 			bit = 1;
-			for (np = 0; np < old_planes; np++)
+			for (np = 0; (int)np < (int)old_planes; np++)
 				back[np] = col_data[mul[np]+x];
 
 			for (pixel = 0; pixel < 16; pixel++) {
 				color = 0;
-				for (np = 0; np < old_planes; np++) {
+				for (np = 0; (int)np < (int)old_planes; np++) {
 					color += ((back[np] & 1) << np);
 					back[np] >>= 1;
 				}
 
-				for (np = 0; np < new_planes; np++) {
+				for (np = 0; (int)np < (int)new_planes; np++) {
 					pos = mul[np] + x;
 					col_data[pos] = (col_data[pos] & ~bit) | (farbtbl[color][np] & bit);
 				}
@@ -1395,12 +1397,12 @@ ULONG colback = 0;
 	pos = 0;
 
 	for (x = 0; x < len; x++) {
-		for (np = 0; np < old_planes; np++)
+		for (np = 0; (int)np < (int)old_planes; np++)
 			back[np] = col_data[mul[np] + x];
 
 		for (pixel = 0; pixel < 16; pixel++) {
 			color = 0;
-			for (np = 0; np < old_planes; np++) {
+			for (np = 0; (int)np < (int)old_planes; np++) {
 				color |= ((back[np] & 0x8000) >> (15 - np));
 				back[np] <<= 1;
 			}

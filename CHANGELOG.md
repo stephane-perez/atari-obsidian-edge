@@ -12,6 +12,10 @@ User-visible changes are also summarised, in plain ASCII for the Atari, in
 ## [Unreleased]
 
 ### Added
+- CI: static checks with clang (`tools/clang_check.py`): any clang warning,
+  and any comparison between a `short` and an `unsigned short` (16 bits in
+  Lattice C, `int` in GCC: the cause of the FAT end-of-chain bug), fails
+  the build.
 - FAT32 partitions (not supported) are recognised, from their partition
   type given by the XHDI driver (`F32`, or DOS types `$0B`/`$0C`/`$1B`/`$1C`)
   or from their boot sector. Choosing one shows "FAT32 partitions are not

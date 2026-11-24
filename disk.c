@@ -18,6 +18,8 @@
  *	Modified for Obsidian Edge (November 2026): FAT32 partitions recognised and refused
  *
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): explicit int comparisons
  */
 
 /*
@@ -285,7 +287,7 @@ long maxclus, ncdata;
 	mybpb->bps = get_word(buf + 11);		/* bytes per sector */
 	mybpb->spc = buf[13];					/* sec per cluster */
 	if (tbpb) {
-		if (mybpb->bps != tbpb->recsiz)		/* when we first access a partition, we */
+		if ((int)mybpb->bps != (int)tbpb->recsiz)		/* when we first access a partition, we */
 			return -1;						/* seem to get an empty boot sector ... */
 		if (mybpb->spc != tbpb->clsiz)
 			return -1;

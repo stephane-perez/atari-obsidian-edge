@@ -103,7 +103,10 @@ been tested on real hardware.**
 `.github/workflows/build.yml` builds the programs on every push and pull
 request (with libcmini, and with MiNTLib for comparison), checks that no
 source file was converted to UTF-8 by an editor (see `.editorconfig`: the
-inherited sources are 8-bit, CR LF), writes a table of
+inherited sources are 8-bit, CR LF), runs the static checks of
+`tools/clang_check.py` (any clang warning, and any comparison between a
+`short` and an `unsigned short`, fails the build; run it locally after
+`make`), writes a table of
 the program sizes compared with Diamond Edge 2.57 in the run summary, runs
 the smoke test with EmuTOS on the libcmini build, and keeps the Atari files
 and the screenshots as workflow artifacts.

@@ -20,6 +20,8 @@
  *	Modified for Obsidian Edge (November 2026): FAT32 alert
  *
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): explicit int comparisons
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -1187,7 +1189,7 @@ char *buf;
 		if (fat16[i])
 			lastused = i;
 	nextfree = lastused + 1;
-	if (nextfree >= dpb.maxc)			/* there *is* no space at the end ... */
+	if ((int)nextfree >= (int)dpb.maxc)			/* there *is* no space at the end ... */
 		return -1;
 
 	if ((buf=malloc(dpb.bpc)) == NULL) {
@@ -2047,7 +2049,7 @@ PRIVATE int is_bad_cluster(short cluster)
 BAD *bad;
 
 	for (bad = firstbad; bad; bad = bad->next_bad)
-		if (bad->badclus == cluster)
+		if ((int)bad->badclus == (int)cluster)
 			return TRUE;
 
 	return FALSE;
@@ -2297,7 +2299,7 @@ short maxsecs, nondatasecs;
 		sprintf(medic[NPASS].ob_spec,"%2d",i+1);
 		redraw_object(medic,NPASS);
 		redraw_object(medic,MDAREA);
-		for (secloc = 1; secloc < nondatasecs; secloc += numsecs) {
+		for (secloc = 1; (int)secloc < (int)nondatasecs; secloc += numsecs) {
 			numsecs = min(nondatasecs-secloc,maxsecs);
 			if (get_key() < 0)
 				return -1;
@@ -2418,7 +2420,7 @@ BAD *b, *n;
 
 		for (b = firstfatbad; b; b = n) {
 			n = b->next_bad;
-			if (b->badclus == cursec)		/* we found this before */
+			if ((int)b->badclus == (int)cursec)		/* we found this before */
 				break;
 		}
 		if (b)

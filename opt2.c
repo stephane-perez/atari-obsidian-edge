@@ -14,6 +14,8 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
  *
  *	Modified for Obsidian Edge (November 2026): FAT32 alert
+ *
+ *	Modified for Obsidian Edge (November 2026): up_newfat_good(): defined order of evaluation
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -1581,8 +1583,8 @@ PRIVATE void up_newfat_good(short cnt)
 {
 short i;
 
-	for (i = 0; i < cnt - 1; i++)
-		newfat[nextcluster] = ++nextcluster;
+	for (i = 0; i < cnt - 1; i++, nextcluster++)
+		newfat[nextcluster] = nextcluster + 1;
 	newfat[nextcluster++] = dpb.bitmask;
 }
 

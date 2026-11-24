@@ -8,6 +8,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: <sys/stat.h> included for GCC, local vsscanf() renamed
+ *
+ *	Modified for Obsidian Edge (November 2026): hexadecimal digits in vsscanf() fixed, compiler warnings fixed
  */
 
 /*
@@ -392,7 +394,7 @@ unsigned char delim[256], digits[17], *q;
 			neg		= -1;
 
 			strcpy(delim,  "\011\012\013\014\015 ");
-			strcpy(digits, "01234567890ABCDEF");
+			strcpy(digits, "0123456789ABCDEF");
 
 			if (fmt[1] == '*') {
 				endnull = store = FALSE;
@@ -438,7 +440,7 @@ fmtnxt:
 
 			case 'd':	/* SIGNED decimal */
 				neg = FALSE;
-				/* FALL-THRU */
+				FALLTHROUGH;
 
 			case 'u':	/* unsigned decimal */
 numfmt:			skip();
@@ -537,7 +539,7 @@ savnum:
 						    rngflag = 2;
 						    break;
 						}
-					    /* fall thru intentional */
+					    FALLTHROUGH;			/* intentional */
 
 					case FALSE:
 						rngflag = (*fmt == '-');
@@ -591,7 +593,7 @@ strproc:
 
 			case '\0':	/* early EOS */
 				--fmt;
-				/* FALL THRU */
+				FALLTHROUGH;
 
 			default:
 				goto cmatch;

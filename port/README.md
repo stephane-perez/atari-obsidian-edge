@@ -66,8 +66,7 @@ a file).
 - The copy protection and registration (`protect.c`, `lib/encrypt.c`,
   `INSTALL.PRG`, `lib/GENREG.TTP`) and the demo version (`-DDEMO`): the
   program is free software now. `EDGE.PRG` is used straight from the
-  distribution folder. Note: the "About" box of `EDGE.RSC` still has the
-  "Registered to" and "Serial number" fields that `INSTALL.PRG` used to fill.
+  distribution folder.
 - The Lattice C project files (`*.PRJ`) and prebuilt libraries (`lib/*.LIB`);
   the GCC build compiles their sources (`lib/*.c`, `lib/compmem.s` via
   `compmem.S`).

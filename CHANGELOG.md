@@ -11,6 +11,11 @@ User-visible changes are also summarised, in plain ASCII for the Atari, in
 
 ## [Unreleased]
 
+### Changed
+- About box (`EDGE.RSC`, edited with Interface): "About Obsidian Edge",
+  "Based on Diamond Edge 2.57", the fork's copyright; the "Registered to"
+  and "Serial number" fields are gone.
+
 ### Added
 - CI: static checks with clang (`tools/clang_check.py`): any clang warning,
   and any comparison between a `short` and an `unsigned short` (16 bits in

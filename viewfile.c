@@ -10,6 +10,8 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: prototype matches the function definition
  *
  *	Modified for Obsidian Edge (November 2026): all the line offsets of a text block initialised
+ *
+ *	Modified for Obsidian Edge (November 2026): CR of CR LF line ends removed
  */
 
 /*
@@ -403,6 +405,8 @@ int len;
 	if ((len=strlen(text)) > 0)
 		if (text[len-1] == '\n')
 			text[--len] = '\0';
+	if ((len > 0) && (text[len-1] == '\r'))	/* CR LF: Lattice's "ra" mode removed the CR */
+		text[--len] = '\0';
 
 	return len;
 }

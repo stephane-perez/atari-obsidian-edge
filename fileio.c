@@ -15,6 +15,8 @@
  *	Modified for Obsidian Edge (November 2026): demo version removed
  *
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): CR of CR LF line ends removed
  */
 
 /*
@@ -156,7 +158,7 @@ char *p;
 	}
 
 	for (i = 0, p = temp; *p && (i < maxlen-2); i++, p++)
-		if (*p == '\n')
+		if ((*p == '\n') || (*p == '\r'))	/* CR LF: Lattice's "ra" mode removed the CR */
 			break;
 	*p = '\0';
 

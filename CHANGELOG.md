@@ -32,6 +32,10 @@ User-visible changes are also summarised, in plain ASCII for the Atari, in
   and `edge.h`).
 
 ### Fixed
+- File viewer (help files, F1 to F5) and "Print file": a CR glyph was shown
+  at the end of every line of CR LF text files. Lattice C's `"ra"` mode
+  removed the CR; the GCC C libraries do not, so the line reading functions
+  now drop it.
 - `EDGE.INF`: the drives selected for the multi-drive functions were read
   back wrongly when their mask (`%08lx`) had a hexadecimal digit from A to
   F: the `vsscanf()` of `section.c` (Edge and Diamond Mirror) used the digit

@@ -18,6 +18,8 @@
  *	Modified for Obsidian Edge (November 2026): FAT32 alert
  *
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): VFAT long file names
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -578,6 +580,8 @@ long offset;
 	}
 
 	for (curpoint = startpoint; curpoint < endpoint; curpoint += sizeof(DIRENTRY)) {
+		if (is_lfn(curpoint))		/* long file name entry */
+			continue;
 		if (*curpoint == DELETION_MARK) {
 			if (!garbage((DIRENTRY *)curpoint))
 				numentry++;
@@ -596,6 +600,8 @@ long offset;
 
 	j = 0;
 	for (curpoint = startpoint; curpoint < endpoint; curpoint += sizeof(DIRENTRY)) {
+		if (is_lfn(curpoint))		/* long file name entry */
+			continue;
 		if (*curpoint == DELETION_MARK) {
 			if (!garbage((DIRENTRY *)curpoint)) {
 				ddir[j].entry = (DIRENTRY *)curpoint;

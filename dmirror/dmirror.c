@@ -13,6 +13,8 @@
  *	Modified for Obsidian Edge (November 2026): partitions with more than 32765 data clusters refused
  *
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): VFAT long file names
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -155,6 +157,8 @@ int perform_tests(unsigned long testlist);
 short open_workstation(void);
 int save_info(short dev,char *path);
 char *sort_dir(char *curdir,int ncl);
+int lfn_entries(char *p,char *end);
+char *sort_units(char *inspoint,char *endpoint,int rmdel);
 char *sort_root(char *);
 int test_loop(short dstart,char *enddir);
 void up_dirlist(void);
@@ -552,6 +556,17 @@ long fsize;
 		if (dir->name[0] == DELETION_MARK)
 			continue;
 
+		/* VFAT long file name: valid if followed by its 8.3 entry (lfn.c) */
+		if (is_lfn(dir)) {
+			if ((i=lfn_entries((char *)dir,end)) > 0) {
+				dir += i - 1;
+				continue;
+			}
+			errcnt[BADENTRY]++;				/* orphan */
+			badflag = -1;
+			continue;
+		}
+
 		ngarbage = namerr = duperr = 0;
 
 		if (dir->attr & BADATTR_MASK)
@@ -591,7 +606,7 @@ long fsize;
 		 */
 		if (dir->attr != FA_VOLUME) {
 			for (sdir = dirstart; (void *) sdir < (void *) dir; sdir++) {
-				if (sdir->attr == FA_VOLUME)
+				if ((sdir->attr == FA_VOLUME) || is_lfn(sdir) || (sdir->name[0] == DELETION_MARK))
 					continue;
 				if (memcmp(sdir->name,dir->name,NAME_LENGTH) == 0) {
 					duperr = 1;
@@ -1041,8 +1056,8 @@ char dname[MAX_FILENAME];
 			curfile++;
 	} else curfile += 2;
 
-	for ( ; curfile->attr == FA_SUBDIR; curfile++) {
-		if (curfile->name[0] == DELETION_MARK)
+	for ( ; (curfile->attr == FA_SUBDIR) || is_lfn(curfile); curfile++) {	/* long names precede their entry */
+		if ((curfile->name[0] == DELETION_MARK) || is_lfn(curfile))
 			continue;
 		dirlevel++;
 		st = dirstart = get_word((char *)&curfile->start);
@@ -1206,7 +1221,6 @@ void up_dirlist()
  */
 char *sort_root(char *dirbuf)
 {
-char temp[sizeof(DIRENTRY)];
 char *curpoint;
 char *inspoint;
 char *endpoint;
@@ -1227,46 +1241,18 @@ int volume_labels_allowed;
 	volume_labels_allowed = 1;
 
 	for (curpoint = inspoint; curpoint < endpoint; curpoint += sizeof(DIRENTRY)) {
-		if (*curpoint && (fattr(curpoint)&FA_VOLUME)) {
+		if (*curpoint && is_volume(curpoint)) {	/* long names have the volume bit */
 			if (volume_labels_allowed)
 				volume_labels_allowed--;
 			else *curpoint = DELETION_MARK;
 		}
 	}
 
-	if (*inspoint && (fattr(inspoint)&FA_VOLUME))		/* skip any initial volume label */
+	if (*inspoint && is_volume(inspoint))		/* skip any initial volume label */
 		inspoint += sizeof(DIRENTRY);
 
-	/*
-	 *	move insertion point to first NON-subdirectory entry
-	 */
-	while(*inspoint && (fattr(inspoint)&FA_SUBDIR))
-		inspoint += sizeof(DIRENTRY);
-
-	/*
-	 *	scan through remainder of directory:
-	 *	. if not a deleted entry:
-	 *		. if a subdirectory entry, move directory entries up 1 & insert it
-	 *		. else just skip it
-	 *	. else it's a deleted entry:
-	 *		. just skip it
-	 */
-	curpoint = inspoint + sizeof(DIRENTRY);
-	while (curpoint < endpoint) {
-		if (*curpoint != DELETION_MARK) {
-			if (*curpoint && (fattr(curpoint)&FA_SUBDIR)) {
-				memcpy(temp,curpoint,sizeof(DIRENTRY));
-				memmove(inspoint+sizeof(DIRENTRY),inspoint,curpoint-inspoint);
-				memcpy(inspoint,temp,sizeof(DIRENTRY));
-				inspoint += sizeof(DIRENTRY);
-			}
-			curpoint += sizeof(DIRENTRY);
-		} else {
-			curpoint += sizeof(DIRENTRY);
-		}
-	}
-
-	return endpoint;
+	/* subdirectories first; long names stay with their 8.3 entry (lfn.c) */
+	return sort_units(inspoint,endpoint,0);
 }
 
 /*
@@ -1280,8 +1266,6 @@ int volume_labels_allowed;
  */
 char *sort_dir(char *curdir,int ncl)
 {
-char temp[sizeof(DIRENTRY)];
-char *curpoint;
 char *inspoint;
 char *endpoint;
 
@@ -1293,35 +1277,8 @@ char *endpoint;
 
 	endpoint += sizeof(DIRENTRY);				/* endpoint is last entry used + 1 */
 
-	/*
-	 *	move insertion point to first NON-subdirectory entry
-	 */
-	while(*inspoint && (fattr(inspoint)&FA_SUBDIR))
-		inspoint += sizeof(DIRENTRY);
-
-	/*
-	 *	scan through remainder of directory:
-	 *	. if not a deleted entry:
-	 *		. if a subdirectory entry, move directory entries up 1 & insert it
-	 *		. else just skip it
-	 *	. else it's a deleted entry:
-	 *		. just skip it
-	 */
-	for (curpoint = inspoint + sizeof(DIRENTRY); curpoint < endpoint; ) {
-		if (*curpoint != DELETION_MARK) {
-			if (*curpoint && (fattr(curpoint)&FA_SUBDIR)) {
-				memcpy(temp,curpoint,sizeof(DIRENTRY));
-				memmove(inspoint+sizeof(DIRENTRY),inspoint,curpoint-inspoint);
-				memcpy(inspoint,temp,sizeof(DIRENTRY));
-				inspoint += sizeof(DIRENTRY);
-			}
-			curpoint += sizeof(DIRENTRY);
-		} else {
-			curpoint += sizeof(DIRENTRY);
-		}
-	}
-
-	return endpoint;
+	/* subdirectories first; long names stay with their 8.3 entry (lfn.c) */
+	return sort_units(inspoint,endpoint,0);
 }
 
 /*

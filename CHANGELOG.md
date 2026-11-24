@@ -32,6 +32,19 @@ User-visible changes are also summarised, in plain ASCII for the Atari, in
   and `edge.h`).
 
 ### Fixed
+- VFAT long file names (written by Windows, Linux, macOS or MiNT) were
+  destroyed: Medic reported them as bad directory entries and "Fix now"
+  deleted them; sorting the root directory (Medic and Optimize) took them
+  for extra volume labels (they have the volume bit) and deleted them; and
+  moving the folders to the start of a directory separated them from their
+  8.3 entry. A long name followed by the 8.3 entry that matches its
+  checksum is now valid, and moved with that entry (`lfn.c`, shared by
+  Edge and Diamond Mirror); only orphans (e.g. left by TOS when it deletes
+  a file) are reported and removed. The folder loops of Medic, Optimize and
+  Diamond Mirror skip long names instead of stopping at them, and Undelete
+  no longer lists deleted long name entries. Tested in Hatari: Medic and
+  Optimize keep every long name and file content (`fsck.fat` clean), and
+  give the same images as Diamond Edge 2.57 on disks without long names.
 - File viewer (help files, F1 to F5) and "Print file": a CR glyph was shown
   at the end of every line of CR LF text files. Lattice C's `"ra"` mode
   removed the CR; the GCC C libraries do not, so the line reading functions

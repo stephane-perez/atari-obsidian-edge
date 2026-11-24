@@ -12,6 +12,8 @@
  *	Modified for Obsidian Edge (November 2026): MAX_DATA_CLUSTERS
  *
  *	Modified for Obsidian Edge (November 2026): E_FAT32, FAT32 texts
+ *
+ *	Modified for Obsidian Edge (November 2026): VFAT long file names
  *	over from the copy protection (INSTALL.PRG, "Unregistered")
  */
 
@@ -159,6 +161,16 @@
 #define DATALITE_SEC_OFFSET	106				/* total sectors, unsigned short */
 
 #define fattr(a)			(*(a+11))
+
+/*
+ *	VFAT long file names: entries with the attribute $0F (read-only, hidden,
+ *	system and volume label) placed just before the 8.3 entry of the file
+ */
+#define FA_LFN				0x0f
+#define MAX_LFN_ENTRIES		20				/* 255 characters, 13 per entry */
+#define is_lfn(p)			(fattr((char *)(p)) == FA_LFN)
+#define is_volume(p)		((fattr((char *)(p)) & FA_VOLUME) && !is_lfn(p))
+#define unit_attr(p,len)	fattr((p)+(len)-sizeof(DIRENTRY))	/* of the 8.3 entry */
 #define form_feed()			(Cprnout(0x0c))
 #define ring_bell()			(Cconout(0x07))
 /* cluster numbers are shorts: maxc (cdata+2) must stay below 32768 */

@@ -12,6 +12,8 @@
  *	Modified for Obsidian Edge (November 2026): removed the prototype of protect(), file names in comments
  *
  *	Modified for Obsidian Edge (November 2026): FAT32 functions
+ *
+ *	Modified for Obsidian Edge (November 2026): VFAT long file names
  */
 
 /* Prototypes for functions defined in copyd.c */
@@ -100,6 +102,10 @@ PUBLIC int init_mirror_prefs(void);
 PUBLIC long allocate_max_units(int min_units,long unit_size,char **ptr);
 PUBLIC void blank(short color);
 PUBLIC void browse(void);
+PUBLIC int lfn_entries(char *p,char *end);
+PUBLIC int dir_unit_len(char *p,char *end);
+PUBLIC void move_unit(char *inspoint,char *curpoint,int len);
+PUBLIC char *sort_units(char *inspoint,char *endpoint,int rmdel);
 PUBLIC unsigned long CDmap(void);
 PUBLIC void ce_off(void);
 PUBLIC void ce_on(void);

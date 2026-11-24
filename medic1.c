@@ -22,6 +22,8 @@
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  *
  *	Modified for Obsidian Edge (November 2026): explicit int comparisons
+ *
+ *	Modified for Obsidian Edge (November 2026): VFAT long file names
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -613,8 +615,8 @@ char pathout[MAX_ERRFILEMSGSIZE];
 			curfile++;
 	} else curfile += 2;
 
-	for ( ; curfile->attr & FA_SUBDIR; curfile++) {
-		if (curfile->name[0] == DELETION_MARK)
+	for ( ; (curfile->attr & FA_SUBDIR) || is_lfn(curfile); curfile++) {	/* long names precede their entry */
+		if ((curfile->name[0] == DELETION_MARK) || is_lfn(curfile))
 			continue;
 		errflag = 0;
 		dirlevel++;
@@ -728,7 +730,7 @@ char pathout[MAX_ERRFILEMSGSIZE];
 
 	errflag = 0;
 	while ((void *) curfile < (void *) enddir) {
-		if (curfile->name[0] != DELETION_MARK) {
+		if ((curfile->name[0] != DELETION_MARK) && !is_lfn(curfile)) {
 			rc = check_fat(curfile,&errflag,pathin);
 			if (rc < 0) {
 				curfile->name[0] = DELETION_MARK;
@@ -949,6 +951,25 @@ char *valid;
 		if (dir->name[0] == DELETION_MARK)
 			continue;
 
+		/*
+		 *	VFAT long file name: valid if followed by the 8.3 entry whose
+		 *	name matches its checksum (the 8.3 entry is checked next);
+		 *	otherwise an orphan (e.g. its file was deleted by TOS), removed
+		 */
+		if (is_lfn(dir)) {
+			if ((n=lfn_entries((char *)dir,end)) > 0) {
+				dir += n - 1;
+				continue;
+			}
+			errcnt[BADENTRY]++;
+			write_errfile("%s%s %s\n",pathin,"(long name)",text[MEDLOG_BADENTRY].ob_spec);
+			dir->name[0] = DELETION_MARK;
+			if (fix)
+				*needtowrite = 1;
+			else badflag = -1;
+			continue;
+		}
+
 		ngarbage = namerr = duperr = 0;
 
 		if (dir->attr & BADATTR_MASK)
@@ -992,7 +1013,7 @@ char *valid;
 		 */
 		if (dir->attr != FA_VOLUME) {
 			for (sdir = dirstart; (void *) sdir < (void *) dir; sdir++) {
-				if (sdir->attr == FA_VOLUME)
+				if ((sdir->attr == FA_VOLUME) || is_lfn(sdir) || (sdir->name[0] == DELETION_MARK))
 					continue;
 				if (memcmp(sdir->name,dir->name,NAME_LENGTH) == 0) {
 					duperr = 1;
@@ -1841,8 +1862,8 @@ char *temp;
 	/*
 	 *	process subdirectories (they have been sorted in-memory to start of dir)
 	 */
-	for ( ; curfile->attr & FA_SUBDIR; curfile++) {
-		if (curfile->name[0] == DELETION_MARK)
+	for ( ; (curfile->attr & FA_SUBDIR) || is_lfn(curfile); curfile++) {	/* long names precede their entry */
+		if ((curfile->name[0] == DELETION_MARK) || is_lfn(curfile))
 			continue;
 		/*
 		 *	check if the subdirectory's starting cluster is bad.  if so, mark it
@@ -1906,7 +1927,7 @@ char *temp;
 	 *	process remaining entries in directory (must be files)
 	 */
 	for ( ; (void *)curfile < (void *)enddir; curfile++) {
-		if (curfile->name[0] == DELETION_MARK)
+		if ((curfile->name[0] == DELETION_MARK) || is_lfn(curfile))
 			continue;
 		size = get_long((char *)&curfile->size);
 		numclus = (size+dpb.bpc-1) >> dpb.cluster_shift;

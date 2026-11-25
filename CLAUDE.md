@@ -64,6 +64,71 @@ with GCC (`m68k-atari-mint`) and libcmini. See `README.md`, `port/README.md`
   Yes (282,247); Medic report buttons Fix now / Continue at (43,292); FAT
   choice "FAT #1" at (232,231); read-error alert "Continue" at (370,247).
 
+## Atari disk structures (manual chapter 2, and what the code does with them)
+
+- **Physical sector 0** (root sector, AHDI): `0x1C2` disk size (long, in 512-
+  byte sectors), 4 partition entries of 12 bytes at `0x1C6`, `0x1D2`, `0x1DE`,
+  `0x1EA`: flag byte (bit 0 active, bit 7 bootable), 3-character id, start
+  sector (long), size in sectors (long); bad sector list start `0x1F6`, size
+  `0x1FE`. Big-endian (Motorola). Root sector word checksum `$1234` =
+  bootable (driver code, e.g. HDDriver on the 512 MB SD image).
+- Ids: **GEM** (logical sector = 512 bytes; ≤16 MB on TOS 1.0/1.02, ≤32 MB on
+  TOS ≥1.04), **BGM** (logical sectors of 512·2^n bytes; the driver maps them
+  to 512-byte physical sectors), **XGM** (extended: points to another
+  pseudo-root sector, chainable, for more than 4 partitions); also `F32`
+  (FAT32, HDDriver), `ACK`/`OOP` (Spectre), `OS9`. ICD/Supra: up to 12
+  entries in sector 0, extra ones at `0x156`…`0x1AA` (step 12); an Atari
+  driver only sees the first 4. TOS 1.00 partitions ≤ 32767 sectors, TOS 1.04
+  ≤ 65535, TOS 4.00 logical sectors up to 16384 bytes.
+- **Not in the manual, and not handled by Edge**: DOS **MBR** disks (`55AA`
+  signature, table at `0x1BE`, which overlaps the AHDI entries) and **GPT**
+  disks (`EFI PART` in sector 1), used by EmuTOS, HDDriver and PC-formatted
+  cards (the Falcon CF image is MBR, the 32 MB SD image is GPT). The
+  partition editor (`part1.c`, `load_root_sectors()`) reads sector 0 as AHDI
+  only: installing partition info there would destroy an MBR/GPT table.
+  To do: detect them and refuse (or warn) in the partitioning and SCSI
+  mirror functions.
+- **Partition layout**: boot sector (logical 0) | reserved | FAT #1 | FAT #2 |
+  root directory (fixed size) | data area (clusters from number 2). FAT n at
+  `res + n·spf`, root at `res + nfat·spf`, data at that + root sectors
+  (`dpb.firstd`). Control sectors = everything before the data area.
+- **Boot sector** (little-endian, Intel): `0x00` branch, `0x02` OEM (6),
+  `0x08` 24-bit serial (media change), `0x0B` bytes/sector, `0x0D`
+  sectors/cluster (usually 2), `0x0E` reserved sectors, `0x10` number of
+  FATs (2), `0x11` root entries, `0x13` total sectors (16-bit), `0x15` media
+  (ignored by the Atari BIOS), `0x16` sectors/FAT, `0x18` sectors/track,
+  `0x1A` sides, `0x1C` hidden sectors; checksum `$1234` over the sector =
+  bootable (floppies). Edge: `load_mybpb()` (disk.c, copy in dmirror.c),
+  `MYBPB dpb`.
+- **FAT**: 12-bit (≤ 4096 clusters, floppies; 2 entries in 3 bytes) or 16-bit
+  (little-endian). Special values: 0 free, `$FF7`/`$FFF7` bad, `$FFF`/`$FFFF`
+  end of chain. Edge converts both into big-endian 16-bit tables in memory
+  (`fat12_to_fat16()`, `swab()`), with `dpb.bitmask` (end) and `dpb.badmask`
+  (bad) = `$FFF`/`$FF7` or `$FFFF`/`$FFF7`. Microsoft's spec allows any of
+  `$FFF8`–`$FFFF` (`$FF8`–`$FFF`) as end of chain: Edge only accepts the exact
+  value, so other systems' `$FFF8` ends would be "Bad FAT entries" (not seen
+  yet; to check with PC-formatted media). Two copies of the FAT; Medic
+  compares them.
+- **Directory entry** (32 bytes): name 8 + extension 3 (space padded, no
+  dot), attribute (`0x01` RO, `0x02` hidden, `0x04` system, `0x08` volume,
+  `0x10` directory, `0x20` archive; `0x0F` = VFAT long name), 10 reserved
+  bytes (`0x0C`; VFAT systems store creation time, access date, high cluster
+  there: Medic counts non-zero as one "garbage" point), time `0x16`, date
+  `0x18`, first cluster `0x1A` (16-bit), size `0x1C` (32-bit), all
+  little-endian. Deleted: first byte `$E5` (FAT chain cleared; Undelete
+  guesses consecutive free clusters, or uses the Mirror FAT). Subdirectories
+  are files with a FAT chain, starting with `.` and `..`, grown one cluster
+  at a time (→ directory fragmentation, which the frag map shows by its
+  drawing order). Root directory has a fixed size.
+- **Optimize**: Full = folders contiguous, then each file contiguous, files of
+  a folder consecutive; Compress Free Space = only removes holes. Read
+  priority packs data at the start (C: AUTO folder files and root first, AUTO
+  order kept), write priority at the end. Diagrams: manual pages 8 and 41.
+- Causes of damage the tools address: crashes while writing (run Medic),
+  weak media (Map Bad, several passes), lost sector 0 / boot sector / FAT /
+  root (Save/Restore SCSI and Disk Mirror, emergency floppy), power loss
+  during Optimize (nothing protects against it: backups).
+
 ## How the program works (Diamond Edge 2.57 manual)
 
 Manual (CC BY-SA 4.0, not in the repository):

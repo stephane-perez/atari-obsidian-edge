@@ -1,5 +1,5 @@
 /*
- *	dmirror.c: Diamond Mirror
+ *	dmirror.c: Obsidian Mirror (Diamond Mirror before Obsidian Edge)
  *
  *	Copyright (C) 2002-2017 Roger Burrows
  *
@@ -15,6 +15,8 @@
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  *
  *	Modified for Obsidian Edge (November 2026): VFAT long file names
+ *
+ *	Modified for Obsidian Edge (November 2026): renamed Obsidian Mirror
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -126,7 +128,7 @@ int test_rotate = FALSE;		/* TRUE => rotate tests */
 struct control mirror;
 char mirror_path[MAX_EDGEPATH] = "";	/* path for mirror files */
 
-char *copyright = "Diamond Mirror: Copyright \275 2002-2017 Roger Burrows.  All Rights Reserved";
+char *copyright = "Obsidian Mirror, based on Diamond Mirror: Copyright \275 2002-2017 Roger Burrows.  All Rights Reserved";
 
 
 /*
@@ -192,7 +194,7 @@ char *p, temp[200];
 		appl_init();
 		myhandle = open_workstation();
 		graf_mouse(ARROW,NULL);
-		form_alert(1,"[1][Diamond Mirror must be run |from the AUTO folder during |bootup. |(Use Diamond Edge to |configure Diamond Mirror)][ OK ]");
+		form_alert(1,"[1][Obsidian Mirror must be run|from the AUTO folder during |bootup. |(Use Obsidian Edge to |configure Obsidian Mirror)][ OK ]");
 		v_clsvwk(myhandle);
 		appl_exit();
 		exit(0);
@@ -206,8 +208,9 @@ char *p, temp[200];
 	sprintf(app_path,DM_PATH,'A'+boot);
 
 	printf("\r\x1bp                                    \n");	/* inverse video */
-	printf("        Diamond Mirror v%-6.6s      \n",PROGRAM_VERSION);
-	printf("    \275 1992-2003 by Roger Burrows    \n");
+	printf("       Obsidian Mirror v%-6.6s      \n",PROGRAM_VERSION);
+	printf("    based on Diamond Mirror by      \n");
+	printf("    \275 1992-2003 Roger Burrows       \n");
 	printf(" based on code by Robert D. Luneski \n");
 	printf("                                    \x1bq\n");		/* normal video */
 	printf("\n");
@@ -284,7 +287,7 @@ char *p, temp[200];
 			bailout = TRUE;
 		update_last_run();
 		if (bailout) {
-			printf("\nDiamond Mirror terminated\n");
+			printf("\nObsidian Mirror terminated\n");
 			return 1;
 		}
 	}
@@ -297,12 +300,12 @@ char *p, temp[200];
 			bailout = TRUE;
 		update_last_run();
 		if (bailout) {
-			printf("\nDiamond Mirror terminated\n");
+			printf("\nObsidian Mirror terminated\n");
 			return 1;
 		}
 	}
 
-	printf("\nDiamond Mirror completed normally\n");
+	printf("\nObsidian Mirror completed normally\n");
 	return 0;
 }
 
@@ -358,7 +361,7 @@ short lastdev;
 			}
 		}
 		printf("\nYou should run Diamond Edge IMMEDIATELY");
-		printf("\nPress any key to exit Diamond Mirror");
+		printf("\nPress any key to exit Obsidian Mirror");
 		get_key();
 		error = -1;
 	} else printf("No disk errors detected\n");
@@ -396,7 +399,7 @@ int error = 0;
 
 	if (error < 0) {
 		printf("\nMirror errors were detected");
-		printf("\nPress any key to exit Diamond Mirror");
+		printf("\nPress any key to exit Obsidian Mirror");
 		get_key();
 	}
 

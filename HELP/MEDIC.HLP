@@ -21,8 +21,8 @@
  performed on either floppy disks or hard disk partitions.  We
  strongly recommend that you run Disk Medic on ALL of your hard disk
  partitions at least once a week.  Another way of performing the same
- function is through the use of the Test option of Diamond Mirror:
- refer to "Configuring Diamond Mirror" in your manual for further
+ function is through the use of the Test option of Obsidian Mirror:
+ refer to "Configuring Obsidian Mirror" in your manual for further
  details.
  
     The actions of Disk Medic are controlled via options in the Medic

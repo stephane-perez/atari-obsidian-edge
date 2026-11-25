@@ -1,5 +1,5 @@
 /*
- *	mirror.c: implements the Diamond Mirror configuration function
+ *	mirror.c: implements the Obsidian (formerly Diamond) Mirror configuration function
  *
  *
  *	Copyright (C) 2002-2017 Roger Burrows
@@ -10,6 +10,8 @@
  *	Modified for Obsidian Edge (November 2026): demo version removed
  *
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): Obsidian Mirror
  */
 
 /*
@@ -94,7 +96,7 @@ PUBLIC int init_mirror_prefs()
 }
 
 /*
- *	read in Diamond Mirror prefs & validate
+ *	read in Obsidian Mirror prefs & validate
  */
 PRIVATE void get_prefs(MIRROR_PREFS *mprefs)
 {

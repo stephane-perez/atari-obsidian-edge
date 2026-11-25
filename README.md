@@ -10,10 +10,13 @@ Like its ancestor, it aims to provide:
 - partition copying,
 - file undeletion.
 
-> **Status: version 0.0.1 (work in progress).** This is the first release of the
-> fork. It is based on Diamond Edge 2.57, rebuilt with GCC, without the copy
-> protection and the demo version; the disk functions are unchanged and not
-> tested yet. Always back up your data before running any disk optimiser.
+> **Status: version 0.1.0.** Based on Diamond Edge 2.57, rebuilt with GCC,
+> without the copy protection and the demo version. The disk functions were
+> fixed for the GCC build and tested in Hatari (EmuTOS, TOS 1.62 with HDDriver)
+> and on real machines (STE, Falcon030, Falcon CT60); VFAT long file names are
+> kept, FAT32 partitions are recognised and refused. See
+> [`CHANGELOG.md`](CHANGELOG.md). Always back up your data before running any
+> disk optimiser.
 
 ## Origin and credits
 

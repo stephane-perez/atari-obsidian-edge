@@ -1,5 +1,5 @@
 /*
- *	lfn.c: VFAT long file names, for Obsidian Edge and Diamond Mirror
+ *	lfn.c: VFAT long file names, for Obsidian Edge and Obsidian Mirror
  *
  *	Copyright (C) 2026 the Obsidian Edge contributors
  *

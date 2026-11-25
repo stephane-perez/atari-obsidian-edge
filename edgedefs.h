@@ -14,6 +14,8 @@
  *	Modified for Obsidian Edge (November 2026): E_FAT32, FAT32 texts
  *
  *	Modified for Obsidian Edge (November 2026): VFAT long file names
+ *
+ *	Modified for Obsidian Edge (November 2026): Obsidian Mirror
  *	over from the copy protection (INSTALL.PRG, "Unregistered")
  */
 
@@ -46,8 +48,8 @@
 #define RSC_FILE		"EDGE.RSC"
 #define PREFS_FILE		"EDGE.INF"			/* stores preferences for Edge */
 #define DM_PROGRAM_FILE	"DMIRROR.PRG"
-#define DM_PREFS_FILE	"DMIRROR.INF"		/* stores preferences for Diamond Mirror */
-#define DM_PATH			"%c:\\AUTO\\"		/* where to find Diamond Mirror program/prefs */
+#define DM_PREFS_FILE	"DMIRROR.INF"		/* stores preferences for Obsidian Mirror */
+#define DM_PATH			"%c:\\AUTO\\"		/* where to find Obsidian Mirror program/prefs */
 
 #define FILE_HELP		"HELP\\FILE.HLP"	/* subpaths for help files */
 #define MEDIC_HELP		"HELP\\MEDIC.HLP"

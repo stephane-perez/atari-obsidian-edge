@@ -9,9 +9,14 @@ the `VERSION` file.
 User-visible changes are also summarised, in plain ASCII for the Atari, in
 [`DOC/CHANGES.TXT`](DOC/CHANGES.TXT).
 
-## [Unreleased]
+## [0.1.0] - 2026-11-25
 
 ### Changed
+- Diamond Mirror renamed Obsidian Mirror in its messages, in `EDGE.RSC`
+  (the "Mirror not found" alert and the configuration dialog title), the
+  help files and the documentation; the program is still `DMIRROR.PRG`,
+  version 2.57.
+- `README.TXT` of the distribution: what has been tested.
 - About box (`EDGE.RSC`, edited with Interface): "About Obsidian Edge",
   "Based on Diamond Edge 2.57", the fork's copyright; the "Registered to"
   and "Serial number" fields are gone.

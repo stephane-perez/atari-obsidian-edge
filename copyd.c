@@ -9,6 +9,10 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 alert
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  */
 
 /*
@@ -112,7 +116,7 @@ char path[3];
 	dev = dev2;
 
 	if (get_mybpb(&dpb,dev) < 0)
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 	else if (zero_fats_and_root() < 0)
 		xform_alert(1,GEN_OPFAIL_ALERT);
 	else if (setup_hd() >= 0) {
@@ -165,7 +169,7 @@ short ret;
 int rc;
 long bufsize;
 DTA dta;
-DIRLIST *curdir, *ddir;
+DIRLIST *curdir = NULL, *ddir;
 char *iobuf;
 char pbuff[MAX_PATHNAME], pathsearch[MAX_PATHNAME], fromfile[MAX_PATHNAME];
 

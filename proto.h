@@ -10,6 +10,10 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: prototypes match the function definitions (char vs unsigned char)
  *
  *	Modified for Obsidian Edge (November 2026): removed the prototype of protect(), file names in comments
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 functions
+ *
+ *	Modified for Obsidian Edge (November 2026): VFAT long file names
  */
 
 /* Prototypes for functions defined in copyd.c */
@@ -26,6 +30,9 @@ PUBLIC void fat16_to_fat12(unsigned short *f16,unsigned char *f12);
 PUBLIC long gemdos_read(short fh,long count,void *buf,char *name,int loc);
 PUBLIC long gemdos_write(short fh,long count,void *buf,char *name,int loc);
 PUBLIC int get_mybpb(MYBPB *mybpb,short device);
+PUBLIC int is_fat32_partition(short dev);
+PUBLIC int is_fat32_bootsector(char *buf);
+PUBLIC void bpb_alert(int index);
 PUBLIC int get_name(DIRENTRY *dir,char *fname);
 PUBLIC void loadboot(char *buf,MYBPB *mybpb);
 PUBLIC int load_mybpb(char *buf,MYBPB *mybpb,BPB *tbpb);
@@ -95,6 +102,10 @@ PUBLIC int init_mirror_prefs(void);
 PUBLIC long allocate_max_units(int min_units,long unit_size,char **ptr);
 PUBLIC void blank(short color);
 PUBLIC void browse(void);
+PUBLIC int lfn_entries(char *p,char *end);
+PUBLIC int dir_unit_len(char *p,char *end);
+PUBLIC void move_unit(char *inspoint,char *curpoint,int len);
+PUBLIC char *sort_units(char *inspoint,char *endpoint,int rmdel);
 PUBLIC unsigned long CDmap(void);
 PUBLIC void ce_off(void);
 PUBLIC void ce_on(void);
@@ -173,6 +184,7 @@ PUBLIC void set_clip(void);
 PUBLIC void toggle_bottom(short obj);
 PUBLIC void wait_for_redraw(short win);
 PUBLIC int xform_alert(int dft,int index, ...);
+PUBLIC char *free_string(int index);
 
 /* Prototypes for functions defined in section.c */
 PUBLIC void close_section(void);

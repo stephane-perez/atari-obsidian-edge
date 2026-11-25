@@ -51,6 +51,13 @@ long chgdsk(int drive);
 /* <io.h>: length of an open file */
 long filelength(int fd);
 
+/* marks an intentional fall-through to the next case label (clang, GCC >= 7) */
+#if defined(__clang__) || (defined(__GNUC__) && __GNUC__ >= 7)
+#define FALLTHROUGH		__attribute__((__fallthrough__))
+#else
+#define FALLTHROUGH		do { } while (0)
+#endif
+
 /* force GEMDOS to see a media change on 'drive' (0 = A:) */
 int _mediach(int drive);
 

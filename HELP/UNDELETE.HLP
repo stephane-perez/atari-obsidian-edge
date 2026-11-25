@@ -6,7 +6,7 @@
     ù  Restoring Disk Mirror
     ù  Saving SCSI Mirror
     ù  Restoring SCSI Mirror
-    ù  Configuring Diamond Mirror
+    ù  Configuring Obsidian Mirror
     ù  Choosing your Undelete method
     ù  Undeleting Files
     ù  What to do after you undelete a file
@@ -103,16 +103,16 @@
  about to restore is correct, select Cancel to abort the restore.
 
   
- ù  Configuring Diamond Mirror
+ ù  Configuring Obsidian Mirror
  
     One of the keys to successful recovery of deleted files is a good
  knowledge of the FAT structure prior to the file deletion.  Diamond
  Mirror is an AUTO-folder program which saves FAT and root directory
  information at user-specified intervals; it also has the capability
  of testing your disk partitions.  Both of these functions can be very
- useful and we strongly recommend that you use Diamond Mirror.
+ useful and we strongly recommend that you use Obsidian Mirror.
  
-    Diamond Mirror is configured from within Diamond Edge by selecting
+    Obsidian Mirror is configured from within Obsidian Edge by selecting
  "Configure Mirror..." from the Undelete menu.  The following items
  may be specified:
  
@@ -122,13 +122,13 @@
        devices as you wish, and you may select different drives to
        Test and Mirror.
  
-    ù  How often to Test/Mirror:  Diamond Mirror can Test and/or
+    ù  How often to Test/Mirror:  Obsidian Mirror can Test and/or
        Mirror the selected drives every time your machine is booted
        up, once per day, or once per week.  You can select different
        schedules for Test and Mirror.
  
     ù  Where to put your Mirror files:  Specify the folder in which
-       the files created by Diamond Mirror will be stored.
+       the files created by Obsidian Mirror will be stored.
  
     After you are satisfied with your configuration, click on Save
  Configuration.  If you want to exit without changing the existing

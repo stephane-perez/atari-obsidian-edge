@@ -12,6 +12,19 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: no cast as lvalue
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *
+ *	Modified for Obsidian Edge (November 2026): unreadable directory clusters dropped correctly, counters fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 alert
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): explicit int comparisons
+ *
+ *	Modified for Obsidian Edge (November 2026): VFAT long file names
+ *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
 /*
@@ -341,7 +354,7 @@ static char title[MAX_DISPLAYSIZE];
 	if (get_mybpb(&dpb,dev) < 0) {
 		strcpy(medic[VBOOTS].ob_spec,text[MISC_ERROR].ob_spec);
 		redraw_object(medic,VBOOTS);
-		xform_alert(1,MD_BADBOOT_ALERT);
+		bpb_alert(MD_BADBOOT_ALERT);
 		return 1;
 	}
 	strcpy(medic[VBOOTS].ob_spec,text[MISC_OK].ob_spec);
@@ -438,8 +451,8 @@ static char title[MAX_DISPLAYSIZE];
 	sprintf(medic[BADCLUS].ob_spec,"%5d",nbadclus);
 	if (faterr) {
 		strcpy(medic[FAT12].ob_spec,text[MISC_ERROR].ob_spec);
-		*problems++;
-	} else sprintf(medic[FAT12].ob_spec,"%5s",text[MISC_OK].ob_spec);
+		(*problems)++;
+	} else sprintf(medic[FAT12].ob_spec,"%5s",(char *)text[MISC_OK].ob_spec);
 
 	if (!*problems) {
 		strcpy(medic[REPACT].ob_spec,text[MEDIC_NOPROBLEMS].ob_spec);
@@ -602,8 +615,8 @@ char pathout[MAX_ERRFILEMSGSIZE];
 			curfile++;
 	} else curfile += 2;
 
-	for ( ; curfile->attr & FA_SUBDIR; curfile++) {
-		if (curfile->name[0] == DELETION_MARK)
+	for ( ; (curfile->attr & FA_SUBDIR) || is_lfn(curfile); curfile++) {	/* long names precede their entry */
+		if ((curfile->name[0] == DELETION_MARK) || is_lfn(curfile))
 			continue;
 		errflag = 0;
 		dirlevel++;
@@ -717,7 +730,7 @@ char pathout[MAX_ERRFILEMSGSIZE];
 
 	errflag = 0;
 	while ((void *) curfile < (void *) enddir) {
-		if (curfile->name[0] != DELETION_MARK) {
+		if ((curfile->name[0] != DELETION_MARK) && !is_lfn(curfile)) {
 			rc = check_fat(curfile,&errflag,pathin);
 			if (rc < 0) {
 				curfile->name[0] = DELETION_MARK;
@@ -745,7 +758,7 @@ char pathout[MAX_ERRFILEMSGSIZE];
 				must_write(dev,dpb.spc,logsector(st),dirlist[dirlevel].dirbuf+offset,DIR);
 				st = fat16[st];
 				offset += (long) dpb.bpc;
-			} while (st != dpb.bitmask);
+			} while (st != (short)dpb.bitmask);
 		} else {
 			must_write(dev,dpb.rds,1+2*dpb.spf,dirlist[0].dirbuf,DIR);
 		}
@@ -795,7 +808,7 @@ long offset;
 					up_dirlist();
 					return -1;
 				} else {
-					*ncl--;
+					(*ncl)--;
 					if (st == *dirstart) {
 						*mustwrite = 1;
 						*dirstart = fat16[st];
@@ -806,9 +819,9 @@ long offset;
 						return 1;
 					} else {
 						tfat[st] = 1;
-						fat16[prev] = fat16[st];
-						st = fat16[st];
+						fat16[prev] = fat16[st];	/* drop the bad cluster from the chain */
 						fat16[st] = dpb.badmask;
+						st = fat16[prev];
 						continue;
 					}
 				}
@@ -823,7 +836,7 @@ long offset;
 		prev = st;
 		st = fat16[st];
 		offset += dpb.bpc;
-	} while (st != dpb.bitmask);
+	} while (st != (short)dpb.bitmask);
 
 	return 0;
 }
@@ -885,7 +898,7 @@ short st;
 		draw_block(st,flag);
 		tfat[st] = 1;
 		st = fat16[st];
-	} while (st != dpb.bitmask);
+	} while (st != (short)dpb.bitmask);
 }
 
 /**********************************************************************/
@@ -897,7 +910,7 @@ short st;
 	do {
 		tfat[st] = 1;
 		st = fat16[st];
-	} while (st != dpb.bitmask);
+	} while (st != (short)dpb.bitmask);
 }
 
 /*
@@ -937,6 +950,25 @@ char *valid;
 	for (dir = dirstart; (void *) dir < (void *) end; dir++) {
 		if (dir->name[0] == DELETION_MARK)
 			continue;
+
+		/*
+		 *	VFAT long file name: valid if followed by the 8.3 entry whose
+		 *	name matches its checksum (the 8.3 entry is checked next);
+		 *	otherwise an orphan (e.g. its file was deleted by TOS), removed
+		 */
+		if (is_lfn(dir)) {
+			if ((n=lfn_entries((char *)dir,end)) > 0) {
+				dir += n - 1;
+				continue;
+			}
+			errcnt[BADENTRY]++;
+			write_errfile("%s%s %s\n",pathin,"(long name)",text[MEDLOG_BADENTRY].ob_spec);
+			dir->name[0] = DELETION_MARK;
+			if (fix)
+				*needtowrite = 1;
+			else badflag = -1;
+			continue;
+		}
 
 		ngarbage = namerr = duperr = 0;
 
@@ -981,7 +1013,7 @@ char *valid;
 		 */
 		if (dir->attr != FA_VOLUME) {
 			for (sdir = dirstart; (void *) sdir < (void *) dir; sdir++) {
-				if (sdir->attr == FA_VOLUME)
+				if ((sdir->attr == FA_VOLUME) || is_lfn(sdir) || (sdir->name[0] == DELETION_MARK))
 					continue;
 				if (memcmp(sdir->name,dir->name,NAME_LENGTH) == 0) {
 					duperr = 1;
@@ -1098,7 +1130,7 @@ char dname[MAX_FILENAME];
 		st = fat16[st];
 		i++;
 
-		if (st == dpb.bitmask)
+		if (st == (short)dpb.bitmask)
 			break;
 
 		if (!valid_cluster(st)) {
@@ -1178,7 +1210,7 @@ char *buf;
 		if (fat16[i])
 			lastused = i;
 	nextfree = lastused + 1;
-	if (nextfree >= dpb.maxc)			/* there *is* no space at the end ... */
+	if ((int)nextfree >= (int)dpb.maxc)			/* there *is* no space at the end ... */
 		return -1;
 
 	if ((buf=malloc(dpb.bpc)) == NULL) {
@@ -1274,7 +1306,7 @@ char dname[MAX_FILENAME];
 /*********************************************************************/
 PRIVATE void check_garbage(char *pathin)
 {
-short start, curc, st;
+short start = 0, curc, st;
 int i, num, total;
 char *endpoint, *end;
 char tname[MAX_FILENAME];
@@ -1282,7 +1314,7 @@ DIRENTRY *d;
 
 	for (i = 2; i < dpb.maxc; i++) {
 		if ((tfat[i] != 0) && (tfat[i] != 1)) {
-			if (tfat[i] != dpb.badmask) {
+			if (tfat[i] != (short)dpb.badmask) {
 				/* diskerr(14); */
 				errcnt[LOSTCLUSTER]++;
 			} else nbadclus++;
@@ -1294,7 +1326,7 @@ DIRENTRY *d;
 	write_errfile("%s  %d %s\n",pathin,errcnt[LOSTCLUSTER],text[MEDLOG_LOSTCLUS].ob_spec);
 	for (i = 2, num = 0; i < dpb.maxc; i++) {
 		if ((tfat[i] != 0) && (tfat[i] != 1)) {
-			if (tfat[i] != dpb.badmask) {
+			if (tfat[i] != (short)dpb.badmask) {
 				write_errfile(" %5d%c",i,(++num%10)?' ':'\n');
 				if (opt.visual)
 					draw_block(i,CLUSTER_ERR);
@@ -1325,13 +1357,13 @@ DIRENTRY *d;
 
 	for (total = 0; endpoint < end; endpoint += sizeof(DIRENTRY), total += num) {
 		for (i = 2, num = 0; i < dpb.maxc; i++) {
-			if ((tfat[i] != 0) && (tfat[i] != 1) && (tfat[i] != dpb.badmask)) {
+			if ((tfat[i] != 0) && (tfat[i] != 1) && (tfat[i] != (short)dpb.badmask)) {
 				num = 1;
 				tfat[i] = 1;
 				start = curc = i;
 				st = fat16[curc];
-				while(st != dpb.bitmask) {
-					if (!valid_cluster(st) || (tfat[st] == 1) || (tfat[st] == dpb.badmask)) {
+				while(st != (short)dpb.bitmask) {
+					if (!valid_cluster(st) || (tfat[st] == 1) || (tfat[st] == (short)dpb.badmask)) {
 						fat16[curc] = dpb.bitmask;
 						break;
 					}
@@ -1448,7 +1480,7 @@ static char title[MAX_DISPLAYSIZE];
 	strcpy(blocks->te_ptext,"0.0");
 	strcpy(medic[NPASS].ob_spec," 1");
 	sprintf(medic[TOTPASS].ob_spec,"%2d",mapbad.passes);
-	strcpy(medic[MBAD].ob_spec,"ù");
+	strcpy(medic[MBAD].ob_spec,"\371");
 	redraw_object(medic,0);
 
 	if (fix) {
@@ -1470,7 +1502,7 @@ static char title[MAX_DISPLAYSIZE];
 	if (get_mybpb(&dpb,dev) < 0) {
 		strcpy(medic[VBOOTS].ob_spec,text[MISC_ERROR].ob_spec);
 		redraw_object(medic,VBOOTS);
-		xform_alert(1,MD_BADBOOT_ALERT);
+		bpb_alert(MD_BADBOOT_ALERT);
 	} else {
 		wind_update(BEG_UPDATE);
 		mouse_off();
@@ -1830,8 +1862,8 @@ char *temp;
 	/*
 	 *	process subdirectories (they have been sorted in-memory to start of dir)
 	 */
-	for ( ; curfile->attr & FA_SUBDIR; curfile++) {
-		if (curfile->name[0] == DELETION_MARK)
+	for ( ; (curfile->attr & FA_SUBDIR) || is_lfn(curfile); curfile++) {	/* long names precede their entry */
+		if ((curfile->name[0] == DELETION_MARK) || is_lfn(curfile))
 			continue;
 		/*
 		 *	check if the subdirectory's starting cluster is bad.  if so, mark it
@@ -1895,7 +1927,7 @@ char *temp;
 	 *	process remaining entries in directory (must be files)
 	 */
 	for ( ; (void *)curfile < (void *)enddir; curfile++) {
-		if (curfile->name[0] == DELETION_MARK)
+		if ((curfile->name[0] == DELETION_MARK) || is_lfn(curfile))
 			continue;
 		size = get_long((char *)&curfile->size);
 		numclus = (size+dpb.bpc-1) >> dpb.cluster_shift;
@@ -1917,7 +1949,7 @@ char *temp;
 				must_write(dev,dpb.spc,logsector(st),dirlist[dirlevel].dirbuf+offset,DIR);
 				st = fat16[st];
 				offset += dpb.bpc;
-			} while (st != dpb.bitmask);
+			} while (st != (short)dpb.bitmask);
 		} else {
 			must_write(dev,dpb.rds,1+2*dpb.spf,dirlist[0].dirbuf,DIR);
 		}
@@ -1956,7 +1988,7 @@ long offset;
 				up_dirlist();
 				return -1;
 			} else {
-				*ncl--;
+				(*ncl)--;
 				if (st == *dirstart) {
 					*mustwrite = 1;
 					*dirstart = fat16[st];
@@ -1965,9 +1997,9 @@ long offset;
 					assert(offset==0L);		/* temporary paranoia */
 					return 1;
 				} else {
-					fat16[prev] = fat16[st];
-					st = fat16[st];
+					fat16[prev] = fat16[st];		/* drop the bad cluster from the chain */
 					fat16[st] = dpb.badmask;
+					st = fat16[prev];
 					continue;
 				}
 			}
@@ -1975,7 +2007,7 @@ long offset;
 		prev = st;
 		st = fat16[st];
 		if (is_bad_cluster(st)) {
-			*ncl--;
+			(*ncl)--;
 			*mustwrite = 1;
 			if (fat16[st] == dpb.bitmask) {		/* bad last cluster */
 				fat16[st] = dpb.badmask;
@@ -1988,7 +2020,7 @@ long offset;
 			}
 		}
 		offset += (long) dpb.bpc;
-	} while (st != dpb.bitmask);
+	} while (st != (short)dpb.bitmask);
 
 	return 0;
 }
@@ -2038,7 +2070,7 @@ PRIVATE int is_bad_cluster(short cluster)
 BAD *bad;
 
 	for (bad = firstbad; bad; bad = bad->next_bad)
-		if (bad->badclus == cluster)
+		if ((int)bad->badclus == (int)cluster)
 			return TRUE;
 
 	return FALSE;
@@ -2288,7 +2320,7 @@ short maxsecs, nondatasecs;
 		sprintf(medic[NPASS].ob_spec,"%2d",i+1);
 		redraw_object(medic,NPASS);
 		redraw_object(medic,MDAREA);
-		for (secloc = 1; secloc < nondatasecs; secloc += numsecs) {
+		for (secloc = 1; (int)secloc < (int)nondatasecs; secloc += numsecs) {
 			numsecs = min(nondatasecs-secloc,maxsecs);
 			if (get_key() < 0)
 				return -1;
@@ -2409,7 +2441,7 @@ BAD *b, *n;
 
 		for (b = firstfatbad; b; b = n) {
 			n = b->next_bad;
-			if (b->badclus == cursec)		/* we found this before */
+			if ((int)b->badclus == (int)cursec)		/* we found this before */
 				break;
 		}
 		if (b)
@@ -2520,7 +2552,7 @@ int needtowrite = 0;
 			needtowrite = 1;
 		} else clusters++;					/* good cluster: count it */
 
-		if (st == dpb.bitmask)				/* end of chain */
+		if (st == (short)dpb.bitmask)				/* end of chain */
 			break;
 
 		if (!valid_cluster(st)) {			/* invalid cluster: */

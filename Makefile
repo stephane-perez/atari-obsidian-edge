@@ -66,13 +66,13 @@ PRGFLAGS := --mfastload --mfastram --mfastalloc
 
 PORT_OBJS := port/lattice.o port/mediach.o $(LIBC_OBJS)
 
-EDGE_SRCS := main.c copyd.c disk.c dmap.c fileio.c info.c medic1.c mirror.c \
+EDGE_SRCS := main.c copyd.c disk.c dmap.c fileio.c info.c lfn.c medic1.c mirror.c \
              misc.c opt2.c part1.c rsc.c section.c undel.c valid.c \
              viewfile.c xrsrc.c lib/driver.c
-EDGE_OBJS := $(EDGE_SRCS:.c=.o) lib/scsidrv.o port/edgeasm.o port/compmem.o port/callstack.o \
+EDGE_OBJS := $(EDGE_SRCS:.c=.o) lib/scsidrv.o port/edgeasm.o port/compmem.o port/callstack.o port/xhdi.o \
              $(PORT_OBJS)
 
-DMIRROR_OBJS := dmirror/dmirror.o dmirror/section.o dmirror/xmode.o \
+DMIRROR_OBJS := dmirror/dmirror.o dmirror/section.o dmirror/xmode.o lfn.o \
                 port/compmem.o $(PORT_OBJS)
 
 PROGRAMS := $(BUILD)/EDGE.PRG $(BUILD)/DMIRROR.PRG

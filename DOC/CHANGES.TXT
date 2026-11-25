@@ -5,6 +5,28 @@ Obsidian Edge is a fork of Diamond Edge v2.57.  This is a summary of
 the changes compared to Diamond Edge v2.57; for details, see the git
 history: https://github.com/stephane-perez/atari-obsidian-edge
 
+v0.1.0 (November 2026)
+----------------------
+  . the disk functions work again: in the first GCC build, Medic and
+    Optimize crashed (or ran through the FAT) on any disk with a folder
+
+  . Medic: an unreadable folder cluster is now dropped correctly; the
+    drive selection for the multi-drive functions is read back correctly
+    from EDGE.INF
+
+  . VFAT long file names (written by Windows, Linux, MiNT...) are kept by
+    Medic and Optimize; only orphans (left when TOS deletes a file) are
+    reported and removed
+
+  . FAT32 partitions are recognised and refused with a message, instead
+    of a boot sector read error
+
+  . Diamond Mirror is renamed Obsidian Mirror (still DMIRROR.PRG, v2.57)
+
+  . the help files no longer show a CR character at the end of the lines
+
+  . new About box
+
 v0.0.1 (November 2026)
 ----------------------
   . first release of the fork, renamed Obsidian Edge.  The About box

@@ -1,5 +1,5 @@
 /*
- *	dmirror.c: Diamond Mirror
+ *	dmirror.c: Obsidian Mirror (Diamond Mirror before Obsidian Edge)
  *
  *	Copyright (C) 2002-2017 Roger Burrows
  *
@@ -7,6 +7,17 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): BETA version and expiry date removed
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *
+ *	Modified for Obsidian Edge (November 2026): partitions with more than 32765 data clusters refused
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): VFAT long file names
+ *
+ *	Modified for Obsidian Edge (November 2026): renamed Obsidian Mirror
+ *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
 /*
@@ -117,7 +128,7 @@ int test_rotate = FALSE;		/* TRUE => rotate tests */
 struct control mirror;
 char mirror_path[MAX_EDGEPATH] = "";	/* path for mirror files */
 
-char *copyright = "Diamond Mirror: Copyright ½ 2002-2017 Roger Burrows.  All Rights Reserved";
+char *copyright = "Obsidian Mirror, based on Diamond Mirror: Copyright \275 2002-2017 Roger Burrows.  All Rights Reserved";
 
 
 /*
@@ -148,6 +159,8 @@ int perform_tests(unsigned long testlist);
 short open_workstation(void);
 int save_info(short dev,char *path);
 char *sort_dir(char *curdir,int ncl);
+int lfn_entries(char *p,char *end);
+char *sort_units(char *inspoint,char *endpoint,int rmdel);
 char *sort_root(char *);
 int test_loop(short dstart,char *enddir);
 void up_dirlist(void);
@@ -158,7 +171,7 @@ int val_direntries(DIRENTRY *dirstart,char *end);
 /*
  *	private macros
  */
-#define sup_on()	{ void *savessp = Super(0L);
+#define sup_on()	{ void *savessp = (void *)Super(0L);
 #define sup_off()	Super(savessp); }
 
 
@@ -181,7 +194,7 @@ char *p, temp[200];
 		appl_init();
 		myhandle = open_workstation();
 		graf_mouse(ARROW,NULL);
-		form_alert(1,"[1][Diamond Mirror must be run |from the AUTO folder during |bootup. |(Use Diamond Edge to |configure Diamond Mirror)][ OK ]");
+		form_alert(1,"[1][Obsidian Mirror must be run|from the AUTO folder during |bootup. |(Use Obsidian Edge to |configure Obsidian Mirror)][ OK ]");
 		v_clsvwk(myhandle);
 		appl_exit();
 		exit(0);
@@ -195,8 +208,9 @@ char *p, temp[200];
 	sprintf(app_path,DM_PATH,'A'+boot);
 
 	printf("\r\x1bp                                    \n");	/* inverse video */
-	printf("        Diamond Mirror v%-6.6s      \n",PROGRAM_VERSION);
-	printf("    ½ 1992-2003 by Roger Burrows    \n");
+	printf("       Obsidian Mirror v%-6.6s      \n",PROGRAM_VERSION);
+	printf("    based on Diamond Mirror by      \n");
+	printf("    \275 1992-2003 Roger Burrows       \n");
 	printf(" based on code by Robert D. Luneski \n");
 	printf("                                    \x1bq\n");		/* normal video */
 	printf("\n");
@@ -206,7 +220,7 @@ char *p, temp[200];
 	 */
 	if (open_section(DM_PREFS_FILE,"ra",TEST_SECTION) == 0) {
 		temp[0] = '\0';
-		read_section_line(INF_PARTITIONS," %[ -ÿ]",temp);
+		read_section_line(INF_PARTITIONS," %[ -\377]",temp);
 		for (p = temp; *p; p++) {
 			n = *p - 'A';
 			if ((n >= FIRST_HD_DEVICE) && (n < NUM_DEVICES))
@@ -219,14 +233,14 @@ char *p, temp[200];
 	}
 	if (open_section(DM_PREFS_FILE,"ra",MIRROR_SECTION) == 0) {
 		temp[0] = '\0';
-		read_section_line(INF_PARTITIONS," %[ -ÿ]",temp);
+		read_section_line(INF_PARTITIONS," %[ -\377]",temp);
 		for (p = temp; *p; p++) {
 			n = *p - 'A';
 			if ((n >= FIRST_HD_DEVICE) && (n < NUM_DEVICES))
 				mirror.partitions |= (1L << n);
 		}
 		read_section_line(INF_FREQUENCY," %d",&mirror.frequency);
-		read_section_line(INF_PATH," %[ -ÿ]",mirror_path);
+		read_section_line(INF_PATH," %[ -\377]",mirror_path);
 		close_section();
 	}
 	if (open_section(DM_PREFS_FILE,"ra",LASTRUN_SECTION) == 0) {
@@ -254,7 +268,7 @@ char *p, temp[200];
 	if (!testlist)
 		printf("No disk tests scheduled\n");
 	else if (next > today)
-		printf("%d day(s) until next disk test\n",next-today);
+		printf("%ld day(s) until next disk test\n",next-today);
 	else tdo = TRUE;
 
 	next = mirror.lastdate + mirror.frequency;
@@ -262,7 +276,7 @@ char *p, temp[200];
 	if (!mirrorlist)
 		printf("No disk mirrors scheduled\n");
 	else if (next > today)
-		printf("%d day(s) until next disk mirror\n",next-today);
+		printf("%ld day(s) until next disk mirror\n",next-today);
 	else mdo = TRUE;
 
 	/*
@@ -273,7 +287,7 @@ char *p, temp[200];
 			bailout = TRUE;
 		update_last_run();
 		if (bailout) {
-			printf("\nDiamond Mirror terminated\n");
+			printf("\nObsidian Mirror terminated\n");
 			return 1;
 		}
 	}
@@ -286,12 +300,12 @@ char *p, temp[200];
 			bailout = TRUE;
 		update_last_run();
 		if (bailout) {
-			printf("\nDiamond Mirror terminated\n");
+			printf("\nObsidian Mirror terminated\n");
 			return 1;
 		}
 	}
 
-	printf("\nDiamond Mirror completed normally\n");
+	printf("\nObsidian Mirror completed normally\n");
 	return 0;
 }
 
@@ -347,7 +361,7 @@ short lastdev;
 			}
 		}
 		printf("\nYou should run Diamond Edge IMMEDIATELY");
-		printf("\nPress any key to exit Diamond Mirror");
+		printf("\nPress any key to exit Obsidian Mirror");
 		get_key();
 		error = -1;
 	} else printf("No disk errors detected\n");
@@ -385,7 +399,7 @@ int error = 0;
 
 	if (error < 0) {
 		printf("\nMirror errors were detected");
-		printf("\nPress any key to exit Diamond Mirror");
+		printf("\nPress any key to exit Obsidian Mirror");
 		get_key();
 	}
 
@@ -502,7 +516,7 @@ char *fat1, *fat2;
  */
 int compare_fats(char *fat1,char *fat2)
 {
-int i, rc;
+int i, rc = 0;
 
 	for (i = 0; i <= MAX_RETRY; i++)
 		if ((rc=Rwabs(2,fat1,dpb.spf,1,dev)) == 0)
@@ -545,6 +559,17 @@ long fsize;
 		if (dir->name[0] == DELETION_MARK)
 			continue;
 
+		/* VFAT long file name: valid if followed by its 8.3 entry (lfn.c) */
+		if (is_lfn(dir)) {
+			if ((i=lfn_entries((char *)dir,end)) > 0) {
+				dir += i - 1;
+				continue;
+			}
+			errcnt[BADENTRY]++;				/* orphan */
+			badflag = -1;
+			continue;
+		}
+
 		ngarbage = namerr = duperr = 0;
 
 		if (dir->attr & BADATTR_MASK)
@@ -584,7 +609,7 @@ long fsize;
 		 */
 		if (dir->attr != FA_VOLUME) {
 			for (sdir = dirstart; (void *) sdir < (void *) dir; sdir++) {
-				if (sdir->attr == FA_VOLUME)
+				if ((sdir->attr == FA_VOLUME) || is_lfn(sdir) || (sdir->name[0] == DELETION_MARK))
 					continue;
 				if (memcmp(sdir->name,dir->name,NAME_LENGTH) == 0) {
 					duperr = 1;
@@ -622,7 +647,7 @@ long fsize;
  */
 int get_mybpb(MYBPB *mybpb,short device)
 {
-int i, rc;
+int i, rc = 0;
 long n;
 BPB *tbpb;
 char *bbuf;
@@ -667,7 +692,7 @@ char *bbuf;
 int load_mybpb(char *buff,MYBPB *mybpb,BPB *tbpb)
 {
 int n;
-long maxclus;
+long maxclus, ncdata;
 
 	if (tbpb)
 		mybpb->isfat16 = tbpb->bflags & 0x01;
@@ -703,7 +728,12 @@ long maxclus;
 	mybpb->nres = get_word(buff + 14);		/* number reserved */
 	mybpb->firstd = (mybpb->nfat*mybpb->spf) + mybpb->rds + mybpb->nres;
 
-	mybpb->cdata = (short) ((mybpb->tsec-mybpb->firstd) / mybpb->spc);
+	if (mybpb->spc <= 0)
+		return -1;
+	ncdata = (mybpb->tsec-mybpb->firstd) / mybpb->spc;
+	if ((ncdata < 0) || (ncdata > MAX_DATA_CLUSTERS))
+		return -1;							/* cluster numbers are shorts */
+	mybpb->cdata = (short)ncdata;
 
 	mybpb->bpf = (long)mybpb->spf * mybpb->bps;
 	mybpb->rdb = (long)mybpb->rds * mybpb->bps;	/* root dir bytes */
@@ -745,7 +775,7 @@ long maxclus;
 	if (mybpb->nfat != 2)
 		return 0;
 
-	if ((mybpb->cdata < 0) || (mybpb->cdata > 32767))		//MAGNUM
+	if ((mybpb->cdata < 0) || (mybpb->cdata > MAX_DATA_CLUSTERS))
 		return 0;
 
 	return 1;
@@ -778,7 +808,7 @@ int j;
  */
 int save_info(short dev,char *path)
 {
-int i, nsec, rc;
+int i, nsec, rc = 0;
 long ntowrite;
 FILE *fp;
 char fbootf[MAX_PATHNAME], bak[MAX_PATHNAME];
@@ -847,7 +877,7 @@ char *rootbuf;
  */
 char *load_root()
 {
-int i, rc;
+int i, rc = 0;
 char *endpoint, *end;
 char *temp;
 
@@ -925,7 +955,7 @@ long size;
 		st = fat16[st];
 		i++;
 
-		if (st == dpb.bitmask)
+		if (st == (short)dpb.bitmask)
 			break;
 
 		if (!valid_cluster(st)) {
@@ -971,7 +1001,7 @@ int i, rc = 0;
 
 	for (i = 2; i < dpb.maxc; i++) {
 		if ((tfat[i] != 0) && (tfat[i] != 1)) {
-			if (tfat[i] != dpb.badmask) {
+			if (tfat[i] != (short)dpb.badmask) {
 				errcnt[LOSTCLUSTER]++;
 				rc = -1;					/* found a lost cluster ... */
 			}
@@ -994,7 +1024,7 @@ short st;
 	do {
 		tfat[st] = 1;
 		st = fat16[st];
-	} while (st != dpb.bitmask);
+	} while (st != (short)dpb.bitmask);
 }
 
 /*
@@ -1029,13 +1059,13 @@ char dname[MAX_FILENAME];
 			curfile++;
 	} else curfile += 2;
 
-	for ( ; curfile->attr == FA_SUBDIR; curfile++) {
-		if (curfile->name[0] == DELETION_MARK)
+	for ( ; (curfile->attr == FA_SUBDIR) || is_lfn(curfile); curfile++) {	/* long names precede their entry */
+		if ((curfile->name[0] == DELETION_MARK) || is_lfn(curfile))
 			continue;
 		dirlevel++;
 		st = dirstart = get_word((char *)&curfile->start);
 		ncl = 1;
-		while (fat16[st] != dpb.bitmask) {
+		while (fat16[st] != (short)dpb.bitmask) {
 			sc = st;
 			st = fat16[st];
 			if (!valid_cluster(st)) {
@@ -1165,7 +1195,7 @@ long offset, rc;
 		prev = st;
 		st = fat16[st];
 		offset += dpb.bpc;
-	} while (st != dpb.bitmask);
+	} while (st != (short)dpb.bitmask);
 
 	return 0;
 }
@@ -1194,7 +1224,6 @@ void up_dirlist()
  */
 char *sort_root(char *dirbuf)
 {
-char temp[sizeof(DIRENTRY)];
 char *curpoint;
 char *inspoint;
 char *endpoint;
@@ -1215,46 +1244,18 @@ int volume_labels_allowed;
 	volume_labels_allowed = 1;
 
 	for (curpoint = inspoint; curpoint < endpoint; curpoint += sizeof(DIRENTRY)) {
-		if (*curpoint && (fattr(curpoint)&FA_VOLUME)) {
+		if (*curpoint && is_volume(curpoint)) {	/* long names have the volume bit */
 			if (volume_labels_allowed)
 				volume_labels_allowed--;
 			else *curpoint = DELETION_MARK;
 		}
 	}
 
-	if (*inspoint && (fattr(inspoint)&FA_VOLUME))		/* skip any initial volume label */
+	if (*inspoint && is_volume(inspoint))		/* skip any initial volume label */
 		inspoint += sizeof(DIRENTRY);
 
-	/*
-	 *	move insertion point to first NON-subdirectory entry
-	 */
-	while(*inspoint && (fattr(inspoint)&FA_SUBDIR))
-		inspoint += sizeof(DIRENTRY);
-
-	/*
-	 *	scan through remainder of directory:
-	 *	. if not a deleted entry:
-	 *		. if a subdirectory entry, move directory entries up 1 & insert it
-	 *		. else just skip it
-	 *	. else it's a deleted entry:
-	 *		. just skip it
-	 */
-	curpoint = inspoint + sizeof(DIRENTRY);
-	while (curpoint < endpoint) {
-		if (*curpoint != DELETION_MARK) {
-			if (*curpoint && (fattr(curpoint)&FA_SUBDIR)) {
-				memcpy(temp,curpoint,sizeof(DIRENTRY));
-				memmove(inspoint+sizeof(DIRENTRY),inspoint,curpoint-inspoint);
-				memcpy(inspoint,temp,sizeof(DIRENTRY));
-				inspoint += sizeof(DIRENTRY);
-			}
-			curpoint += sizeof(DIRENTRY);
-		} else {
-			curpoint += sizeof(DIRENTRY);
-		}
-	}
-
-	return endpoint;
+	/* subdirectories first; long names stay with their 8.3 entry (lfn.c) */
+	return sort_units(inspoint,endpoint,0);
 }
 
 /*
@@ -1268,8 +1269,6 @@ int volume_labels_allowed;
  */
 char *sort_dir(char *curdir,int ncl)
 {
-char temp[sizeof(DIRENTRY)];
-char *curpoint;
 char *inspoint;
 char *endpoint;
 
@@ -1281,35 +1280,8 @@ char *endpoint;
 
 	endpoint += sizeof(DIRENTRY);				/* endpoint is last entry used + 1 */
 
-	/*
-	 *	move insertion point to first NON-subdirectory entry
-	 */
-	while(*inspoint && (fattr(inspoint)&FA_SUBDIR))
-		inspoint += sizeof(DIRENTRY);
-
-	/*
-	 *	scan through remainder of directory:
-	 *	. if not a deleted entry:
-	 *		. if a subdirectory entry, move directory entries up 1 & insert it
-	 *		. else just skip it
-	 *	. else it's a deleted entry:
-	 *		. just skip it
-	 */
-	for (curpoint = inspoint + sizeof(DIRENTRY); curpoint < endpoint; ) {
-		if (*curpoint != DELETION_MARK) {
-			if (*curpoint && (fattr(curpoint)&FA_SUBDIR)) {
-				memcpy(temp,curpoint,sizeof(DIRENTRY));
-				memmove(inspoint+sizeof(DIRENTRY),inspoint,curpoint-inspoint);
-				memcpy(inspoint,temp,sizeof(DIRENTRY));
-				inspoint += sizeof(DIRENTRY);
-			}
-			curpoint += sizeof(DIRENTRY);
-		} else {
-			curpoint += sizeof(DIRENTRY);
-		}
-	}
-
-	return endpoint;
+	/* subdirectories first; long names stay with their 8.3 entry (lfn.c) */
+	return sort_units(inspoint,endpoint,0);
 }
 
 /*

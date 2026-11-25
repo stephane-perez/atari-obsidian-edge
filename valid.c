@@ -8,6 +8,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  */
 
 /*
@@ -453,7 +455,7 @@ char temp2[MAX_FILENAME];
 PRIVATE int check_valid(char *p,DTA *dtap,char *str,FILE *vf,int valcode)
 {
 VAL *v, *vsave;
-unsigned short crcval;
+unsigned short crcval = 0;
 
 	output_string(str);
 
@@ -485,6 +487,7 @@ unsigned short crcval;
 		if (xform_alert(1,VL_ASK_ALERT) == 2)
 			return 0;
 						/* else drop through to 'ADDFILE' action */
+		FALLTHROUGH;
 	case ADDFILE:
 		crcval = calc_valid(p,dtap,valcode);
 		write_valid(dtap,crcval,vf,valcode);
@@ -636,7 +639,7 @@ char temp[MAX_PATHNAME];
 
 	if (val == chk) {
 		sprintf(temp,"   0x%04X     %-4.4s",
-				val,text[addfile?VALIDATE_ADD:MISC_OK].ob_spec);
+				val,(char *)text[addfile?VALIDATE_ADD:MISC_OK].ob_spec);
 		v_gtext(myhandle,workx+360,worky+ychar-1,temp);		//MAGNUM
 		return;
 	}
@@ -647,7 +650,7 @@ char temp[MAX_PATHNAME];
 	}
 
 	sprintf(temp,"   0x%04X %-4.4s= 0x%04X  %-6.6s",
-			val,text[VALIDATE_REF].ob_spec,chk,text[MISC_ERROR].ob_spec);
+			val,(char *)text[VALIDATE_REF].ob_spec,chk,(char *)text[MISC_ERROR].ob_spec);
 	v_gtext(myhandle,workx+360,worky+ychar,temp);			//MAGNUM
 	if (vlderr)
 		fprintf(vlderr,"%s\\%s\n%s\n",path,name,temp);

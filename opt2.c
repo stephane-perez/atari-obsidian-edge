@@ -10,6 +10,15 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: no casts as lvalues
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 alert
+ *
+ *	Modified for Obsidian Edge (November 2026): up_newfat_good(): defined order of evaluation
+ *
+ *	Modified for Obsidian Edge (November 2026): VFAT long file names
+ *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
 /*
@@ -292,7 +301,7 @@ DIRENTRY *temp;
 	start_bar(msg);
 
 	if (get_mybpb(&dpb,dev) < 0) {
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 		return -1;
 	}
 
@@ -787,8 +796,8 @@ DIRENTRY *dirend;
 			curfile++;
 	} else curfile += 2;
 
-	for ( ; curfile->attr == FA_SUBDIR; curfile++) {
-		if (curfile->name[0] == DELETION_MARK)
+	for ( ; (curfile->attr == FA_SUBDIR) || is_lfn(curfile); curfile++) {	/* long names precede their entry */
+		if ((curfile->name[0] == DELETION_MARK) || is_lfn(curfile))
 			continue;
 		dirlevel++;
 		st = olddirstart = get_word((char *)&curfile->start);
@@ -814,7 +823,7 @@ DIRENTRY *dirend;
 			}
 			st = fat16[st];
 			offset += (long) dpb.bpc;
-		} while (st != dpb.bitmask);
+		} while (st != (short)dpb.bitmask);
 
 		if (curfile->name[0] == DELETION_MARK)
 			continue;
@@ -844,7 +853,7 @@ DIRENTRY *dirend;
 	}
 
 	while (curfile < end) {
-		if (curfile->name[0] != DELETION_MARK) {
+		if ((curfile->name[0] != DELETION_MARK) && !is_lfn(curfile)) {
 			oldstart = get_word((char *)&curfile->start);
 			if (oldstart) {
 				if (opt.priority == READ)
@@ -867,7 +876,7 @@ DIRENTRY *dirend;
 			must_write(dev,dpb.spc,logsector(st),dirlist[dirlevel].dirbuf+offset,DIR);
 			st = fat16[st];
 			offset += dpb.bpc;
-		} while (st != dpb.bitmask);
+		} while (st != (short)dpb.bitmask);
 		up_dirlist();
 	}
 
@@ -1057,7 +1066,7 @@ static char title[MAX_DISPLAYSIZE];	/* static because it's a window title */
 	start_obar(text[PROG_READFAT].ob_spec);
 
 	if (get_mybpb(&dpb,dev) < 0) {
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 		return -1;
 	}
 
@@ -1468,8 +1477,8 @@ char *dirend;
 			curfile++;
 	} else curfile += 2;
 
-	for ( ; curfile->attr == FA_SUBDIR; curfile++) {
-		if (curfile->name[0] == DELETION_MARK)
+	for ( ; (curfile->attr == FA_SUBDIR) || is_lfn(curfile); curfile++) {	/* long names precede their entry */
+		if ((curfile->name[0] == DELETION_MARK) || is_lfn(curfile))
 			continue;
 		dirlevel++;
 		st = olddirstart = get_word((char *)&curfile->start);
@@ -1497,7 +1506,7 @@ char *dirend;
 			}
 			st = fat16[st];
 			offset += (long) dpb.bpc;
-		} while (st != dpb.bitmask);
+		} while (st != (short)dpb.bitmask);
 
 		if (curfile->name[0] == DELETION_MARK)
 			continue;
@@ -1517,7 +1526,7 @@ char *dirend;
 	}
 
 	while ((void *) curfile < (void *) end) {
-		if (curfile->name[0] != DELETION_MARK) {
+		if ((curfile->name[0] != DELETION_MARK) && !is_lfn(curfile)) {
 			oldstart = get_word((char *)&curfile->start);
 			if (oldstart) {
 				putword(&curfile->start,nextcluster);
@@ -1535,7 +1544,7 @@ char *dirend;
 			must_write(dev,dpb.spc,logsector(st),dirlist[dirlevel].dirbuf+offset,DIR);
 			st = fat16[st];
 			offset += dpb.bpc;
-		} while (st != dpb.bitmask);
+		} while (st != (short)dpb.bitmask);
 		up_dirlist();
 	}
 
@@ -1566,7 +1575,7 @@ short nc = nextcluster;
 		nc++;
 		start = fat16[start];
 		cnt++;
-	} while(start != dpb.bitmask);
+	} while(start != (short)dpb.bitmask);
 
 	return cnt;
 }
@@ -1576,8 +1585,8 @@ PRIVATE void up_newfat_good(short cnt)
 {
 short i;
 
-	for (i = 0; i < cnt - 1; i++)
-		newfat[nextcluster] = ++nextcluster;
+	for (i = 0; i < cnt - 1; i++, nextcluster++)
+		newfat[nextcluster] = nextcluster + 1;
 	newfat[nextcluster++] = dpb.bitmask;
 }
 
@@ -1606,7 +1615,7 @@ short nc = nextcluster;
 			;
 		start = fat16[start];
 		cnt++;
-	} while(start != dpb.bitmask);
+	} while(start != (short)dpb.bitmask);
 
 	return cnt;
 }
@@ -1688,9 +1697,34 @@ long q;
 /********************************************/
 
 /*
+ *	remove entries with zeroes in the first 16 bytes !?
+ *
+ *	this is bogus, it shouldn't be possible as far as I can see
+ */
+PRIVATE char *remove_zero_entries(char *curpoint,char *endpoint)
+{
+char temp[sizeof(DIRENTRY)];
+
+	memset(temp,0x00,sizeof(DIRENTRY));
+	while (curpoint < endpoint) {
+		if (!memcmp(curpoint,temp,16)) {					//MAGNUM
+			memmove(curpoint,curpoint+sizeof(DIRENTRY),endpoint-curpoint-sizeof(DIRENTRY));
+			endpoint -= sizeof(DIRENTRY);
+			memset(endpoint,0x00,sizeof(DIRENTRY));
+			assert(0);										//rfb
+		} else {
+			curpoint += sizeof(DIRENTRY);
+		}
+	}
+
+	return endpoint;
+}
+
+/*
  *	sort directory into the following order:
  *		all subdirectory entries
  *		file entries (we preserve the existing entry order)
+ *	long file names stay with their 8.3 entry
  *
  *	we also (optionally) remove deleted entries
  *
@@ -1698,8 +1732,6 @@ long q;
  */
 char *sort_dir(char *curdir,int ncl,int rmdel)
 {
-char temp[sizeof(DIRENTRY)];
-char *curpoint;
 char *inspoint;
 char *endpoint;
 
@@ -1722,60 +1754,9 @@ char *endpoint;
 		}
 	}
 
-	/*
-	 *	move insertion point to first NON-subdirectory entry
-	 */
-	while(*inspoint && (fattr(inspoint)&FA_SUBDIR))
-		inspoint += sizeof(DIRENTRY);
+	endpoint = sort_units(inspoint,endpoint,rmdel);
 
-	/*
-	 *	scan through remainder of directory:
-	 *	. if not a deleted entry:
-	 *		. if a subdirectory entry, move directory entries up 1 & insert it
-	 *		. else just skip it
-	 *	. else it's a deleted entry:
-	 *		. if removing deleted entries, move directory entries down 1
-	 *		. else just skip it
-	 */
-	for (curpoint = inspoint + sizeof(DIRENTRY); curpoint < endpoint; ) {
-		if (*curpoint != DELETION_MARK) {
-			if (*curpoint && (fattr(curpoint)&FA_SUBDIR)) {
-				memcpy(temp,curpoint,sizeof(DIRENTRY));
-				memmove(inspoint+sizeof(DIRENTRY),inspoint,curpoint-inspoint);
-				memcpy(inspoint,temp,sizeof(DIRENTRY));
-				inspoint += sizeof(DIRENTRY);
-			}
-			curpoint += sizeof(DIRENTRY);
-		} else {
-			if (rmdel) {
-				memmove(curpoint,curpoint+sizeof(DIRENTRY),endpoint-curpoint-sizeof(DIRENTRY));
-				endpoint -= sizeof(DIRENTRY);
-				memset(endpoint,0x00,sizeof(DIRENTRY));
-			} else {
-				curpoint += sizeof(DIRENTRY);
-			}
-		}
-	}
-
-	/*
-	 *	now scan directory and remove entries with zeroes in the first 16 bytes !?
-	 *
-	 *	this is bogus, it shouldn't be possible as far as I can see
-	 */
-	curpoint = curdir;
-	memset(temp,0x00,sizeof(DIRENTRY));
-	while (curpoint < endpoint) {
-		if (!memcmp(curpoint,temp,16)) {					//MAGNUM
-			memmove(curpoint,curpoint+sizeof(DIRENTRY),endpoint-curpoint-sizeof(DIRENTRY));
-			endpoint -= sizeof(DIRENTRY);
-			memset(endpoint,0x00,sizeof(DIRENTRY));
-			assert(0);										//rfb
-		} else {
-			curpoint += sizeof(DIRENTRY);
-		}
-	}
-
-	return endpoint;
+	return remove_zero_entries(curdir,endpoint);
 }
 
 /*
@@ -1784,6 +1765,7 @@ char *endpoint;
  *		AUTO folder entry (if present)
  *		all other subdirectory entries
  *		file entries (we preserve the existing entry order)
+ *	long file names stay with their 8.3 entry
  *
  *	we remove deleted entries iff 'rmdel' is non-zero
  *
@@ -1791,11 +1773,10 @@ char *endpoint;
  */
 char *sort_root(char *dirbuf,int rmdel)
 {
-char temp[sizeof(DIRENTRY)];
 char *curpoint;
 char *inspoint;
 char *endpoint;
-int volume_labels_allowed;
+int volume_labels_allowed, len;
 
 	inspoint = dirbuf;	/* no . or .. in root */
 
@@ -1808,18 +1789,19 @@ int volume_labels_allowed;
 	/*
 	 *	we now scan the entire directory, deleting any extra volume labels
 	 *	(early TOS versions didn't check for an existing vol label when creating one)
+	 *	(long file name entries also have the volume label attribute bit)
 	 */
 	volume_labels_allowed = 1;
 
 	for (curpoint = inspoint; curpoint < endpoint; curpoint += sizeof(DIRENTRY)) {
-		if (*curpoint && (fattr(curpoint)&FA_VOLUME)) {
+		if (*curpoint && is_volume(curpoint)) {
 			if (volume_labels_allowed)
 				volume_labels_allowed--;
 			else *curpoint = DELETION_MARK;
 		}
 	}
 
-	if (*inspoint && (fattr(inspoint)&FA_VOLUME))		/* skip any initial volume label */
+	if (*inspoint && is_volume(inspoint))		/* skip any initial volume label */
 		inspoint += sizeof(DIRENTRY);
 
 	/*
@@ -1833,76 +1815,28 @@ int volume_labels_allowed;
 		}
 	}
 
-	/*
-	 *	move insertion point to first NON-subdirectory entry
-	 */
-	while(*inspoint && (fattr(inspoint)&FA_SUBDIR))
-		inspoint += sizeof(DIRENTRY);
-
-	/*
-	 *	scan through remainder of directory:
-	 *	. if not a deleted entry:
-	 *		. if a subdirectory entry, move directory entries up 1 & insert it
-	 *		. else just skip it
-	 *	. else it's a deleted entry:
-	 *		. if removing deleted entries, move directory entries down 1
-	 *		. else just skip it
-	 */
-	curpoint = inspoint + sizeof(DIRENTRY);
-	while (curpoint < endpoint) {
-		if (*curpoint != DELETION_MARK) {
-			if (*curpoint && (fattr(curpoint)&FA_SUBDIR)) {
-				memcpy(temp,curpoint,sizeof(DIRENTRY));
-				memmove(inspoint+sizeof(DIRENTRY),inspoint,curpoint-inspoint);
-				memcpy(inspoint,temp,sizeof(DIRENTRY));
-				inspoint += sizeof(DIRENTRY);
-			}
-			curpoint += sizeof(DIRENTRY);
-		} else {
-			if (rmdel) {
-				memmove(curpoint,curpoint+sizeof(DIRENTRY),endpoint-curpoint-sizeof(DIRENTRY));
-				endpoint -= sizeof(DIRENTRY);
-				memset(endpoint,0x00,sizeof(DIRENTRY));
-			} else {
-				curpoint += sizeof(DIRENTRY);
-			}
-		}
-	}
-
-	/*
-	 *	now scan directory and remove entries with zeroes in the first 16 bytes !?
-	 *
-	 *	this is bogus, it shouldn't be possible as far as I can see
-	 */
-	curpoint = dirbuf;
-	memset(temp,0x00,sizeof(DIRENTRY));
-	while (curpoint < endpoint) {
-		if (!memcmp(curpoint,temp,16)) {					//MAGNUM
-			memmove(curpoint,curpoint+sizeof(DIRENTRY),endpoint-curpoint-sizeof(DIRENTRY));
-			endpoint -= sizeof(DIRENTRY);
-			memset(endpoint,0x00,sizeof(DIRENTRY));
-			assert(0);										//rfb
-		} else {
-			curpoint += sizeof(DIRENTRY);
-		}
-	}
+	endpoint = sort_units(inspoint,endpoint,rmdel);
+	endpoint = remove_zero_entries(dirbuf,endpoint);
 
 	/*
 	 *	finally, we ensure any folder named AUTO comes immediately
 	 *	after the volume label (if present)
 	 */
 	inspoint = dirbuf;
-	if (*inspoint && (fattr(inspoint)&FA_VOLUME))
+	if (*inspoint && is_volume(inspoint))
 		inspoint += sizeof(DIRENTRY);
-	curpoint = inspoint + sizeof(DIRENTRY);
-	while (*curpoint && (fattr(curpoint)&FA_SUBDIR)) {
-		if (strncmp(curpoint,"AUTO       ",NAME_LENGTH) == 0) {			//MAGNUM
-			memcpy(temp,curpoint,sizeof(DIRENTRY));
-			memmove(inspoint+sizeof(DIRENTRY),inspoint,curpoint-inspoint);
-			memcpy(inspoint,temp,sizeof(DIRENTRY));
+	if (inspoint >= endpoint)
+		return endpoint;
+	curpoint = inspoint + dir_unit_len(inspoint,endpoint);
+	while ((curpoint < endpoint) && *curpoint) {
+		len = dir_unit_len(curpoint,endpoint);
+		if (!(unit_attr(curpoint,len)&FA_SUBDIR))
+			break;
+		if (strncmp(curpoint+len-sizeof(DIRENTRY),"AUTO       ",NAME_LENGTH) == 0) {			//MAGNUM
+			move_unit(inspoint,curpoint,len);
 			break;
 		}
-		curpoint += sizeof(DIRENTRY);
+		curpoint += len;
 	}
 
 	return endpoint;

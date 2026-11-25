@@ -8,6 +8,8 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  */
 
 /*
@@ -111,7 +113,7 @@ PRIVATE long nullfunction(long error);
 /*
  *	private macros
  */
-#define sup_on()	{ void *savessp = Super(0L);
+#define sup_on()	{ void *savessp = (void *)Super(0L);
 #define sup_off()	Super(savessp); }
 
 /*

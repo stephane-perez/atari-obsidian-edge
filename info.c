@@ -11,6 +11,10 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 partitions refused
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  */
 
 /*
@@ -69,6 +73,11 @@ char fbootf[MAX_PATHNAME];
 int rc = 0;
 MYBPB tpb;
 BPB *tbpb;
+
+	if (is_fat32_partition(savedev)) {
+		xform_alert(1,FAT32_ALERT);
+		return -1;
+	}
 
 	n = (savedev >= FIRST_HD_DEVICE) ? MAX_HD_LOGSECSIZE : MAX_FL_LOGSECSIZE;
 	if ((bootbuf=malloc(n)) == NULL) {
@@ -491,7 +500,7 @@ OBJECT *obj;
 			continue;
 		for (n = 0; (n < IDS_PER_BUS) && (ndev < MAX_DEVS); n++) {
 			id = bus*IDS_PER_BUS + n;
-			sprintf(obj->ob_spec,"%3d %2d   %s",id,lun,text[PART_INQUIRING].ob_spec);
+			sprintf(obj->ob_spec,"%3d %2d   %s",id,lun,(char *)text[PART_INQUIRING].ob_spec);
 			redraw_object(selscsi,SNAME1+ndev);
 			if (device_exists(id,lun,identifier) == HD_DEVICE) {
 				sprintf(obj->ob_spec,"%3d %2d   %s",id,lun,identifier);

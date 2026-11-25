@@ -8,6 +8,12 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: xdraw_cicon() runs
+ *
+ *	Modified for Obsidian Edge (November 2026): R_IMAGEDATA returns the image pointer
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): explicit int comparisons
  *	on a private stack (the AES calls it on its own, small, stack)
  */
 
@@ -493,7 +499,7 @@ union {
 
 	case R_IMAGEDATA:
 		the_addr = get_sub(index,hdr_buf->rsh_imdata,sizeof(BYTE *));
-		the_addr = (VOID *) *(BYTE *)the_addr;
+		the_addr = (VOID *) *(BYTE **)the_addr;
 		break;
 
 	case R_FRIMG:
@@ -538,7 +544,7 @@ WORD ret = TRUE;
 	}
 	rs_global = global;
 
-	old_dta = Fgetdta();
+	old_dta = (DTA *)Fgetdta();
 	Fsetdta(&dta);
 	if (Fsfirst(tmpnam,FA_SUBDIR) == 0)
 		size = dta.d_length;
@@ -1231,7 +1237,7 @@ WORD pixtbl[16] = {0, 2, 3, 6, 4, 7, 5, 8, 9, 10, 11, 14, 12, 15, 13, 16};
 static VOID xfix_cicon(UWORD *col_data,LONG len,WORD old_planes,WORD new_planes,MFDB *s)
 {
 LONG x, i, old_len, rest_len, mul[32], pos;
-UWORD np, *new_data, mask, pixel, bit, color, back[32], old_col[32], maxcol;
+UWORD np, *new_data, mask, pixel, bit, color, back[32], old_col[32], maxcol = 0;
 WORD got_mem = FALSE;
 MFDB d;
 
@@ -1321,17 +1327,17 @@ MFDB d;
 		}
 		for (x = 0; x < len; x++) {
 			bit = 1;
-			for (np = 0; np < old_planes; np++)
+			for (np = 0; (int)np < (int)old_planes; np++)
 				back[np] = col_data[mul[np]+x];
 
 			for (pixel = 0; pixel < 16; pixel++) {
 				color = 0;
-				for (np = 0; np < old_planes; np++) {
+				for (np = 0; (int)np < (int)old_planes; np++) {
 					color += ((back[np] & 1) << np);
 					back[np] >>= 1;
 				}
 
-				for (np = 0; np < new_planes; np++) {
+				for (np = 0; (int)np < (int)new_planes; np++) {
 					pos = mul[np] + x;
 					col_data[pos] = (col_data[pos] & ~bit) | (farbtbl[color][np] & bit);
 				}
@@ -1368,7 +1374,7 @@ LONG x, i, mul[32], pos;
 UWORD np, *new_data, pixel, color, back[32];
 WORD memflag = FALSE;
 UBYTE *p1, *p2;
-ULONG colback;
+ULONG colback = 0;
 
 	if (s->fd_addr == col_data) {
 		if ((col_data = malloc(len * sizeof(WORD) * s->fd_nplanes)) == NULL) {
@@ -1391,12 +1397,12 @@ ULONG colback;
 	pos = 0;
 
 	for (x = 0; x < len; x++) {
-		for (np = 0; np < old_planes; np++)
+		for (np = 0; (int)np < (int)old_planes; np++)
 			back[np] = col_data[mul[np] + x];
 
 		for (pixel = 0; pixel < 16; pixel++) {
 			color = 0;
-			for (np = 0; np < old_planes; np++) {
+			for (np = 0; (int)np < (int)old_planes; np++) {
 				color |= ((back[np] & 0x8000) >> (15 - np));
 				back[np] <<= 1;
 			}
@@ -1431,7 +1437,7 @@ ULONG colback;
 /****************************/
 static int __saveds xdraw_cicon(PARMBLK *pb)
 {
-WORD ob_x, ob_y, x, y, dummy, pxy[4], m_mode, i_mode, mskcol, icncol;
+WORD ob_x, ob_y, x, y, dummy, pxy[4], m_mode, i_mode = MD_TRANS, mskcol, icncol;
 LONG ob_spec;
 ICONBLK *iconblk;
 CICON *cicn;

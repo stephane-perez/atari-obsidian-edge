@@ -8,6 +8,14 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): removed the definitions left
+ *
+ *	Modified for Obsidian Edge (November 2026): MAX_DATA_CLUSTERS
+ *
+ *	Modified for Obsidian Edge (November 2026): E_FAT32, FAT32 texts
+ *
+ *	Modified for Obsidian Edge (November 2026): VFAT long file names
+ *
+ *	Modified for Obsidian Edge (November 2026): Obsidian Mirror
  *	over from the copy protection (INSTALL.PRG, "Unregistered")
  */
 
@@ -40,8 +48,8 @@
 #define RSC_FILE		"EDGE.RSC"
 #define PREFS_FILE		"EDGE.INF"			/* stores preferences for Edge */
 #define DM_PROGRAM_FILE	"DMIRROR.PRG"
-#define DM_PREFS_FILE	"DMIRROR.INF"		/* stores preferences for Diamond Mirror */
-#define DM_PATH			"%c:\\AUTO\\"		/* where to find Diamond Mirror program/prefs */
+#define DM_PREFS_FILE	"DMIRROR.INF"		/* stores preferences for Obsidian Mirror */
+#define DM_PATH			"%c:\\AUTO\\"		/* where to find Obsidian Mirror program/prefs */
 
 #define FILE_HELP		"HELP\\FILE.HLP"	/* subpaths for help files */
 #define MEDIC_HELP		"HELP\\MEDIC.HLP"
@@ -155,8 +163,23 @@
 #define DATALITE_SEC_OFFSET	106				/* total sectors, unsigned short */
 
 #define fattr(a)			(*(a+11))
+
+/*
+ *	VFAT long file names: entries with the attribute $0F (read-only, hidden,
+ *	system and volume label) placed just before the 8.3 entry of the file
+ */
+#define FA_LFN				0x0f
+#define MAX_LFN_ENTRIES		20				/* 255 characters, 13 per entry */
+#define is_lfn(p)			(fattr((char *)(p)) == FA_LFN)
+#define is_volume(p)		((fattr((char *)(p)) & FA_VOLUME) && !is_lfn(p))
+#define unit_attr(p,len)	fattr((p)+(len)-sizeof(DIRENTRY))	/* of the 8.3 entry */
 #define form_feed()			(Cprnout(0x0c))
 #define ring_bell()			(Cconout(0x07))
+/* cluster numbers are shorts: maxc (cdata+2) must stay below 32768 */
+#define MAX_DATA_CLUSTERS	32765
+
+/* FAT32 partitions are not supported: get_mybpb() returns E_FAT32 (texts: FAT32_ALERT, FAT32_TEXT) */
+#define E_FAT32				(-1000)
 #define valid_cluster(clus)	(((clus)>=2)&&((clus)<dpb.maxc))
 #define IS_COLOUR_AES		(_AESglobal[0] >= 0x330)
 #define MAGX_COOKIE			0x4d616758L		/* MagX */

@@ -1,5 +1,5 @@
 /*
- *	mirror.c: implements the Diamond Mirror configuration function
+ *	mirror.c: implements the Obsidian (formerly Diamond) Mirror configuration function
  *
  *
  *	Copyright (C) 2002-2017 Roger Burrows
@@ -8,6 +8,10 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): Obsidian Mirror
  */
 
 /*
@@ -92,7 +96,7 @@ PUBLIC int init_mirror_prefs()
 }
 
 /*
- *	read in Diamond Mirror prefs & validate
+ *	read in Obsidian Mirror prefs & validate
  */
 PRIVATE void get_prefs(MIRROR_PREFS *mprefs)
 {
@@ -119,7 +123,7 @@ char savepath[MAX_PATHNAME];
 
 	if (open_section(DM_PREFS_FILE,"ra",TEST_SECTION) == 0) {
 		temp[0] = '\0';
-		read_section_line(INF_PARTITIONS," %[ -ÿ]",temp);
+		read_section_line(INF_PARTITIONS," %[ -\377]",temp);
 		for (p = temp; *p; p++) {
 			n = *p - 'A';
 			if ((n >= FIRST_HD_DEVICE) && (n < NUM_DEVICES))
@@ -133,14 +137,14 @@ char savepath[MAX_PATHNAME];
 
 	if (open_section(DM_PREFS_FILE,"ra",MIRROR_SECTION) == 0) {
 		temp[0] = '\0';
-		read_section_line(INF_PARTITIONS," %[ -ÿ]",temp);
+		read_section_line(INF_PARTITIONS," %[ -\377]",temp);
 		for (p = temp; *p; p++) {
 			n = *p - 'A';
 			if ((n >= FIRST_HD_DEVICE) && (n < NUM_DEVICES))
 				mprefs->mirror.partitions |= (1L << n);
 		}
 		read_section_line(INF_FREQUENCY," %d",&mprefs->mirror.frequency);
-		read_section_line(INF_PATH," %[ -ÿ]",mprefs->mirror_path);
+		read_section_line(INF_PATH," %[ -\377]",mprefs->mirror_path);
 		close_section();
 	}
 

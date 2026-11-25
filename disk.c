@@ -12,6 +12,14 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): partitions with more than 32765 data clusters refused
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 partitions recognised and refused
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): explicit int comparisons
  */
 
 /*
@@ -42,6 +50,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <aes.h>
+#include <cookie.h>
 #include <dos.h>
 #include <limits.h>
 #include <oserr.h>
@@ -52,6 +61,8 @@
 #include "edgedefs.h"
 #include "miscdef.h"
 #include "proto.h"
+
+PRIVATE short fat32_seen;
 
 #define MODULE_NUMBER	2		/* used by error() macro */
 
@@ -75,8 +86,6 @@ MLOCAL struct {			/* remember which drives have been scanned */
 	long free;
 } devstats[NUM_DEVICES] =
 	{ { TRUE, 0L, 0L }, { TRUE, 0L, 0L } };	/* say A & B have been scanned (is this necessary?) */
-
-MLOCAL char alert[MAX_ALERT_SIZE];
 
 /*
  *	function prototypes
@@ -144,6 +153,12 @@ long n;
 BPB *tbpb;
 char *bbuf;
 
+	fat32_seen = 0;
+	if (is_fat32_partition(device)) {	/* not supported: no BIOS access, no error */
+		fat32_seen = 1;
+		return E_FAT32;
+	}
+
 	_mediach(device);
 	n = (device>=FIRST_HD_DEVICE) ? MAX_HD_LOGSECSIZE : MAX_FL_LOGSECSIZE;
 	if ((bbuf=malloc(n)) == NULL) {
@@ -156,13 +171,77 @@ char *bbuf;
 		return ret;
 	}
 
-	if ((tbpb=Getbpb(device)) == NULL)
+	if (is_fat32_bootsector(bbuf)) {
+		fat32_seen = 1;
+		ret = E_FAT32;
+	} else if ((tbpb=Getbpb(device)) == NULL)
 		ret = -1;
 	else ret = load_mybpb(bbuf,mybpb,tbpb);
 
 	free(bbuf);
 
 	return ret;
+}
+
+/*
+ *	FAT32 partitions are not supported.  They are recognised from their
+ *	partition type, which the XHDI driver gives (EmuTOS and HDDriver map
+ *	them to drive letters, but the BIOS cannot read them), or else from
+ *	the boot sector (when the BIOS can read it, e.g. under FreeMiNT).
+ */
+
+long oe_xhdi_version(long entry);
+long oe_xhdi_inqdev2(long entry,long dev,unsigned long *start,char *partid);
+
+static long xhdi_entry;
+static short xhdi_dev;
+static char xhdi_partid[4];
+
+static long xhdi_partid_super(void)
+{
+static unsigned long start;
+
+	if (*(long *)(xhdi_entry-4) != 0x27011992L)	/* XHDI magic */
+		return -1L;
+	if ((oe_xhdi_version(xhdi_entry) & 0xffffL) < 0x0110)	/* XHInqDev2() */
+		return -1L;
+	return oe_xhdi_inqdev2(xhdi_entry,xhdi_dev,&start,xhdi_partid);
+}
+
+PUBLIC int is_fat32_partition(short dev)
+{
+	if (dev < FIRST_HD_DEVICE)
+		return 0;
+	if (!getcookie(0x58484449L,&xhdi_entry) || !xhdi_entry)	/* 'XHDI' */
+		return 0;
+	xhdi_dev = dev;
+	memset(xhdi_partid,0,sizeof(xhdi_partid));
+	if (Supexec(xhdi_partid_super) != 0L)
+		return 0;
+	if (memcmp(xhdi_partid,"F32",3) == 0)		/* Atari (AHDI/XGM) partition */
+		return 1;
+	if ((xhdi_partid[0] == 0) && (xhdi_partid[1] == 'D'))	/* DOS (MBR) partition */
+		switch((unsigned char)xhdi_partid[2]) {
+		case 0x0b: case 0x0c: case 0x1b: case 0x1c:
+			return 1;
+		}
+	return 0;
+}
+
+PUBLIC int is_fat32_bootsector(char *buf)
+{
+	/* 16-bit sectors per FAT is 0, and the FAT32 file system type */
+	return (get_word(buf+22) == 0) && (memcmp(buf+82,"FAT32",5) == 0);
+}
+
+/*
+ *	the alert for a get_mybpb() failure: FAT32 partitions get their own
+ */
+PUBLIC void bpb_alert(int index)
+{
+	if (fat32_seen)
+		xform_alert(1,FAT32_ALERT);
+	else xform_alert(1,index);
 }
 
 /*
@@ -195,7 +274,7 @@ long rc;
 PUBLIC int load_mybpb(char *buf,MYBPB *mybpb,BPB *tbpb)
 {
 int n;
-long maxclus;
+long maxclus, ncdata;
 
 	if (tbpb)
 		mybpb->isfat16 = tbpb->bflags & 0x01;
@@ -208,7 +287,7 @@ long maxclus;
 	mybpb->bps = get_word(buf + 11);		/* bytes per sector */
 	mybpb->spc = buf[13];					/* sec per cluster */
 	if (tbpb) {
-		if (mybpb->bps != tbpb->recsiz)		/* when we first access a partition, we */
+		if ((int)mybpb->bps != (int)tbpb->recsiz)		/* when we first access a partition, we */
 			return -1;						/* seem to get an empty boot sector ... */
 		if (mybpb->spc != tbpb->clsiz)
 			return -1;
@@ -240,7 +319,12 @@ long maxclus;
 		if (tbpb)
 			mybpb->cdata = tbpb->numcl;		/* test for DL2 */
 	} else {
-		mybpb->cdata = (short) ((mybpb->tsec-mybpb->firstd) / mybpb->spc);
+		if (mybpb->spc <= 0)
+			return -1;
+		ncdata = (mybpb->tsec-mybpb->firstd) / mybpb->spc;
+		if ((ncdata < 0) || (ncdata > MAX_DATA_CLUSTERS))
+			return -1;						/* cluster numbers are shorts */
+		mybpb->cdata = (short)ncdata;
 		if (mybpb->datalite)
 			mybpb->tsec = *(unsigned short *)(buf+DATALITE_SEC_OFFSET);
 	}
@@ -285,7 +369,7 @@ long maxclus;
 	if (mybpb->nfat != 2)
 		return -1;
 
-	if ((mybpb->cdata < 0) || (mybpb->cdata > 32767))		//MAGNUM
+	if ((mybpb->cdata < 0) || (mybpb->cdata > MAX_DATA_CLUSTERS))
 		return -1;
 
 	return 0;
@@ -432,7 +516,7 @@ char temp[MAX_DISPLAYSIZE];
 	wrap_bar();
 	dev = savedev;
 	if (get_mybpb(&dpb,dev) < 0)
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 
 	_mediach(dev2);
 	force_update(dev2);
@@ -446,21 +530,21 @@ PRIVATE int copy_image(int dev1,int dev2)
 int cmpbps, cmpcdata, nout, ndo;
 int nclus, ls, i;
 long rc;
-short lastused;			/* hwm of used clusters */
+short lastused = 1;		/* hwm of used clusters */
 unsigned short *f16;
 char *readbuf = NULL;
 char *rootbuf;
 
 	dev = dev1;
 	if (get_mybpb(&dpb,dev) < 0) {
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 		return 0;
 	}
 	cmpbps = dpb.bps;
 	cmpcdata = dpb.cdata;
 	dev = dev2;
 	if (get_mybpb(&dpb,dev) < 0) {
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 		return 0;
 	}
 	if ((cmpbps != dpb.bps) || (cmpcdata != dpb.cdata)) {
@@ -591,7 +675,10 @@ char *f12;
 			if (rc == -EDRVNR) {
 				((TEDINFO *)chart[CBARMAX+i*2].ob_spec)->te_ptext = text[DRIVE_NOT_READY].ob_spec;
 				redraw_object(chart,CBARMAX+i*2);
-			} else xform_alert(1,GEN_BPB_ALERT);
+			} else if (rc == E_FAT32) {
+				((TEDINFO *)chart[CBARMAX+i*2].ob_spec)->te_ptext = free_string(FAT32_TEXT);
+				redraw_object(chart,CBARMAX+i*2);
+			} else bpb_alert(GEN_BPB_ALERT);
 			continue;
 		}
 		if (dpb.isfat16) {							/* fat16 */
@@ -647,7 +734,7 @@ char *f12;
 			strcpy(chart[CFREEP+i].ob_spec,"100.");
 		} else {
 			chart[CBAR+i*2].ob_flags &= ~HIDETREE;
-			sprintf(chart[CFREEP+i].ob_spec,"%2d.%1d",thousandths/10,thousandths%10);
+			sprintf(chart[CFREEP+i].ob_spec,"%2ld.%1ld",thousandths/10,thousandths%10);
 			redraw_object(chart,CBAR+i*2);
 		}
 
@@ -678,7 +765,7 @@ char *f12;
 
 	if (thousandths >= 1000)
 		strcpy(chart[TFREEP].ob_spec,"100.");
-	else sprintf(chart[TFREEP].ob_spec,"%2d.%1d",thousandths/10,thousandths%10);
+	else sprintf(chart[TFREEP].ob_spec,"%2ld.%1ld",thousandths/10,thousandths%10);
 
 	redraw_object(chart,TTOT);
 	redraw_object(chart,TUSED);
@@ -858,7 +945,7 @@ PRIVATE int sector_retry(long errnum,int type,int errmsgno,int sector,int pgmloc
 PUBLIC int critical_read(short dev,short numsec,long start,char *buf,int errmsgno,int pgmloc)
 {
 int i, errors, tries;
-long rc;
+long rc = 0L;
 
 	ce_off();
 	for (tries = 0; tries < MAX_TRIES; tries++)
@@ -893,7 +980,7 @@ long rc;
 PUBLIC int critical_write(short dev,short numsec,long start,char *buf,int errmsgno,int pgmloc)
 {
 int i, errors, tries;
-long rc;
+long rc = 0L;
 
 	ce_off();
 	for (tries = 0; tries < MAX_TRIES; tries++)

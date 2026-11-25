@@ -13,6 +13,13 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 alert
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
 /*
@@ -133,7 +140,7 @@ PUBLIC int do_diskinfo()
 
 	if (dev != status.infodev) {		/* need to get new info */
 		if (get_mybpb(&dpb,dev) < 0) {
-			xform_alert(1,GEN_BPB_ALERT);
+			bpb_alert(GEN_BPB_ALERT);
 			return -1;
 		} else if (diskinfo() < 0) {
 			xform_alert(1,GEN_OPFAIL_ALERT);
@@ -246,7 +253,7 @@ int rc;
 	}
 
 	if (get_mybpb(&dpb,dev) < 0) {
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 		return -1;
 	}
 
@@ -336,7 +343,7 @@ char *f12;
 	for (i = 0; i < FRAGBUCKETS; i++) {
 		dmap[BAR1+i].ob_height = 1;
 		dmap[BAR1+i].ob_y = ref_y + ref_h;
-		dmap[BAR1+i].ob_spec = (void *)B0;	/* BOX */
+		dmap[BAR1+i].ob_spec = (void *)(long)B0;	/* BOX */
 	}
 
 	ted = (TEDINFO *) (dmap+S4)->ob_spec;
@@ -415,9 +422,9 @@ char *f12;
 		}
 	}
 
-	sprintf(dmap[FOLDER].ob_spec,"%4d",frag.totfolders);
-	sprintf(dmap[FILES].ob_spec,"%5d",frag.totfiles);
-	sprintf(dmap[FRAG].ob_spec,"%5d",frag.totfragfiles);
+	sprintf(dmap[FOLDER].ob_spec,"%4ld",frag.totfolders);
+	sprintf(dmap[FILES].ob_spec,"%5ld",frag.totfiles);
+	sprintf(dmap[FRAG].ob_spec,"%5ld",frag.totfragfiles);
 
 	if (frag.totfragfiles == 0) {
 		phigh = plow = 0;
@@ -507,7 +514,7 @@ unsigned short ls;
 				return -1;
 
 			st = f16[st];
-			if (st == dpb.bitmask)
+			if (st == (short)dpb.bitmask)
 				break;
 
 			if (!valid_cluster(st))
@@ -613,7 +620,7 @@ short prev, st, numfrags, sz, fill;
 			}
 			prev = st;
 			st = f16[prev];
-			if (st == dpb.bitmask)					/* end of chain */
+			if (st == (short)dpb.bitmask)					/* end of chain */
 				break;
 			if (st != prev+1)						/* fragmented ? */
 				if (f16[prev+1] != dpb.badmask)		/* only counts if NOT due to bad sector */
@@ -841,7 +848,7 @@ char path[MAX_PATHNAME];
 			return;
 
 	if (get_mybpb(&dpb,dev) < 0)
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 	else if (zero_fats_and_root() < 0)
 		xform_alert(1,GEN_OPFAIL_ALERT);
 
@@ -868,7 +875,7 @@ int rc;
 char temp[MAX_DISPLAYSIZE];
 
 	if (get_mybpb(&dpb,dev) < 0)
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 	else if (zero_fats_and_root() < 0)
 		xform_alert(1,GEN_OPFAIL_ALERT);
 	else {

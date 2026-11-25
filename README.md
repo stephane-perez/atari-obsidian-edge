@@ -10,10 +10,13 @@ Like its ancestor, it aims to provide:
 - partition copying,
 - file undeletion.
 
-> **Status: version 0.0.1 (work in progress).** This is the first release of the
-> fork. It is based on Diamond Edge 2.57, rebuilt with GCC, without the copy
-> protection and the demo version; the disk functions are unchanged and not
-> tested yet. Always back up your data before running any disk optimiser.
+> **Status: version 0.1.0.** Based on Diamond Edge 2.57, rebuilt with GCC,
+> without the copy protection and the demo version. The disk functions were
+> fixed for the GCC build and tested in Hatari (EmuTOS, TOS 1.62 with HDDriver)
+> and on real machines (STE, Falcon030, Falcon CT60); VFAT long file names are
+> kept, FAT32 partitions are recognised and refused. See
+> [`CHANGELOG.md`](CHANGELOG.md). Always back up your data before running any
+> disk optimiser.
 
 ## Origin and credits
 
@@ -103,7 +106,10 @@ been tested on real hardware.**
 `.github/workflows/build.yml` builds the programs on every push and pull
 request (with libcmini, and with MiNTLib for comparison), checks that no
 source file was converted to UTF-8 by an editor (see `.editorconfig`: the
-inherited sources are 8-bit, CR LF), writes a table of
+inherited sources are 8-bit, CR LF), runs the static checks of
+`tools/clang_check.py` (any clang warning, and any comparison between a
+`short` and an `unsigned short`, fails the build; run it locally after
+`make`), writes a table of
 the program sizes compared with Diamond Edge 2.57 in the run summary, runs
 the smoke test with EmuTOS on the libcmini build, and keeps the Atari files
 and the screenshots as workflow artifacts.
@@ -137,7 +143,8 @@ contribution is licensed under the same GPL v2 terms.
 As required by section 2(a) of the GPL v2, a source file modified in this fork
 carries a notice saying that it was changed, and when, below its original
 copyright notice (for example `Modified for Obsidian Edge (November 2026): ...`).
-User-visible changes are also listed in [`DOC/CHANGES.TXT`](DOC/CHANGES.TXT).
+Every change, fix and improvement is recorded in [`CHANGELOG.md`](CHANGELOG.md);
+user-visible changes are also listed in [`DOC/CHANGES.TXT`](DOC/CHANGES.TXT).
 
 The sources inherited from Diamond Edge use the Atari 8-bit character set,
 CR LF line ends and tabs of 4: see `.editorconfig`. Do not let an editor

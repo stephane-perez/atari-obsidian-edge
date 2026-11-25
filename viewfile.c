@@ -8,6 +8,10 @@
  *	option any later version.  See DOC\LICENSE.TXT for details.
  *
  *	Modified for Obsidian Edge (November 2026): GCC port: prototype matches the function definition
+ *
+ *	Modified for Obsidian Edge (November 2026): all the line offsets of a text block initialised
+ *
+ *	Modified for Obsidian Edge (November 2026): CR of CR LF line ends removed
  */
 
 /*
@@ -364,7 +368,7 @@ TEXTBLOCK *current, *prev;
 		current->tb_prev = prev;
 		current->tb_next = NULL;
 		for (n = 0, lptr = current->tb_offset; n < LINES_PER_BLOCK; n++)
-			*lptr = -1L;
+			*lptr++ = -1L;
 	}
 
 	current->tb_offset[blockpos] = offset;
@@ -401,6 +405,8 @@ int len;
 	if ((len=strlen(text)) > 0)
 		if (text[len-1] == '\n')
 			text[--len] = '\0';
+	if ((len > 0) && (text[len-1] == '\r'))	/* CR LF: Lattice's "ra" mode removed the CR */
+		text[--len] = '\0';
 
 	return len;
 }

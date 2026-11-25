@@ -5,6 +5,10 @@
  *
  *	This file is distributed under the GPL, version 2 or at your
  *	option any later version.  See DOC\LICENSE.TXT for details.
+ *
+ *	Modified for Obsidian Edge (November 2026): return value initialised for 0 sectors
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  */
 
 /*
@@ -77,7 +81,7 @@ long rc;
 	/*
 	 *	allocate buffer in ST RAM, in case of virtual memory
 	 */
-	ourbuf = getcookie(_FRB,NULL)?Mxalloc(BUFSIZE,0):Malloc(BUFSIZE);
+	ourbuf = (char *)(getcookie(_FRB,NULL)?Mxalloc(BUFSIZE,0):Malloc(BUFSIZE));
 	if (!ourbuf)
 		return -1;
 
@@ -184,7 +188,7 @@ int phys_read(short busid,short lun,short numsec,long start,char *buf)
 {
 long (*read)(tHandle,short,short,long,char *);
 tHandle handle;
-long rc;
+long rc = 0;
 int i, n;
 
 	if (!ourbuf)						/* init_driver() not called, or failed */
@@ -221,7 +225,7 @@ int phys_write(short busid,short lun,short numsec,long start,char *buf)
 {
 long (*write)(tHandle,short,short,long,char *);
 tHandle handle;
-long rc;
+long rc = 0;
 int i, n;
 
 	if (!ourbuf)			/* init_driver() not called, or failed */

@@ -10,6 +10,17 @@
  *	Modified for Obsidian Edge (November 2026): GCC port: prototypes match the function definitions
  *
  *	Modified for Obsidian Edge (November 2026): demo version removed
+ *
+ *	Modified for Obsidian Edge (November 2026): GCC port: 16-bit comparisons
+ *
+ *	Modified for Obsidian Edge (November 2026): error code initialised when the mirror file cannot be read
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 alert
+ *
+ *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): VFAT long file names
+ *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
 /*
@@ -246,7 +257,7 @@ PRIVATE void cleanup_old_directory()
  */
 PRIVATE void calc_prob(DIRENTRY *entry,short *total,short *recover)
 {
-int i, j, nclus, notused;
+int i, j, nclus, notused = 0;
 short st;
 unsigned short *f;
 
@@ -274,11 +285,12 @@ unsigned short *f;
 					notused++;
 				st = mirrorfat[st];
 				j++;
-			} while (st != dpb.bitmask);
+			} while (st != (short)dpb.bitmask);
 			if (j == nclus)
 				break;
 		}
 		/* otherwise drop thru': file not recoverable from mirror */
+		FALLTHROUGH;
 	case SIM:
 		for (i = 0, notused = 0, f = fat16+finfo.start; i < nclus; i++) {
 			if (*f++ == 0)
@@ -356,9 +368,9 @@ char dt_str[20], recstr[20];
 				FOLDER_INDICATOR,nm,ext,dt_str);
 	} else {
 		if (de->recover == 0)
-			sprintf(recstr,"%-6.6s",text[MISC_NO].ob_spec);
+			sprintf(recstr,"%-6.6s",(char *)text[MISC_NO].ob_spec);
 		else if (de->tot == de->recover)
-			sprintf(recstr,"%-6.6s",text[MISC_YES].ob_spec);
+			sprintf(recstr,"%-6.6s",(char *)text[MISC_YES].ob_spec);
 		else sprintf(recstr,"%5d/%-5d",de->recover,de->tot);
 		sprintf(temp,"  %-8s.%3s %10ld %s %s",
 				nm,ext,finfo.size,dt_str,recstr);
@@ -562,12 +574,14 @@ long offset;
 			}
 			st = fat16[st];
 			offset += dpb.bpc;
-		} while(st!=dpb.bitmask);
+		} while(st!=(short)dpb.bitmask);
 		startpoint = curdirbuf + 2*sizeof(DIRENTRY);
 		endpoint = sort_dir(curdirbuf,ncl,0);		/* don't remove deletions! */
 	}
 
 	for (curpoint = startpoint; curpoint < endpoint; curpoint += sizeof(DIRENTRY)) {
+		if (is_lfn(curpoint))		/* long file name entry */
+			continue;
 		if (*curpoint == DELETION_MARK) {
 			if (!garbage((DIRENTRY *)curpoint))
 				numentry++;
@@ -586,6 +600,8 @@ long offset;
 
 	j = 0;
 	for (curpoint = startpoint; curpoint < endpoint; curpoint += sizeof(DIRENTRY)) {
+		if (is_lfn(curpoint))		/* long file name entry */
+			continue;
 		if (*curpoint == DELETION_MARK) {
 			if (!garbage((DIRENTRY *)curpoint)) {
 				ddir[j].entry = (DIRENTRY *)curpoint;
@@ -843,7 +859,7 @@ short ret = -1;
 			}
 			st = fat16[st];
 			offset += (long) dpb.bpc;
-		} while (st != dpb.bitmask);
+		} while (st != (short)dpb.bitmask);
 
 		endp = sort_dir(dirlist[fdirlevel].dirbuf,ncl,0);	/* don't remove deletions! */
 	}
@@ -1037,7 +1053,7 @@ char fname2[MAX_FILENAME];
  */
 PRIVATE void undelete_one_file(DIRENTRY *entry)
 {
-short lastc, num2, unumclus, ucclus, unextc, unum, dotype;
+short lastc = 0, num2, unumclus, ucclus, unextc, unum, dotype;
 
 	unumclus = (finfo.size+dpb.bpc-1) >> dpb.cluster_shift;
 	ucclus = finfo.start;
@@ -1049,7 +1065,7 @@ short lastc, num2, unumclus, ucclus, unextc, unum, dotype;
 		} else {
 			while(fat16[ucclus]) {			/* look for first free cluster in current FAT */
 				ucclus = mirrorfat[ucclus];	/* while following chain in mirror */
-				if (ucclus == dpb.bitmask) {/* end of chain: start of deleted file has been reused ... */
+				if (ucclus == (short)dpb.bitmask) {/* end of chain: start of deleted file has been reused ... */
 					dotype = SIM;
 					break;
 				}
@@ -1060,7 +1076,7 @@ short lastc, num2, unumclus, ucclus, unextc, unum, dotype;
 	unum = 0;						/* count clusters written */
 	if (dotype == MIR) {
 		putword(&entry->start,ucclus);
-		for (unextc = mirrorfat[ucclus]; unextc != dpb.bitmask; unextc = mirrorfat[unextc]) {
+		for (unextc = mirrorfat[ucclus]; unextc != (short)dpb.bitmask; unextc = mirrorfat[unextc]) {
 			if (fat16[unextc] == 0) {
 				fat16[ucclus] = unextc;
 				ucclus = unextc;
@@ -1076,6 +1092,7 @@ short lastc, num2, unumclus, ucclus, unextc, unum, dotype;
 			ucclus++;							//rfb: we assume there is one ...
 		}
 		putword(&entry->start,ucclus);
+		lastc = ucclus;
 		for (unextc = ucclus+1; num2 < unumclus-1; unextc++, num2++) {
 			if (fat16[unextc] == 0) {		/* this cluster is free: */
 				fat16[ucclus] = unextc;			/* set prev -> this */
@@ -1113,7 +1130,7 @@ PUBLIC int init_uroot(short device,int draw)
 							/* and have just switched modes from Simple to Mirror or vice versa */
 	dev = device;
 	if (get_mybpb(&dpb,dev) < 0) {
-		xform_alert(1,GEN_BPB_ALERT);
+		bpb_alert(GEN_BPB_ALERT);
 		return -1;
 	}
 
@@ -1204,7 +1221,7 @@ char *mfat12;
 				Fclose(from);
 				return mfat16;
 			}
-		}
+		} else count = -1;
 	} else {								/* fat12 */
 		if ((mfat16=calloc(3,dpb.bpf)) == NULL) {
 			error(3*dpb.bpf,MEMALLOC,"");

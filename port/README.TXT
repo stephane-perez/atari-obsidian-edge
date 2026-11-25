@@ -7,8 +7,8 @@ Source code: https://github.com/stephane-perez/atari-obsidian-edge
 
 It is the Diamond Edge 2.57 source code, rebuilt with a modern compiler
 (GCC) instead of Lattice C, without the copy protection and the demo
-version, with bug fixes.  Some dialogs still say "Diamond Edge"; Obsidian
-Mirror (DMIRROR.PRG, formerly Diamond Mirror) still says v2.57.
+version, with bug fixes.  Some dialogs still say "Diamond Edge".
+Obsidian Mirror (DMIRROR.PRG) was called Diamond Mirror.
 VFAT long file names are kept; FAT32 partitions are not supported.
 Back up your disks before using it.
 
@@ -32,5 +32,12 @@ How to install
    them, every boot, once a day or once a week.  Copy DMIRROR.PRG to the
    AUTO folder of your boot drive, then configure it in EDGE.PRG (Undelete
    menu, "Configure Mirror...").
+
+Manual
+------
+The Diamond Edge 2.57 manual (PDF) describes every function; Obsidian
+Edge works the same way, without the installation and registration.
+Download it from:
+https://sourceforge.net/projects/diamond-edge/files/releases/v2.57/v257_manual.pdf/download
 
 License: GNU General Public License, version 2 (see LICENSE.TXT).

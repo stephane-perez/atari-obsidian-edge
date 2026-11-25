@@ -19,7 +19,7 @@
     User selectable preferences are available through the Preferences
  option under the File menu.  Until you save them, default preferences
  are used, and you may modify them at any time.  The selectable options
- include the default path where you want both Diamond Edge Information
+ include the default path where you want both Obsidian Edge Information
  and Validation files to be saved (initially, the folder of EDGE.PRG).
  
     ù  Note that ALL of the currently selected menu options and
@@ -60,7 +60,7 @@
  
     There are many situations (such as when no errors are found) where
  automatic continuation after a Disk Medic pass is convenient.  If you
- enter a value (0 to 9) here, Diamond Edge will pause for that number
+ enter a value (0 to 9) here, Obsidian Edge will pause for that number
  of seconds between displaying the Disk Medic Report and continuing
  with the next task.  If you leave the value blank, the program will
  always wait for user input before continuing.  The program will also
@@ -153,7 +153,7 @@
  partitions is displayed at the bottom of the display.
 
     ù  If you have some drive letters assigned to CD-ROM drives and
-       you are NOT using a modern CD-ROM driver, Diamond Edge may
+       you are NOT using a modern CD-ROM driver, Obsidian Edge may
        attempt to access these drives, resulting in error messages.
        You will also get an error message if a partition is defined
        on a removable drive, and the disk is not present.
@@ -176,6 +176,11 @@
  Obsidian Edge is an independent project, not affiliated with or
  endorsed by Oregon Research Associates, Anodyne Software or the
  authors of Diamond Edge.
+ 
+    The Diamond Edge manual (v2.57, PDF) describes every function
+ of the program; it is available from SourceForge:
+    sourceforge.net/projects/diamond-edge/files/releases/v2.57/
+    file v257_manual.pdf
  
     Copyright (C) Robert D. Luneski / Oregon Research Associates
     Copyright (C) 2002-2017 Roger Burrows / Anodyne Software

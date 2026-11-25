@@ -24,7 +24,7 @@
  existing data on the destination partition is lost.
  
     To perform an image copy, select Copy Drive Image from the Utility
- menu.  Diamond Edge will prompt you for the source and destination
+ menu.  Obsidian Edge will prompt you for the source and destination
  partitions.  If you have Warn mode set, you will be notified that all
  data on the destination partition will be lost, and you will be given
  the opportunity to cancel.  Otherwise the partition copy will begin
@@ -43,7 +43,7 @@
  destination partition will be lost.  
  
     To perform a copy with defragmentation, select Copy Drive Defrag
- from the Utility menu.  Diamond Edge will prompt you for the source
+ from the Utility menu.  Obsidian Edge will prompt you for the source
  and destination partitions.  If you have Warn mode set, you will be
  notified that all data on the destination partition will be lost,
  and you will be given the opportunity to cancel.  Otherwise the
@@ -90,7 +90,7 @@
 
  ù  Partition Zeroing
  
-    Diamond Edge provides several methods of erasing information from
+    Obsidian Edge provides several methods of erasing information from
  your disk.  In order to minimise the possibility that you will do
  this accidentally, you must enable the zeroing functions by selecting
  Enable zeroing from the Utility Menu.
@@ -137,7 +137,7 @@
  partition, first the FAT and root directory sectors are erased, and
  then every sector of the partition is overwritten.  This allows you
  to eliminate confidential data.  You should use this function with
- care: if you Wipe a partition, Diamond Edge will not be able to
+ care: if you Wipe a partition, Obsidian Edge will not be able to
  recover the lost data.
 
  

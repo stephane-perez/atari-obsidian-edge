@@ -17,6 +17,8 @@
  *	Modified for Obsidian Edge (November 2026): VFAT long file names
  *
  *	Modified for Obsidian Edge (November 2026): renamed Obsidian Mirror
+ *
+ *	Modified for Obsidian Edge (November 2026): same version as Obsidian Edge
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -47,7 +49,7 @@
 /*
  *	stuff (currently) exclusive to dmirror
  */
-#define PROGRAM_VERSION	"2.57"
+#include "../version.h"				/* same version as Obsidian Edge */
 
 #define ABORT_KEY		0x03				/* control-C */
 
@@ -360,7 +362,7 @@ short lastdev;
 				fflush(stdout);
 			}
 		}
-		printf("\nYou should run Diamond Edge IMMEDIATELY");
+		printf("\nYou should run Obsidian Edge IMMEDIATELY");
 		printf("\nPress any key to exit Obsidian Mirror");
 		get_key();
 		error = -1;

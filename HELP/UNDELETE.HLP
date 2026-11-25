@@ -25,7 +25,7 @@
     Select all of the drives for which you want to create disk mirror
  files, and then click on Save.  A GEM file selector will appear,
  prompting you for the folder in which to save the mirror files.  The
- default folder is that specified in the Diamond Edge Preferences
+ default folder is that specified in the Obsidian Edge Preferences
  dialog.  Note that you need only select the appropriate folder, not
  a specific filename, since disk mirror file names are generated
  automatically.  Select OK from the file selector to save the disk
@@ -69,7 +69,7 @@
  catastrophe.  That is the purpose of Save SCSI Mirror.
 
     To create a SCSI Mirror file, select Save SCSI Mirror from the
- Undelete menu.  Diamond Edge will query the SCSIDRV driver for
+ Undelete menu.  Obsidian Edge will query the SCSIDRV driver for
  installed hard disk devices on the system buses.  The devices found
  will be displayed in the Select SCSI device dialog: select the
  devices that you wish to create mirror files for.
@@ -81,7 +81,7 @@
 
     Selecting Save SCSI Info File will bring up a GEM file selector,
  prompting you for the folder in which to save the SCSI Mirror files.
- The default folder is that specified in the Diamond Edge Preferences
+ The default folder is that specified in the Obsidian Edge Preferences
  dialog.  Note that you need only select the appropriate folder, not
  a specific filename, since SCSI mirror file names are generated
  automatically.  Select OK from the file selector to save the SCSI
@@ -151,7 +151,7 @@
  
     A Mirror Undelete uses FAT and root directory information stored
  in the disk Mirror files to determine exactly what clusters the file
- occupied prior to deletion.  Diamond Edge then recovers all clusters
+ occupied prior to deletion.  Obsidian Edge then recovers all clusters
  that the file occupied that are not currently allocated to other
  files.  This is the only method that can fully recover a fragmented
  file.
@@ -181,7 +181,7 @@
        the clusters prior to the first fragmentation point will be
        valid.
 
-    Diamond Edge provides a general purpose deleted file finder within
+    Obsidian Edge provides a general purpose deleted file finder within
  the Undelete control screen.  To search for deleted files, enter a
  deleted file search mask in the editable field labelled Search mask.
  You can search for a specific file or enter a general-purpose
@@ -214,7 +214,7 @@
  on Undelete.
  
     For each file selected, you will be prompted to enter the first
- character of the filename to be undeleted.  Diamond Edge will then
+ character of the filename to be undeleted.  Obsidian Edge will then
  check if there is another file in the same folder that already has
  that name.  If a conflict is found, you will be prompted to enter a
  different first character.

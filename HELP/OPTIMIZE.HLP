@@ -10,7 +10,7 @@
 
  ù  Choosing the Optimization Method
  
-    Diamond Edge provides two optimization methods: Full Optimization,
+    Obsidian Edge provides two optimization methods: Full Optimization,
  and Compress Free Space.  You select the method by choosing the
  appropriate entry under the Optimize menu.
  
@@ -29,7 +29,7 @@
  space is together.
  
     We recommend that all partitions be fully optimized when you first
- receive Diamond Edge.  After that you can use Compress Free Space to
+ receive Obsidian Edge.  After that you can use Compress Free Space to
  keep the free space contiguous between full optimizations.  Use the
  disk fragmentation maps and statistics to assist you in determining
  the amount of fragmentation on each of your partitions.
@@ -37,7 +37,7 @@
  
  ù  Choosing the Optimization Priority
  
-    Diamond Edge provides two optimization priorities: Prioritize
+    Obsidian Edge provides two optimization priorities: Prioritize
  Reading and Prioritize Writing.  You select the desired priority by
  choosing the appropriate entry under the Optimize menu.  The basic
  distinction between the two priorities is where the allocated space
@@ -96,9 +96,9 @@
  ù  Optimizing your Drive
  
     Before you perform an optimization there is one thing left to do:
- backup your drive!  Diamond Edge provides secure protection against,
+ backup your drive!  Obsidian Edge provides secure protection against,
  and recovery from, a wide variety of disk-related problems.  However,
- many errors can occur which Diamond Edge cannot prevent: for example,
+ many errors can occur which Obsidian Edge cannot prevent: for example,
  a power outage during an optimization.  In such circumstances, there
  is NO SUBSTITUTE for a valid up-to-date backup.  Depending on what
  other hardware you have, either Diamond Back or CDbackup will provide
@@ -111,7 +111,7 @@
  fixed before optimization will be allowed.  After the disk has passed
  the Disk Medic examination, the optimization will begin.  During
  optimization, if Visual Update is enabled, the movement of disk data
- is displayed in the graphic window.  Diamond Edge will ring the
+ is displayed in the graphic window.  Obsidian Edge will ring the
  keyboard 'bell' to indicate when the optimization is complete.
 
 

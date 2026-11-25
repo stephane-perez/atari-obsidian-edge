@@ -17,7 +17,7 @@
  
  ù  Testing Your Disk Structure
  
-    As with all of Diamond Edge's functions, the Disk Medic can be
+    As with all of Obsidian Edge's functions, the Disk Medic can be
  performed on either floppy disks or hard disk partitions.  We
  strongly recommend that you run Disk Medic on ALL of your hard disk
  partitions at least once a week.  Another way of performing the same
@@ -26,14 +26,14 @@
  details.
  
     The actions of Disk Medic are controlled via options in the Medic
- menu.  If you select Auto-Fix Errors, Diamond Edge will automatically
+ menu.  If you select Auto-Fix Errors, Obsidian Edge will automatically
  correct all disk errors found during the Disk Medic evaluation of the
  active drive.  A log of all errors found will be written to the file
  MEDIC_X.ERR where X is the active drive (Disk Medic error files are
  saved in the folder specified in the Preferences dialog).  After the
  Disk Medic pass, you may view the error file for information on what
  errors were found and fixed.  Error files are for information only
- and may be safely deleted after exiting Diamond Edge.
+ and may be safely deleted after exiting Obsidian Edge.
  
     If you do not select Auto-Fix Errors, Disk Medic will perform a
  test pass on the active drive first.  If errors are found during the
@@ -55,7 +55,7 @@
     ù  In the event that you have lost data due to a previous program
        crash on a drive, you MAY be able to recover it from one of
        these files.  If you choose not to do so, you may safely delete
-       these files after exiting Diamond Edge.
+       these files after exiting Obsidian Edge.
 
 
  ù  Running Disk Medic
@@ -200,9 +200,9 @@
  
  ù  Partitioning Your Hard Disk
  
-    In order to partition your hard disk, Diamond Edge must access
+    In order to partition your hard disk, Obsidian Edge must access
  sectors outside the normal hard disk partitions.  To do this on all
- of the many Atari-compatible systems available, Diamond Edge uses
+ of the many Atari-compatible systems available, Obsidian Edge uses
  the SCSIDRV interface.  If you do not have a SCSIDRV driver on your
  system, the partition function will NOT be available.
 
@@ -211,7 +211,7 @@
  this function.  This will give you the basic understanding of disk
  and partition structure required.  
  
-    After you select Partition Hard Disk, Diamond Edge will query the
+    After you select Partition Hard Disk, Obsidian Edge will query the
  SCSIDRV driver for installed hard disk devices on the system buses.
  The devices found will be displayed in the Select SCSI Device dialog.
  Select the device you wish to partition and click on Partition SCSI
@@ -244,7 +244,7 @@
  
     ù  Display Size Mode:  You can select to have the disk and
        partition size information displayed in either Sectors or
-       Megabytes (MB).  Diamond Edge displays Megabytes consistent
+       Megabytes (MB).  Obsidian Edge displays Megabytes consistent
        with the ICD definition of 1 MB = 1,000,000 bytes.  Note that
        this differs from the usual Atari definition (1 MB = 1,048,576
        bytes).
@@ -319,14 +319,14 @@
        Undelete menu.
  
     ù  Cancel:  If you have not performed any other action, then
-       selecting Cancel will return you to the Diamond Edge main
+       selecting Cancel will return you to the Obsidian Edge main
        window.  However, if you have installed partition information,
        or rebuilt one or more partitions, then selecting Cancel will
        perform a cold boot of your system.  This is required for the
        operating system to become aware of the new disk structure.
  
     Remember to specify which partitions you want to be active.
- Diamond Edge allows up to 64 different partitions to be installed on
+ Obsidian Edge allows up to 64 different partitions to be installed on
  each disk.  However, operating systems allow a smaller total number
  of active partitions; for example, GEMDOS only allows a total of 14
  active partitions (C thru P) on all your hard drives.  One use of
@@ -347,7 +347,7 @@
 
     ù  Install and rebuild one:  This will install the displayed
        partition information and rebuild one specified partition.
-       When rebuilding a partition, Diamond Edge creates a boot
+       When rebuilding a partition, Obsidian Edge creates a boot
        sector, two FATs, and a root directory on the specified
        partition and then initializes them.  ALL EXISTING DATA ON
        THE AFFECTED PARTITION WILL BE LOST.

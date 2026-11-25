@@ -28,6 +28,20 @@ Obsidian Edge is a fork of **Diamond Edge**.
   **Roger Burrows / Anodyne Software** on SourceForge:
   <https://sourceforge.net/p/diamond-edge/>
 
+## Manual
+
+The **Diamond Edge manual** (version 2.57, PDF, by Roger Burrows, licensed
+under CC BY-SA 4.0) describes every function of the program; Obsidian Edge
+works the same way. It is not included in this repository; download it from
+SourceForge: <https://sourceforge.net/projects/diamond-edge/files/releases/v2.57/v257_manual.pdf/download>
+
+What differs in Obsidian Edge: no installation program nor registration (run
+`EDGE.PRG` from its folder), Diamond Mirror is called **Obsidian Mirror**
+(`DMIRROR.PRG`), FAT32 partitions are refused, VFAT long file names are kept.
+See [`CHANGELOG.md`](CHANGELOG.md).
+
+## Disclaimer
+
 This project is **not affiliated with, nor endorsed by**, Oregon Research
 Associates, Anodyne Software or the original authors. "Diamond Edge" is the
 name of the original product; this fork uses a different name to avoid any

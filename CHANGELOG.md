@@ -9,6 +9,17 @@ the `VERSION` file.
 User-visible changes are also summarised, in plain ASCII for the Atari, in
 [`DOC/CHANGES.TXT`](DOC/CHANGES.TXT).
 
+## [Unreleased]
+
+### Changed
+- Obsidian Mirror (`DMIRROR.PRG`) has the same version as Obsidian Edge
+  (it showed 2.57); its "run Edge immediately" message names Obsidian Edge.
+- Help files: "Diamond Edge" replaced by "Obsidian Edge", except the
+  "Diamond Edge Extensible Help System" headers, the references to the
+  Diamond Edge manual and the credits. The "About Obsidian Edge" help topic,
+  `README.md` and `README.TXT` give the address of the Diamond Edge 2.57
+  manual (PDF, not included).
+
 ## [0.1.0] - 2026-11-25
 
 ### Changed

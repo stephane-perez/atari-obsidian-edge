@@ -20,6 +20,8 @@
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  *
  *	Modified for Obsidian Edge (November 2026): VFAT long file names
+ *
+ *	Modified for Obsidian Edge (November 2026): all end-of-chain values
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -1144,6 +1146,7 @@ PUBLIC int init_uroot(short device,int draw)
 		if (log_read(dev,dpb.spf,1,fat16,FAT))
 			return -1;
 		swab((char *)fat16,(char *)fat16,dpb.bpf);
+		fat_normalize_eoc(fat16,dpb.maxc,1);		/* $FFF8..$FFFE ends -> $FFFF */
 	} else {										/* fat12 */
 		if ((fat12=malloc(dpb.bpf)) == NULL) {
 			error(dpb.bpf,MEMALLOC,"");
@@ -1218,6 +1221,7 @@ char *mfat12;
 		if (Fseek((long)dpb.bps,from,FSEEK_SET) == dpb.bps) {		/* new with Mirror 1.1 */
 			if ((count=Fread(from,dpb.bpf,mfat16)) == dpb.bpf) {
 				swab(mfat16,mfat16,dpb.bpf);
+				fat_normalize_eoc(mfat16,dpb.maxc,1);		/* $FFF8..$FFFE ends -> $FFFF */
 				Fclose(from);
 				return mfat16;
 			}

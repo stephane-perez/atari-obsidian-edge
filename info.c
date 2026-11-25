@@ -15,6 +15,8 @@
  *	Modified for Obsidian Edge (November 2026): FAT32 partitions refused
  *
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): DOS (MBR) and GPT disks refused
  */
 
 /*
@@ -530,6 +532,8 @@ PRIVATE void read_and_edit_root(short id,short lun)
 char *iobuf;
 long bufsize, fsize;
 
+	if (refuse_foreign_disk(id,lun))		/* DOS (MBR) or GPT disk */
+		return;
 	bufsize = ROOTSEC_BUFSIZE;
 	if ((iobuf=calloc(1,bufsize)) == NULL) {
 		error(bufsize,MEMALLOC,"");

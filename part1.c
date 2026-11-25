@@ -10,6 +10,8 @@
  *	Modified for Obsidian Edge (November 2026): demo version removed
  *
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): DOS (MBR) and GPT disks refused
  */
 
 //NOTE: at the moment, a Load of SCSI info overwrites the original data in orgbuf,
@@ -209,6 +211,63 @@ PRIVATE int write_scsi_info(short id,short lun);
 
 
 
+/*
+ *	DOS (MBR) and GPT partition tables
+ *
+ *	The partitioning functions only know the Atari (AHDI/ICD) root sector.
+ *	In a DOS master boot record, the partition table (0x1BE..0x1FD, then the
+ *	signature 0x55 0xAA) overlaps the AHDI entries (0x1C6..0x1F5); a GPT disk
+ *	has a protective MBR (type 0xEE) in sector 0.  Writing an Atari root
+ *	sector there would destroy the disk's partition table, so such disks are
+ *	refused.  Hybrid root sectors (Atari and DOS tables together) are refused
+ *	too: the Atari root sector written by Obsidian Edge would lose the DOS one.
+ *
+ *	is_foreign_root_sector() returns the number of DOS partition entries
+ *	(0 if the sector is not a DOS master boot record)
+ */
+PUBLIC int is_foreign_root_sector(unsigned char *buf)
+{
+unsigned char *e;
+int i, n = 0;
+
+	if ((buf[510] != 0x55) || (buf[511] != 0xaa))
+		return 0;
+	for (i = 0, e = buf+0x1be; i < 4; i++, e += 16) {
+		if (e[4] == 0)					/* unused entry */
+			continue;
+		if (e[0] & 0x7f)				/* status must be 0x00 or 0x80 */
+			return 0;
+		n++;
+	}
+
+	return n;
+}
+
+/*
+ *	read physical sector 0 of the device: if it is a DOS (MBR) or GPT disk,
+ *	tell the user and return TRUE
+ */
+PUBLIC int refuse_foreign_disk(short id,short lun)
+{
+unsigned char *buf;
+int foreign;
+
+	if ((buf=malloc(PHYSICAL_SECSIZE)) == NULL) {
+		error(PHYSICAL_SECSIZE,MEMALLOC,"");
+		return TRUE;
+	}
+	if (phys_read(id,lun,1,0L,(char *)buf)) {
+		free(buf);
+		return FALSE;					/* the caller reports read errors */
+	}
+	foreign = is_foreign_root_sector(buf);
+	free(buf);
+	if (foreign)
+		form_alert(1,FOREIGN_DISK_ALERT);
+
+	return foreign ? TRUE : FALSE;
+}
+
 /*********************************************************/
 PUBLIC void do_part(void)
 {
@@ -225,6 +284,8 @@ PRIVATE void load_and_edit_root(short id,short lun)
 char *rootbuf;
 long size;
 
+	if (refuse_foreign_disk(id,lun))
+		return;
 	if ((rootbuf=calloc(1,ROOTSEC_BUFSIZE)) == NULL) {
 		error(ROOTSEC_BUFSIZE,MEMALLOC,"");
 		return;
@@ -1925,6 +1986,9 @@ long offset;
 int i, n, error;
 long max_partsize_gem, max_partsize_bgm;
 PART *part;
+
+	if (refuse_foreign_disk(id,lun))	/* never overwrite a DOS (MBR) or GPT table */
+		return -1;
 
 	load_newbuf();		/* populates scsi.newbuf */
 

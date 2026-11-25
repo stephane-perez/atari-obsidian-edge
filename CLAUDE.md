@@ -86,8 +86,8 @@ with GCC (`m68k-atari-mint`) and libcmini. See `README.md`, `port/README.md`
   cards (the Falcon CF image is MBR, the 32 MB SD image is GPT). The
   partition editor (`part1.c`, `load_root_sectors()`) reads sector 0 as AHDI
   only: installing partition info there would destroy an MBR/GPT table.
-  To do: detect them and refuse (or warn) in the partitioning and SCSI
-  mirror functions.
+  Such disks (and hybrid AHDI+DOS sectors) are now refused:
+  `is_foreign_root_sector()` / `refuse_foreign_disk()` in part1.c.
 - **Partition layout**: boot sector (logical 0) | reserved | FAT #1 | FAT #2 |
   root directory (fixed size) | data area (clusters from number 2). FAT n at
   `res + n·spf`, root at `res + nfat·spf`, data at that + root sectors
@@ -105,9 +105,9 @@ with GCC (`m68k-atari-mint`) and libcmini. See `README.md`, `port/README.md`
   end of chain. Edge converts both into big-endian 16-bit tables in memory
   (`fat12_to_fat16()`, `swab()`), with `dpb.bitmask` (end) and `dpb.badmask`
   (bad) = `$FFF`/`$FF7` or `$FFFF`/`$FFF7`. Microsoft's spec allows any of
-  `$FFF8`–`$FFFF` (`$FF8`–`$FFF`) as end of chain: Edge only accepts the exact
-  value, so other systems' `$FFF8` ends would be "Bad FAT entries" (not seen
-  yet; to check with PC-formatted media). Two copies of the FAT; Medic
+  `$FFF8`–`$FFFF` (`$FF8`–`$FFF`) as end of chain: `fat_normalize_eoc()`
+  (fatutil.c) turns them into `dpb.bitmask` when a FAT is loaded (Diamond
+  Edge 2.57 reported them as bad FAT entries). Call it after any new FAT load. Two copies of the FAT; Medic
   compares them.
 - **Directory entry** (32 bytes): name 8 + extension 3 (space padded, no
   dot), attribute (`0x01` RO, `0x02` hidden, `0x04` system, `0x08` volume,

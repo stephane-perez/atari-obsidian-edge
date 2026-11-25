@@ -16,6 +16,8 @@
  *	Modified for Obsidian Edge (November 2026): VFAT long file names
  *
  *	Modified for Obsidian Edge (November 2026): Obsidian Mirror
+ *
+ *	Modified for Obsidian Edge (November 2026): DOS (MBR) and GPT disks
  *	over from the copy protection (INSTALL.PRG, "Unregistered")
  */
 
@@ -180,6 +182,10 @@
 
 /* FAT32 partitions are not supported: get_mybpb() returns E_FAT32 (texts: FAT32_ALERT, FAT32_TEXT) */
 #define E_FAT32				(-1000)
+
+/* disks with a DOS (MBR) or GPT partition table cannot be partitioned (part1.c);
+   to be moved to EDGE.RSC as a free string */
+#define FOREIGN_DISK_ALERT	"[3][This disk has a DOS (MBR)|or GPT partition table,|which Obsidian Edge cannot|edit. Use HDDRUTIL or a PC|tool to partition it.][ OK ]"
 #define valid_cluster(clus)	(((clus)>=2)&&((clus)<dpb.maxc))
 #define IS_COLOUR_AES		(_AESglobal[0] >= 0x330)
 #define MAGX_COOKIE			0x4d616758L		/* MagX */

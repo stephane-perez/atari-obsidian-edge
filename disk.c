@@ -20,6 +20,8 @@
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  *
  *	Modified for Obsidian Edge (November 2026): explicit int comparisons
+ *
+ *	Modified for Obsidian Edge (November 2026): all end-of-chain values
  */
 
 /*
@@ -129,6 +131,7 @@ int j;
 PUBLIC void fat12_to_fat16(unsigned char *f12,unsigned short *f16)
 {
 int j;
+unsigned short *f16start = f16;
 
 	/*
 	 *	in loop n, we convert clusters 2n and 2n+1 ...
@@ -137,6 +140,7 @@ int j;
 		*f16 = (*f12 | (*(f12+1)<<8)) & 0x0fff;
 		*(f16+1) = ((*(f12+1)>>4) | (*(f12+2)<<4)) & 0x0fff;
 	}
+	fat_normalize_eoc(f16start,dpb.maxc,0);	/* $FF8..$FFE ends -> $FFF */
 }
 
 /*

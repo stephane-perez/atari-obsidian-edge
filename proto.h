@@ -14,6 +14,8 @@
  *	Modified for Obsidian Edge (November 2026): FAT32 functions
  *
  *	Modified for Obsidian Edge (November 2026): VFAT long file names
+ *
+ *	Modified for Obsidian Edge (November 2026): MBR/GPT, end of chain
  */
 
 /* Prototypes for functions defined in copyd.c */
@@ -31,6 +33,9 @@ PUBLIC long gemdos_read(short fh,long count,void *buf,char *name,int loc);
 PUBLIC long gemdos_write(short fh,long count,void *buf,char *name,int loc);
 PUBLIC int get_mybpb(MYBPB *mybpb,short device);
 PUBLIC int is_fat32_partition(short dev);
+PUBLIC int is_foreign_root_sector(unsigned char *buf);
+PUBLIC void fat_normalize_eoc(unsigned short *f16,int maxc,int isfat16);
+PUBLIC int refuse_foreign_disk(short id,short lun);
 PUBLIC int is_fat32_bootsector(char *buf);
 PUBLIC void bpb_alert(int index);
 PUBLIC int get_name(DIRENTRY *dir,char *fname);

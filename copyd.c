@@ -13,6 +13,8 @@
  *	Modified for Obsidian Edge (November 2026): FAT32 alert
  *
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): all end-of-chain values
  */
 
 /*
@@ -440,6 +442,7 @@ char *rootbuf;
 	dirlevel = 0;
 	firstrun = NULL;
 	swab(fat16,fat16,dpb.bpf);
+	fat_normalize_eoc((unsigned short *)fat16,dpb.maxc,1);		/* $FFF8..$FFFE ends -> $FFFF */
 	if (form_run() < 0) {	/* only if insufficient memory, VERY unlikely */
 		free_all_runs();
 		free(rootbuf);

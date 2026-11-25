@@ -19,6 +19,8 @@
  *	Modified for Obsidian Edge (November 2026): FAT32 alert
  *
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
+ *
+ *	Modified for Obsidian Edge (November 2026): all end-of-chain values
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -319,6 +321,7 @@ char *f12;
 			return -1;
 		}
 		swab(f16,f16,dpb.bpf);
+		fat_normalize_eoc(f16,dpb.maxc,1);		/* $FFF8..$FFFE ends -> $FFFF */
 	} else {									/* fat12 */
 		if ((f16=malloc(dpb.bpf*3L)) == NULL) {	/* allow for fat12->fat16 expansion */
 			error(dpb.bpf*3,MEMALLOC,"");

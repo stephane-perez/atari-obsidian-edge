@@ -19,6 +19,8 @@
  *	Modified for Obsidian Edge (November 2026): renamed Obsidian Mirror
  *
  *	Modified for Obsidian Edge (November 2026): same version as Obsidian Edge
+ *
+ *	Modified for Obsidian Edge (November 2026): all end-of-chain values
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -146,6 +148,7 @@ void do_block(short);
 int do_tdisk(void);
 void errmsg(int type,int errnum,char *msg1,char *msg2);
 void fat12_to_fat16(unsigned char *f12,unsigned short *f16);
+void fat_normalize_eoc(unsigned short *f16,int maxc,int isfat16);
 int get_key(void);
 long get_long(char *);
 int get_mybpb(MYBPB *,short);
@@ -454,6 +457,8 @@ char *fat1, *fat2;
 
 		swab(fat16,fat16,dpb.bpf);
 		swab(tfat,tfat,dpb.bpf);
+		fat_normalize_eoc((unsigned short *)fat16,dpb.maxc,1);		/* $FFF8..$FFFE ends -> $FFFF */
+		fat_normalize_eoc((unsigned short *)tfat,dpb.maxc,1);		/* $FFF8..$FFFE ends -> $FFFF */
 	} else {
 		if ((fat12=malloc(dpb.bpf*4)) == NULL) {
 			errmsg(OTHER_ERROR,0,"Insufficient memory for","FATs");
@@ -791,6 +796,7 @@ long maxclus, ncdata;
 void fat12_to_fat16(unsigned char *f12,unsigned short *f16)
 {
 int j;
+unsigned short *f16start = f16;
 
 	/*
 	 *	in loop n, we convert clusters 2n and 2n+1 ...
@@ -799,6 +805,7 @@ int j;
 		*f16 = (*f12 | (*(f12+1)<<8)) & 0x0fff;
 		*(f16+1) = ((*(f12+1)>>4) | (*(f12+2)<<4)) & 0x0fff;
 	}
+	fat_normalize_eoc(f16start,dpb.maxc,0);	/* $FF8..$FFE ends -> $FFF */
 }
 
 /*

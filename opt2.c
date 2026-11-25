@@ -18,6 +18,8 @@
  *	Modified for Obsidian Edge (November 2026): up_newfat_good(): defined order of evaluation
  *
  *	Modified for Obsidian Edge (November 2026): VFAT long file names
+ *
+ *	Modified for Obsidian Edge (November 2026): all end-of-chain values
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -317,6 +319,7 @@ DIRENTRY *temp;
 		if (log_read(dev,dpb.spf,1,fat16,FAT))
 			return -1;
 		swab(fat16,fat16,dpb.bpf);
+		fat_normalize_eoc(fat16,dpb.maxc,1);		/* $FFF8..$FFFE ends -> $FFFF */
 	} else {										/* fat12 */
 		if ((newfat=calloc(4,dpb.bpf)) == NULL) {
 			error(4*dpb.bpf,MEMALLOC,"");
@@ -1088,6 +1091,7 @@ static char title[MAX_DISPLAYSIZE];	/* static because it's a window title */
 		if (log_read(dev,dpb.spf,1,fat16,FAT))
 			return -1;
 		swab(fat16,fat16,dpb.bpf);
+		fat_normalize_eoc(fat16,dpb.maxc,1);		/* $FFF8..$FFFE ends -> $FFFF */
 	} else {									/* fat12 */
 		if ((fmold=calloc(4,dpb.bpf)) == NULL) {
 			error(4*dpb.bpf,MEMALLOC,"");

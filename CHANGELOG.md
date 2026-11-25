@@ -11,6 +11,21 @@ User-visible changes are also summarised, in plain ASCII for the Atari, in
 
 ## [Unreleased]
 
+### Fixed
+- Partitioning, Restore SCSI Mirror: disks with a DOS (MBR) or GPT partition
+  table (EmuTOS, HDDriver, PC-formatted CompactFlash and SD cards) are now
+  refused with a message. Their sector 0 was read as an Atari (AHDI) root
+  sector, whose entries overlap the DOS table: installing partition
+  information would have destroyed it. Hybrid sectors (Atari and DOS tables)
+  are refused too. The check is also made just before sector 0 is written.
+- End of FAT chains written as `$FFF8`–`$FFFE` (`$FF8`–`$FFE` in a 12-bit
+  FAT), allowed by Microsoft's specification, were taken for bad FAT entries:
+  Medic reported every such file and folder and "Fix now" truncated them.
+  They are now read as end of chain (`fatutil.c`, Edge and Obsidian Mirror).
+  Tested in Hatari: on a disk whose 85 chains end with `$FFF8`, Diamond Edge
+  2.57 reports 82 bad FAT entries and 3 invalid directories, Obsidian Edge
+  none.
+
 ### Changed
 - Obsidian Mirror (`DMIRROR.PRG`) has the same version as Obsidian Edge
   (it showed 2.57); its "run Edge immediately" message names Obsidian Edge.

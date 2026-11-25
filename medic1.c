@@ -24,6 +24,8 @@
  *	Modified for Obsidian Edge (November 2026): explicit int comparisons
  *
  *	Modified for Obsidian Edge (November 2026): VFAT long file names
+ *
+ *	Modified for Obsidian Edge (November 2026): all end-of-chain values
  *		of cluster numbers with the end-of-chain and bad-cluster marks
  */
 
@@ -378,6 +380,8 @@ static char title[MAX_DISPLAYSIZE];
 
 		swab(fat16,fat16,dpb.bpf);
 		swab(tfat,tfat,dpb.bpf);
+		fat_normalize_eoc((unsigned short *)fat16,dpb.maxc,1);		/* $FFF8..$FFFE ends -> $FFFF */
+		fat_normalize_eoc(tfat,dpb.maxc,1);		/* $FFF8..$FFFE ends -> $FFFF */
 	} else {												/* fat12 */
 		if ((fat12=fat1=malloc(dpb.bpf * 4L)) == NULL) {
 			error(dpb.bpf*4,MEMALLOC,"");
@@ -1655,6 +1659,7 @@ BAD *b1;
 			if (log_read(dev,dpb.spf,1,fat16,FAT))
 				return -1;
 			swab((char *)fat16,(char *)fat16,dpb.bpf);
+			fat_normalize_eoc((unsigned short *)fat16,dpb.maxc,1);		/* $FFF8..$FFFE ends -> $FFFF */
 		} else {								/* fat12 */
 			if ((fat12 = malloc(dpb.bpf * 6L)) == NULL) {
 				error(dpb.bpf*6,MEMALLOC,"");

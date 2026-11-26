@@ -5,6 +5,23 @@ Obsidian Edge is a fork of Diamond Edge v2.57.  This is a summary of
 the changes compared to Diamond Edge v2.57; for details, see the git
 history: https://github.com/stephane-perez/atari-obsidian-edge
 
+Since v0.1.0
+------------
+  . Obsidian Mirror has the same version as Obsidian Edge
+
+  . disks with a DOS (MBR) or GPT partition table cannot be
+    partitioned (Obsidian Edge would destroy their table): a message
+    says so
+
+  . FAT32 partitions are protected in the partition editor: they
+    cannot be moved, resized, removed or rebuilt
+
+  . files whose FAT chain ends with $FFF8 to $FFFE (allowed by the
+    FAT specification) are no longer reported as bad FAT entries
+
+  . "Obsidian Edge" instead of "Diamond Edge" in the dialogs, the
+    alerts and the help files
+
 v0.1.0 (November 2026)
 ----------------------
   . the disk functions work again: in the first GCC build, Medic and

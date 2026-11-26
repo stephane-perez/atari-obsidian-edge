@@ -12,6 +12,8 @@
  *	Modified for Obsidian Edge (November 2026): compiler warnings fixed
  *
  *	Modified for Obsidian Edge (November 2026): DOS (MBR) and GPT disks refused
+ *
+ *	Modified for Obsidian Edge (November 2026): FAT32 (F32) partitions protected
  */
 
 //NOTE: at the moment, a Load of SCSI info overwrites the original data in orgbuf,

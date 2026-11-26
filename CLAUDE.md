@@ -12,6 +12,11 @@ with GCC (`m68k-atari-mint`) and libcmini. See `README.md`, `port/README.md`
   list the strings or objects to change (tree / object number / name from
   `edge.h`, or free string index) rather than editing it, unless asked.
   `EDGE.HRD` holds the names (Interface), `edge.h` the generated indices.
+  When asked to edit it: `tools/rsc_patch.py` (replace texts, add free
+  strings; keeps the colour icon extension), then add the names to `edge.h`
+  and `EDGE.HRD` (record: type byte 2 = alert / 3 = free string, 0, tree or
+  string index (word), object (word), name, 0), check the object widths, and
+  look at the dialogs in Hatari. Alert lines: ≤ 30 characters.
 - Record every change, fix or improvement in **`CHANGELOG.md`** (Keep a
   Changelog, section `[Unreleased]`); user-visible changes also in
   `DOC/CHANGES.TXT` (plain ASCII, shipped).
@@ -60,6 +65,8 @@ with GCC (`m68k-atari-mint`) and libcmini. See `README.md`, `port/README.md`
   corrupts file contents silently: wait long enough).
 - Simulating a read error: move a cluster to the end of the partition and
   truncate the image there (Hatari's ACSI then fails the read).
+- The French TOS ROMs use an AZERTY keyboard: digits need Shift in xdotool
+  (`shift+2`), and a key may be repeated; prefer buttons to typed numbers.
 - Screen positions (ST high, 640x400): Optimize Alt-O then Yes (287,247),
   Yes (282,247); Medic report buttons Fix now / Continue at (43,292); FAT
   choice "FAT #1" at (232,231); read-error alert "Continue" at (370,247).
@@ -87,7 +94,9 @@ with GCC (`m68k-atari-mint`) and libcmini. See `README.md`, `port/README.md`
   partition editor (`part1.c`, `load_root_sectors()`) reads sector 0 as AHDI
   only: installing partition info there would destroy an MBR/GPT table.
   Such disks (and hybrid AHDI+DOS sectors) are now refused:
-  `is_foreign_root_sector()` / `refuse_foreign_disk()` in part1.c.
+  `is_foreign_root_sector()` / `refuse_foreign_disk()` in part1.c. F32
+  partitions are protected in the editor: `is_kept_f32()` before sector 0
+  is written, and `rebuild()` only formats GEM/BGM partitions.
 - **Partition layout**: boot sector (logical 0) | reserved | FAT #1 | FAT #2 |
   root directory (fixed size) | data area (clusters from number 2). FAT n at
   `res + n·spf`, root at `res + nfat·spf`, data at that + root sectors

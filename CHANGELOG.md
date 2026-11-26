@@ -26,7 +26,25 @@ User-visible changes are also summarised, in plain ASCII for the Atari, in
   2.57 reports 82 bad FAT entries and 3 invalid directories, Obsidian Edge
   none.
 
+- Partition editor: FAT32 partitions (id `F32`, e.g. made by HDDRIVER) are
+  protected. Installing a partition table that would move, resize or remove
+  one is refused (alert F32_KEEP_ALERT), and only GEM and BGM partitions are
+  rebuilt (alert F32_REBUILD_ALERT for the others: they used to get a GEM
+  boot sector and FATs). Tested in Hatari (TOS 1.62 + HDDRIVER, SD card with
+  a BGM and an F32 partition): "Clear" then "Install partition info only" is
+  refused and the disk is unchanged; "Install and rebuild all" rebuilds the
+  BGM partition and leaves every sector of the F32 one untouched.
+
 ### Changed
+- `EDGE.RSC` (edited with `tools/rsc_patch.py`): "Diamond Edge" replaced by
+  "Obsidian Edge" in the alerts GEN_CHGRES_ALERT, GEN_NOHNDL_ALERT,
+  GEN_INSTAL_ALERT, REG_WARNING and VL_BADVAL_ALERT, the Preferences dialog
+  title, and the Medic titles ("Obsidian Disk Medic", "... Report"); new
+  alerts FOREIGN_DISK_ALERT (72, its text was in the code), F32_KEEP_ALERT
+  (73) and F32_REBUILD_ALERT (74), named in `edge.h` and `EDGE.HRD`.
+- `tools/rsc_patch.py`: replaces texts and adds free strings in a GEM
+  resource file without an Atari resource editor (colour icon extension
+  kept).
 - Obsidian Mirror (`DMIRROR.PRG`) has the same version as Obsidian Edge
   (it showed 2.57); its "run Edge immediately" message names Obsidian Edge.
 - Help files: "Diamond Edge" replaced by "Obsidian Edge", except the

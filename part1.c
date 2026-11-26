@@ -263,9 +263,49 @@ int foreign;
 	foreign = is_foreign_root_sector(buf);
 	free(buf);
 	if (foreign)
-		form_alert(1,FOREIGN_DISK_ALERT);
+		xform_alert(1,FOREIGN_DISK_ALERT);
 
 	return foreign ? TRUE : FALSE;
+}
+
+/*
+ *	FAT32 partitions (id F32, e.g. made by HDDRIVER) are not supported, but
+ *	they appear in the partition editor like the others.  They must stay
+ *	exactly where they are: is_kept_f32() checks, before physical sector 0
+ *	is written, that every F32 entry of the Atari area of the disk's current
+ *	root sector is still in the new partition table, with the same start and
+ *	size.  (F32 partitions inside an XGM chain are not checked.)
+ *
+ *	returns TRUE if they are all kept (or if the sector cannot be read: the
+ *	write will then fail and be reported)
+ */
+PRIVATE int is_kept_f32(short id,short lun)
+{
+char *buf;
+PART *old, *p;
+int i, j, kept = TRUE;
+
+	if ((buf=malloc(PHYSICAL_SECSIZE)) == NULL) {
+		error(PHYSICAL_SECSIZE,MEMALLOC,"");
+		return FALSE;
+	}
+	if (phys_read(id,lun,1,0L,buf)) {
+		free(buf);
+		return TRUE;
+	}
+	for (i = 0; kept && (i < MAX_PARTS_ATARI); i++) {
+		old = part(buf,i);
+		if (strncmp(old->type,"F32",3) != 0)
+			continue;
+		kept = FALSE;
+		for (j = 0, p = &scsi.part[0]; j < npart; j++, p++)
+			if ((strncmp(p->type,"F32",3) == 0) && (p->firstsector == old->firstsector)
+			 && (p->size == old->size))
+				kept = TRUE;
+	}
+	free(buf);
+
+	return kept;
 }
 
 /*********************************************************/
@@ -1989,6 +2029,10 @@ PART *part;
 
 	if (refuse_foreign_disk(id,lun))	/* never overwrite a DOS (MBR) or GPT table */
 		return -1;
+	if (!is_kept_f32(id,lun)) {			/* FAT32 partitions must not move */
+		xform_alert(1,F32_KEEP_ALERT);
+		return -1;
+	}
 
 	load_newbuf();		/* populates scsi.newbuf */
 
@@ -2066,6 +2110,15 @@ int nps, nwrite, num2write, nout;
 unsigned short logsecs;
 char *buf, *buf2;
 MYBPB mybpb, dummybpb;
+
+	/*
+	 *	only GEM and BGM partitions are rebuilt: the others (FAT32, Spectre,
+	 *	OS-9...) would get a GEM boot sector and FATs
+	 */
+	if ((strncmp(part->type,GEM,3) != 0) && (strncmp(part->type,BGM,3) != 0)) {
+		xform_alert(1,F32_REBUILD_ALERT,(int)(part-&scsi.part[0])+1);
+		return 0;
+	}
 
 	nbytes = part->size * PHYSICAL_SECSIZE;
 

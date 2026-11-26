@@ -811,3 +811,9 @@
 #define FAT32_ALERT      70  /* Alert-string */
 
 #define FAT32_TEXT       71  /* Free string */
+
+#define FOREIGN_DISK_ALERT 72  /* Alert-string */
+
+#define F32_KEEP_ALERT   73  /* Alert-string */
+
+#define F32_REBUILD_ALERT 74  /* Alert-string */
